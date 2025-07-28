@@ -123,6 +123,7 @@ export default function NTWrt() {
           <button type="button" className="cancel-btn" onClick={() => navigate("/noticeList")}>취소</button>
         </div>
       </form>
+    
     </div>
   );
 }
