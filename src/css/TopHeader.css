@@ -58,6 +58,7 @@
   font-size: 12px;
 }
 
+/* 드롭다운 메뉴 */
 .dropdown-menu {
   position: absolute;
   top: 100%;
@@ -71,15 +72,20 @@
   transition: opacity 0.2s ease;
 }
 
-.dropdown-menu li {
+/* ✅ a 태그 스타일 초기화 */
+.dropdown-menu li a {
+  display: block;
   padding: 8px 16px;
-  color: #666;
-  cursor: pointer;
+  color: #333;               
+  text-decoration: none;     
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.dropdown-menu li:hover {
+/* ✅ hover 스타일 */
+.dropdown-menu li a:hover {
   background-color: #f3f3f3;
-  color: #000;
+  color: #9b197f;           
 }
 
 /* 오른쪽 유틸 메뉴 */
