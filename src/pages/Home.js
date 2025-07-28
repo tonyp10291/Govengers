@@ -57,7 +57,7 @@
     <p>포인트 적립하세용~</p>
   </div>
   <div className="info-banner-card">
-    <img src="/receipt.png" alt="고기 굽는 법" />
+    <img src="/recipe.png" alt="고기 굽는 법" />
     <h3>고기 맛있게 굽는 방법</h3>
     <p>고깃간이 알려주는 고기 굽는법</p>
   </div>
