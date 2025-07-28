@@ -34,7 +34,7 @@ return () => window.removeEventListener("scroll", handleScroll);
 return (
 <div className={`header-top ${isScrolled ? "scrolled" : ""}`}>
   <div className="header-inner">
-    {/* 왼쪽 영역 */}
+
     <div className="header-left">
       {!isAdmin && (
         <span className="cs-center">
@@ -61,7 +61,7 @@ return (
               </>
             ) : (
               <>
-                <li><Link to="/notice">공지사항</Link></li>
+                <li><Link to="/ntwrt">공지사항</Link></li>
                 <li><Link to="/recipe">레시피</Link></li>
                 <li><Link to="/contact">문의하기</Link></li>
                 <li><Link to="/review">구매리뷰</Link></li>
@@ -72,7 +72,6 @@ return (
       </div>
     </div>
 
-    {/* 오른쪽 영역 */}
     <div className="header-right">
       {isAdmin ? (
         <>
@@ -93,7 +92,6 @@ return (
     </div>
   </div>
 
-  {/* 검색창 - 유저용만 노출 */}
   {!isAdmin && (
     <div className={`search-slide-full ${showSearch ? "open" : ""}`}>
       <div className="search-container">

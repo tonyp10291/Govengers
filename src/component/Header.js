@@ -1,11 +1,13 @@
-import TopHeader from './components/TopHeader';
+import TopHeader from './TopHeader';
 
-function App() {
+function Header() {
   return (
     <>
       <TopHeader />
       <header className="home-header"> ... </header>
-      <main className="home-main"> ... </main>
+      <main className="home-main"> … </main>
     </>
   );
 }
+
+export default Header;

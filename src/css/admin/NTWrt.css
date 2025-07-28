@@ -1,0 +1,65 @@
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    margin-top: 20px;
+    padding: 40px;
+    background-color: white;
+    border: 1px solid #ccc;
+    font-family: "Helvetica", "Arial", sans-serif;
+  }
+  
+  h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 30px;
+    font-weight: bold;
+  }
+  
+  form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: inline-block;
+    width: 120px;
+  }
+  
+  form .form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  form .form-control {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  textarea.form-control {
+    resize: vertical;
+    height: 150px;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 20px;
+    margin-left: 120px;
+  }
+  
+  .btn-area {
+    text-align: right;
+    margin-top: 30px;
+  }
+  
+  .btn-area button {
+    padding: 8px 20px;
+    font-size: 14px;
+    margin-left: 10px;
+  }
+
+  select.form-control {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  

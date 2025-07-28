@@ -3,8 +3,6 @@
   import "./css/App.css";
   import { BrowserRouter, Routes, Route } from "react-router-dom";
   import "./css/TopHeader.css";
-  import NTWrt from "./pages/admin/NTWrt";
-  
   function App() {
     return (
       <BrowserRouter>
