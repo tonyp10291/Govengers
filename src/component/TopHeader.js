@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import "../css/HeaderTop.css";
+import "../css/TopHeader.css";
 
 function HeaderTop() {
   const [isOpen, setIsOpen] = useState(false); // COMMUNITY 드롭다운

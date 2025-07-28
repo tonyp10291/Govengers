@@ -2,13 +2,16 @@
   import { Link } from "react-router-dom";
   import "../css/Home.css";
   import MainSlider from "../component/MainSlider";
-  import HeaderTop from "../component/HeaderTop";
+  import TopHeader from "../component/TopHeader";
+  import Footer from "../component/Footer"; 
+  import ProductList from "../component/ProductList"; 
+
 
   const Home = () => {
     return (
       <div className="home-container">
         {/* 🔝 상단 고객센터 / 커뮤니티 */}
-        <HeaderTop /> {}
+        <TopHeader />
         {/* 🔝 헤더 */}
         <header className="home-header">
           <img src="/logo.png" alt="고깃간 로고" className="logo" />
@@ -42,10 +45,26 @@
           </p>
         </main>
 
-        {/* 🦶 푸터 */}
-        <footer className="home-footer">
-          ⓒ 2025 고벤저스 Corp. All rights reserved.
-        </footer>
+    <div className="info-banner-section">
+  <div className="info-banner-card">
+    <img src="/postoffice.png" alt="우체국 배송 안내" />
+    <h3>우체국배송 안내</h3>
+    <p>우체국배송 토요일 휴무지역</p>
+  </div>
+  <div className="info-banner-card">
+    <img src="/point.png" alt="포인트 적립" />
+    <h3>포인트 적립</h3>
+    <p>포인트 적립하세용~</p>
+  </div>
+  <div className="info-banner-card">
+    <img src="/receipt.png" alt="고기 굽는 법" />
+    <h3>고기 맛있게 굽는 방법</h3>
+    <p>고깃간이 알려주는 고기 굽는법</p>
+  </div>
+</div>
+<ProductList />
+<Footer />
+        
       </div>
     );
   };
