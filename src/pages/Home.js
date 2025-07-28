@@ -3,8 +3,8 @@
   import "../css/Home.css";
   import MainSlider from "../component/MainSlider";
   import TopHeader from "../component/TopHeader";
-  import Footer from "../component/Footer"; 
   import ProductList from "../component/ProductList"; 
+  import Footer from "../component/Footer"; 
 
 //gfgfg
   const Home = () => {
@@ -45,6 +45,8 @@
           </p>
         </main>
 
+<ProductList />
+
     <div className="info-banner-section">
   <div className="info-banner-card">
     <img src="/postoffice.png" alt="우체국 배송 안내" />
@@ -62,7 +64,6 @@
     <p>고깃간이 알려주는 고기 굽는법</p>
   </div>
 </div>
-<ProductList />
 <Footer />
         
       </div>

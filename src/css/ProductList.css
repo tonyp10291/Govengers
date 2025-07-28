@@ -29,3 +29,54 @@
 .badge.soldout { background: #d00; }
 .badge.hit     { background: #f80; }
 .badge.new     { background: #2a7; }
+
+.hit-text {
+  color: #ff4747;
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.product-list {
+  display: flex;
+  justify-content: center;  /* 가로 중앙 */
+  align-items: flex-start;   /* 세로 시작(아래쪽으로 정렬하면 center로 바꿔도 됨) */
+  flex-wrap: wrap;           /* 카드가 여러 개면 자동 줄바꿈 */
+  gap: 32px;                 /* 카드 사이 간격(원하는 값) */
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 400px;
+}
+
+.product-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;           /* 카드 사이 간격 */
+  width: 100%;
+  max-width: 1200px;   /* 한 줄에 최대 4개 (250px × 4 + gap) */
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+}
+
+.product-item {
+  width: 250px;          /* 카드 크기 */
+  min-height: 320px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+  padding: 24px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.product-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
