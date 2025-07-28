@@ -1,20 +1,29 @@
   import React from "react";
-  import { Link } from "react-router-dom";
+  import { Link, useNavigate } from "react-router-dom";
   import "../css/Home.css";
   import MainSlider from "../component/MainSlider";
   import TopHeader from "../component/TopHeader";
   import Footer from "../component/Footer"; 
-  import ProductList from "../component/ProductList"; 
-
-
+  import ProductList from "../component/ProductList";
+  import { Button } from "../util/Buttons";
+  
   const Home = () => {
+    const navigate = useNavigate();
+  //홈으로
+  const homeBtnClick = () => {
+      navigate("/");
+  }
+    
     return (
       <div className="home-container">
         {/* 🔝 상단 고객센터 / 커뮤니티 */}
         <TopHeader />
         {/* 🔝 헤더 */}
         <header className="home-header">
-          <img src="/logo.png" alt="고벤져스 로고" className="logo" />
+          {/* <img src="/logo.png" alt="고벤져스 로고" className="logo" /> */}
+          <div className="logo">
+            <Button type={"logo"} onClick={homeBtnClick} />
+          </div>         
           <nav className="nav-menu">
             <Link to="/products?cate=소고기">소고기</Link>
             <Link to="/products?cate=돼지고기">돼지고기</Link>
