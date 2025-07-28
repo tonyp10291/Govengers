@@ -12,7 +12,10 @@
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/ntwrt" element={<NTWrt />} />
+<<<<<<< Updated upstream
           <Route path="/uqna" element={<UQnA />} />
+=======
+>>>>>>> Stashed changes
         </Routes>
       </BrowserRouter>
     );
