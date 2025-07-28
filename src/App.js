@@ -4,6 +4,7 @@
   import { BrowserRouter, Routes, Route } from "react-router-dom";
   import "./css/TopHeader.css";
   import NTWrt from "./pages/admin/NTWrt";
+  import UQnA from "./pages/user/UQnA";
   
   function App() {
     return (
@@ -11,6 +12,7 @@
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/ntwrt" element={<NTWrt />} />
+          <Route path="/uqna" element={<UQnA />} />
         </Routes>
       </BrowserRouter>
     );

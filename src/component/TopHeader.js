@@ -63,7 +63,7 @@ return (
               <>
                 <li><Link to="/ntwrt">공지사항</Link></li>
                 <li><Link to="/recipe">레시피</Link></li>
-                <li><Link to="/contact">문의하기</Link></li>
+                <li><Link to="/uqna">문의하기</Link></li>
                 <li><Link to="/review">구매리뷰</Link></li>
               </>
             )}

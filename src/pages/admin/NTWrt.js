@@ -65,68 +65,64 @@ export default function NTWrt() {
   };
 
   return (
-    <div className="container mt-5">
-      <h2 className="mb-4">📢 공지사항 / 이벤트 등록</h2>
-      <form onSubmit={handleSubmit}>
+    <div className="notice-container">
+      <h2 className="notice-title">📢 공지사항 / 이벤트 등록</h2>
+      <form className="notice-form" onSubmit={handleSubmit}>
         <div className="form-group">
-            <label htmlFor="noticeId">공지 번호</label>
-            <input
+          <label htmlFor="noticeId">공지 번호</label>
+          <input
             type="text"
-            className="form-control"
             id="noticeId"
             value={noticeId !== null ? noticeId : "로딩 중..."}
             readOnly
-            />
+          />
         </div>
-
+  
         <div className="form-group">
-            <label>카테고리</label>
-            <select
-                id="is_event"
-                className="form-control"
-                value={notice.is_event ? "event" : "notice"}
-                onChange={(e) =>
-                setNotice((prev) => ({
-                    ...prev,
-                    is_event: e.target.value === "event",
-                }))
-                }
-            >
-                <option value="notice">공지</option>
-                <option value="event">이벤트</option>
-            </select>
+          <label htmlFor="is_event">카테고리</label>
+          <select
+            id="is_event"
+            value={notice.is_event ? "event" : "notice"}
+            onChange={(e) =>
+              setNotice((prev) => ({
+                ...prev,
+                is_event: e.target.value === "event",
+              }))
+            }
+          >
+            <option value="notice">공지</option>
+            <option value="event">이벤트</option>
+          </select>
         </div>
-
+  
         <div className="form-group">
-            <label htmlFor="title">제목</label>
-            <input
+          <label htmlFor="title">제목</label>
+          <input
             type="text"
-            className="form-control"
             id="title"
             value={notice.title}
             maxLength={50}
             onChange={handleChange}
             placeholder="제목을 입력해주세요 (최대 50자)"
-            />
+          />
         </div>
-
+  
         <div className="form-group">
-            <label htmlFor="content">내용</label>
-            <textarea
-            className="form-control"
+          <label htmlFor="content">내용</label>
+          <textarea
             id="content"
             value={notice.content}
             maxLength={1500}
             onChange={handleChange}
             placeholder="내용을 입력해주세요 (최대 1500자)"
-            ></textarea>
+          ></textarea>
         </div>
-
-        <div className="btn-area">
-            <button type="submit" className="btn btn-primary">등록</button>
-            <button type="button" className="btn btn-secondary" onClick={() => navigate("/noticeList")}>취소</button>
+  
+        <div className="notice-buttons">
+          <button type="submit" className="submit-btn">등록</button>
+          <button type="button" className="cancel-btn" onClick={() => navigate("/noticeList")}>취소</button>
         </div>
-        </form>
-</div>
+      </form>
+    </div>
   );
 }

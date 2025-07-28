@@ -1,65 +1,70 @@
-.container {
-    max-width: 900px;
-    margin: 0 auto;
-    margin-top: 20px;
-    padding: 40px;
-    background-color: white;
-    border: 1px solid #ccc;
-    font-family: "Helvetica", "Arial", sans-serif;
+.notice-container {
+    width: 80%;
+    margin: 40px auto;
+    font-family: 'Noto Sans KR', sans-serif;
   }
   
-  h2 {
+  .notice-title {
     text-align: center;
-    font-size: 24px;
+    font-size: 32px;
+    font-weight: bold;
     margin-bottom: 30px;
-    font-weight: bold;
   }
   
-  form label {
-    font-weight: bold;
-    margin-bottom: 5px;
-    display: inline-block;
-    width: 120px;
+  .notice-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
   }
   
-  form .form-group {
+  .notice-form .form-group {
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
   }
   
-  form .form-control {
+  .notice-form label {
+    width: 120px;
+    font-weight: bold;
+    font-size: 15px;
+  }
+  
+  .notice-form input,
+  .notice-form select,
+  .notice-form textarea {
     flex: 1;
-    padding: 8px 12px;
+    padding: 10px;
     font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
   }
   
-  textarea.form-control {
+  .notice-form textarea {
     resize: vertical;
     height: 150px;
   }
   
-  .checkbox-group {
+  .notice-buttons {
     display: flex;
-    align-items: center;
-    gap: 30px;
-    margin-bottom: 20px;
-    margin-left: 120px;
-  }
-  
-  .btn-area {
-    text-align: right;
+    justify-content: flex-end;
+    gap: 10px;
     margin-top: 30px;
   }
   
-  .btn-area button {
-    padding: 8px 20px;
-    font-size: 14px;
-    margin-left: 10px;
+  .notice-buttons button {
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: bold;
   }
-
-  select.form-control {
-    padding: 8px 12px;
-    font-size: 14px;
+  
+  .notice-buttons .submit-btn {
+    background-color: #000;
+    color: #fff;
+  }
+  
+  .notice-buttons .cancel-btn {
+    background-color: #ccc;
+    color: #000;
   }
   

@@ -4,8 +4,8 @@ function Header() {
   return (
     <>
       <TopHeader />
-      <header className="home-header"> ... </header>
-      <main className="home-main"> … </main>
+      <header className="home-header"></header>
+      <main className="home-main"></main>
     </>
   );
 }
