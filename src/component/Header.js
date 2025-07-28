@@ -1,9 +1,9 @@
-import HeaderTop from './components/TopHeader';
+import TopHeader from './components/TopHeader';
 
 function App() {
   return (
     <>
-      <HeaderTop />
+      <TopHeader />
       <header className="home-header"> ... </header>
       <main className="home-main"> ... </main>
     </>

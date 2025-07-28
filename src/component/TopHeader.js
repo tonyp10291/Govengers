@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../css/TopHeader.css";
 
-function HeaderTop() {
+function TopHeader() {
   const [isOpen, setIsOpen] = useState(false); // COMMUNITY 드롭다운
   const [showSearch, setShowSearch] = useState(false); // 검색 슬라이드 토글
   const [isScrolled, setIsScrolled] = useState(false); // 스크롤 시 헤더 축소
@@ -94,4 +94,4 @@ function HeaderTop() {
   );
 }
 
-export default HeaderTop;
+export default TopHeader;

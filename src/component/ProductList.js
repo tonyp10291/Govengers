@@ -1,6 +1,5 @@
-// src/component/ProductList.jsx
 import React, { useEffect, useState } from 'react';
-import '../css/ProductList.css';  
+import '../css/admin/ProductList.css';  
 const ProductList = () => {
   const [products, setProducts] = useState([]);
 
