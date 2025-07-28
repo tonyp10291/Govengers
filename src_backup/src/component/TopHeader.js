@@ -3,7 +3,6 @@ import "../css/TopHeader.css";
 import { Link } from "react-router-dom";
 
 function TopHeader({ isAdmin }) {
-const [isLoggedIn, setIsLoggedIn] = useState(false);
 const [isOpen, setIsOpen] = useState(false);
 const [showSearch, setShowSearch] = useState(false);
 const [isScrolled, setIsScrolled] = useState(false);
@@ -56,10 +55,9 @@ return (
           <ul className="dropdown-menu">
             {isAdmin ? (
               <>
-                <li><Link to="/notice">공지사항</Link></li>
-                <li><Link to="/recipe">레시피</Link></li>
+                <li><Link to="/notice">공지</Link></li>
                 <li><Link to="/contact">신고/문의</Link></li>
-                <li><Link to="/review">리뷰목록</Link></li>
+                <li><Link to="/review">리뷰</Link></li>
               </>
             ) : (
               <>
