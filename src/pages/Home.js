@@ -11,7 +11,7 @@
         <HeaderTop /> {}
         {/* 🔝 헤더 */}
         <header className="home-header">
-          <img src="/logo.png" alt="고깃간 로고" className="logo" />
+          <img src="/logo.png" alt="고벤져스 로고" className="logo" />
           <nav className="nav-menu">
             <Link to="/products?cate=소고기">소고기</Link>
             <Link to="/products?cate=돼지고기">돼지고기</Link>
@@ -36,7 +36,7 @@
           <p className="home-subtitle">
             스마트폰으로 바로 주문하고 다음날 받아보는 온라인 정육점 고벤저스
             <br />
-            고깃간의 제품은 등급과 육질 육량 등을 체크해 매일 경매를 받습니다
+            고벤져스의 제품은 등급과 육질 육량 등을 체크해 매일 경매를 받습니다
             <br />
             그리고 그것들 중 또 한번 전문가들의 선별 작업을 거쳐 통과된 고기만이 고객님의 집으로 배달됩니다
           </p>
