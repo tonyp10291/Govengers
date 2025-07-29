@@ -4,13 +4,8 @@ function Header() {
   return (
     <>
       <TopHeader />
-<<<<<<< HEAD
       <header className="home-header"> ... </header>
-      <main className="home-main"> … </main>
-=======
-      <header className="home-header"></header>
-      <main className="home-main"></main>
->>>>>>> origin/main
+      <main className="home-main"> ... </main>
     </>
   );
 }
