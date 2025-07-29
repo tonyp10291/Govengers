@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import TopHeader from "../../component/TopHeader";
 import "../../css/admin/NTWrt.css";
+import "../../css/util/Buttons.css";
+import { Button } from "../../util/Buttons";
 
 export default function NTWrt() {
   const navigate = useNavigate();
@@ -65,8 +68,11 @@ export default function NTWrt() {
   };
 
   return (
+    <div>
+    <TopHeader />
     <div className="notice-container">
-      <h2 className="notice-title">📢 공지사항 / 이벤트 등록</h2>
+
+      <h2 className="notice-title">공지사항 / 이벤트 등록</h2>
       <form className="notice-form" onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="noticeId">공지 번호</label>
@@ -119,11 +125,13 @@ export default function NTWrt() {
         </div>
   
         <div className="notice-buttons">
-          <button type="submit" className="submit-btn">등록</button>
-          <button type="button" className="cancel-btn" onClick={() => navigate("/noticeList")}>취소</button>
+          <Button text={"등록"} type={"submit"} />
+          {/* <button type="submit" className="submit-btn">등록</button> */}
+          <Button text={"취소"} type={"cancel"} onClick={() => navigate("/noticeList")} />
+          {/* <button type="button" className="cancel-btn" onClick={() => navigate("/noticeList")}>취소</button> */}
         </div>
       </form>
-    
+      </div>
     </div>
   );
 }
