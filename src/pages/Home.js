@@ -9,10 +9,10 @@
   
   const Home = () => {
     const navigate = useNavigate();
-  //홈으로
-  const homeBtnClick = () => {
-      navigate("/");
-  }
+    //홈으로
+    const homeBtnClick = () => {
+        navigate("/");
+    }
     
     return (
       <div className="home-container">
