@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "../../component/Header";
+import TopHeader from "../../component/TopHeader";
 import "../../css/user/UQnA.css";
 
 const UQnA = () => {
@@ -17,7 +17,7 @@ const UQnA = () => {
 
   return (
     <div>
-      <Header />
+        <TopHeader />
       <div className="uqna-container">
         {/* Q&A 제목 */}
         <h1 className="uqna-title">문의하기</h1>

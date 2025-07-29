@@ -3,7 +3,6 @@
   import "../css/Home.css";
   import MainSlider from "../component/MainSlider";
   import TopHeader from "../component/TopHeader";
-  import Footer from "../component/Footer"; 
   import ProductList from "../component/ProductList";
   import { Button } from "../util/Buttons";
   
@@ -72,8 +71,6 @@
   </div>
 </div>
 <ProductList />
-<Footer />
-        
       </div>
     );
   };

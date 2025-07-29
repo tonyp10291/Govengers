@@ -19,11 +19,27 @@
     border: 0;
     transition: color 0.3s;
 }
+
 .btn_submit{
-    border: 0;
-    transition: color 0.3s;
+    background: #000;
+    color: #fff;
+    border: none;
+    padding: 10px 30px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .btn_movePage:hover {
     color: black !important;
+}
+
+.btn_cancel{
+    background: #888;
+    color: #fff;
+    border: none;
+    padding: 10px 30px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
 }

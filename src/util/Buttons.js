@@ -1,5 +1,6 @@
 import "../css/util/Buttons.css";
 
+
 /*
 버튼 사용법!
 사용하고 싶은 곳에 아래 코드 추가하기
@@ -21,7 +22,8 @@ export const Button = ({text, type, style, onClick}) => {
     const btnType = [
         "logo",
         "movePage",
-        "submit"
+        "submit",
+        "cancel"
     ].includes(type) ? type : "default";
 
     return (

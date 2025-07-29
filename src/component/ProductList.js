@@ -27,7 +27,7 @@ const ProductList = () => {
             </div>
           </li>
         ))}
-      </ul>
+      </ul>``
     </section>
   );
 };
