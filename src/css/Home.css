@@ -1,7 +1,7 @@
 body {
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* ✅ 좌우 스크롤 제거 */
+  overflow-x: hidden; 
 }
 
 html {
@@ -68,7 +68,7 @@ html {
 
 .info-banner-section {
   display: flex;
-  justify-content: space-between;  /* ✅ 좌우로 쫙 벌림 */
+  justify-content: space-between; 
   flex-wrap: wrap;
   max-width: 1200px;
   margin: 0 auto;

@@ -2,25 +2,22 @@
   import { Link, useNavigate } from "react-router-dom";
   import "../css/Home.css";
   import MainSlider from "../component/MainSlider";
-  import TopHeader from "../component/TopHeader";
-  import Footer from "../component/Footer"; 
   import ProductList from "../component/ProductList";
   import { Button } from "../util/Buttons";
+  import Footer from "../component/Footer";
   
   const Home = () => {
     const navigate = useNavigate();
-  //홈으로
-  const homeBtnClick = () => {
-      navigate("/");
-  }
+    //홈으로
+    const homeBtnClick = () => {
+        navigate("/");
+    }
+
+    /* UUID 생성 및 localstorage 저장 함수 생성 구역 */
     
     return (
       <div className="home-container">
-        {/* 🔝 상단 고객센터 / 커뮤니티 */}
-        <TopHeader />
-        {/* 🔝 헤더 */}
         <header className="home-header">
-          {/* <img src="/logo.png" alt="고벤져스 로고" className="logo" /> */}
           <div className="logo">
             <Button type={"logo"} onClick={homeBtnClick} />
           </div>         
@@ -32,7 +29,6 @@
           </nav>
         </header>
 
-        {/* 메인 영역 */}
         <main className="home-main">
           <MainSlider />
           <p className="home-description">
@@ -79,4 +75,4 @@
     );
   };
 
-  export default Home;
+export default Home;

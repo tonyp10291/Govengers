@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { AuthContext } from '../../context/AuthContext'; // ✅ 중괄호로!
 
-import '../css/common/Login.css';
+import '../../css/common/Login.css';
 
 function Login() {
     const { login } = useContext(AuthContext);

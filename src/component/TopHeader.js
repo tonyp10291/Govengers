@@ -1,37 +1,30 @@
-import React, { useContext, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from '../context/AuthContext';
+import "../css/TopHeader.css";
 import { Button } from "../util/Buttons";
-import { AuthContext } from "../context/AuthContext";
 
 function TopHeader() {
-  const { isLoggedIn, user, logout } = useContext(AuthContext);
-  const [isOpen, setIsOpen] = React.useState(false);
-  const [showSearch, setShowSearch] = React.useState(false);
-  const [isScrolled, setIsScrolled] = React.useState(false);
-  const timeoutRef = useRef(null);
+  const { isLoggedIn, userRole, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+  const [isOpen, setIsOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const timeoutRef = useRef(null);
 
-  const isAdmin = user && user.role === "ROLE_ADMIN";
-
-  const handleMouseEnter = () => {
-    clearTimeout(timeoutRef.current);
-    setIsOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setIsOpen(false);
-    }, 200);
-  };
-
-  const toggleSearch = () => {
-    setShowSearch(prev => !prev);
+  const handleMouseEnter = () => { clearTimeout(timeoutRef.current); setIsOpen(true); };
+  const handleMouseLeave = () => { timeoutRef.current = setTimeout(() => { setIsOpen(false); }, 200); };
+  const toggleSearch = () => { setShowSearch(prev => !prev); };
+  
+  const handleLogout = () => {
+    logout();
+    alert("로그아웃 되었습니다.");
+    navigate("/");
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => { setIsScrolled(window.scrollY > 50); };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
@@ -39,19 +32,9 @@ function TopHeader() {
   return (
     <div className={`header-top ${isScrolled ? "scrolled" : ""}`}>
       <div className="header-inner">
-
         <div className="header-left">
-          {!isAdmin && (
-            <span className="cs-center">
-              C/S CENTER <b>010-1231-0000</b>
-            </span>
-          )}
-
-          <div
-            className="community-wrapper"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-          >
+          {!isAdmin && ( <span className="cs-center"> C/S CENTER <b>010-1231-0000</b> </span> )}
+          <div className="community-wrapper" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
             <button className="community-btn">
               <span className="icon">≡</span>
               <span className="text">COMMUNITY</span>
@@ -60,16 +43,15 @@ function TopHeader() {
               <ul className="dropdown-menu">
                 {isAdmin ? (
                   <>
-                    <li><Link to="/notice">공지사항</Link></li>
-                    <li><Link to="/recipe">레시피</Link></li>
-                    <li><Link to="/contact">신고/문의</Link></li>
-                    <li><Link to="/review">리뷰목록</Link></li>
+                    <li><Link to="/notice-admin">공지 관리</Link></li>
+                    <li><Link to="/contact-admin">문의 관리</Link></li>
+                    <li><Link to="/review-admin">리뷰 관리</Link></li>
                   </>
                 ) : (
                   <>
-                    <li><Link to="/ntwrt">공지사항</Link></li>
+                    <li><Link to="/notice">공지사항</Link></li>
                     <li><Link to="/recipe">레시피</Link></li>
-                    <li><Link to="/uqna">문의하기</Link></li>
+                    <li><Link to="/contact">문의하기</Link></li>
                     <li><Link to="/review">구매리뷰</Link></li>
                   </>
                 )}

@@ -3,12 +3,12 @@ import axios from "axios";
 import "../css/admin/MUser.css";
 
 const MUser = () => {
-  const [users, setUsers] = useState([]);
+  const [user, setUser] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:8080/api/admin/users")
+    axios.get("/api/admin/user")
       .then((res) => {
-        setUsers(res.data);
+        setUser(res.data);
       })
       .catch((err) => {
         console.error("❌ 사용자 목록 불러오기 실패:", err);
@@ -40,7 +40,7 @@ const MUser = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => (
+            {user.map((user) => (
               <tr key={user.uid}>
                 <td><input type="checkbox" /></td>
                 <td><button className="user-link-btn">{user.unm}</button></td>

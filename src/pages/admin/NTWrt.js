@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "../../css/admin/NTWrt.css";
+import TopHeader from "../../component/TopHeader";
+import "../../css/admin/NTWrt.css";     // 공지사항 페이지용 CSS
+import "../../css/util/Button.css";     // 공통 버튼 CSS (소문자 b!)
+import { Button } from "../../util/Buttons"; // Button 컴포넌트는 util/Buttons.js에서 import
 
 export default function NTWrt() {
   const navigate = useNavigate();
@@ -65,65 +68,68 @@ export default function NTWrt() {
   };
 
   return (
-    <div className="notice-container">
-      <h2 className="notice-title">📢 공지사항 / 이벤트 등록</h2>
-      <form className="notice-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="noticeId">공지 번호</label>
-          <input
-            type="text"
-            id="noticeId"
-            value={noticeId !== null ? noticeId : "로딩 중..."}
-            readOnly
-          />
-        </div>
-  
-        <div className="form-group">
-          <label htmlFor="is_event">카테고리</label>
-          <select
-            id="is_event"
-            value={notice.is_event ? "event" : "notice"}
-            onChange={(e) =>
-              setNotice((prev) => ({
-                ...prev,
-                is_event: e.target.value === "event",
-              }))
-            }
-          >
-            <option value="notice">공지</option>
-            <option value="event">이벤트</option>
-          </select>
-        </div>
-  
-        <div className="form-group">
-          <label htmlFor="title">제목</label>
-          <input
-            type="text"
-            id="title"
-            value={notice.title}
-            maxLength={50}
-            onChange={handleChange}
-            placeholder="제목을 입력해주세요 (최대 50자)"
-          />
-        </div>
-  
-        <div className="form-group">
-          <label htmlFor="content">내용</label>
-          <textarea
-            id="content"
-            value={notice.content}
-            maxLength={1500}
-            onChange={handleChange}
-            placeholder="내용을 입력해주세요 (최대 1500자)"
-          ></textarea>
-        </div>
-  
-        <div className="notice-buttons">
-          <button type="submit" className="submit-btn">등록</button>
-          <button type="button" className="cancel-btn" onClick={() => navigate("/noticeList")}>취소</button>
-        </div>
-      </form>
+    <div>
+      <TopHeader />
+      <div className="notice-container">
+
+        <h2 className="notice-title">공지사항 / 이벤트 등록</h2>
+        <form className="notice-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="noticeId">공지 번호</label>
+            <input
+              type="text"
+              id="noticeId"
+              value={noticeId !== null ? noticeId : "로딩 중..."}
+              readOnly
+            />
+          </div>
     
+          <div className="form-group">
+            <label htmlFor="is_event">카테고리</label>
+            <select
+              id="is_event"
+              value={notice.is_event ? "event" : "notice"}
+              onChange={(e) =>
+                setNotice((prev) => ({
+                  ...prev,
+                  is_event: e.target.value === "event",
+                }))
+              }
+            >
+              <option value="notice">공지</option>
+              <option value="event">이벤트</option>
+            </select>
+          </div>
+    
+          <div className="form-group">
+            <label htmlFor="title">제목</label>
+            <input
+              type="text"
+              id="title"
+              value={notice.title}
+              maxLength={50}
+              onChange={handleChange}
+              placeholder="제목을 입력해주세요 (최대 50자)"
+            />
+          </div>
+    
+          <div className="form-group">
+            <label htmlFor="content">내용</label>
+            <textarea
+              id="content"
+              value={notice.content}
+              maxLength={1500}
+              onChange={handleChange}
+              placeholder="내용을 입력해주세요 (최대 1500자)"
+            ></textarea>
+          </div>
+    
+          <div className="notice-buttons">
+            <Button text={"등록"} type={"submit"} />
+            <Button text={"취소"} type={"cancel"} onClick={() => navigate("/noticeList")} />
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
