@@ -12,6 +12,8 @@
     const homeBtnClick = () => {
         navigate("/");
     }
+
+    /* UUID 생성 및 localstorage 저장 함수 생성 구역 */
     
     return (
       <div className="home-container">
@@ -35,7 +37,7 @@
         <main className="home-main">
           <MainSlider />
           <p className="home-description">
-            PREMIUM ONLINE BUTCHER SHOP GOVENGERS
+            PREMIUM ONLINE BUTCHER SHOP GOVENGERS``
           </p>
           <h1 className="home-title">
             신선한 고기를

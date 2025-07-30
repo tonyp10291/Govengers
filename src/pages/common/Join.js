@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../css/common/Join.css';
+import '../../css/common/Join.css';
 
 function Join() {
     const navigate = useNavigate();
