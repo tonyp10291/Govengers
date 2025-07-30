@@ -5,14 +5,12 @@
     font-family: 'Noto Sans KR', sans-serif;
   }
   
-  /* 제목 */
   .uqna-title {
     text-align: center;
     font-size: 32px;
     margin-bottom: 20px;
   }
   
-  /* 탭 메뉴 */
   .uqna-tabs {
     display: flex;
     justify-content: center;
@@ -32,7 +30,6 @@
     border-bottom: 2px solid #000;
   }
   
-  /* 테이블 */
   .uqna-table {
     width: 100%;
     border-collapse: collapse;
@@ -54,7 +51,6 @@
     text-align: left;
   }
   
-  /* 검색 & 글쓰기 */
   .uqna-bottom {
     display: flex;
     justify-content: space-between;

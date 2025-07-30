@@ -24,7 +24,6 @@
   transition: transform 0.3s ease; 
 }
 
-/* 왼쪽 영역 */
 .header-left {
   display: flex;
   align-items: center;
@@ -58,7 +57,6 @@
   font-size: 12px;
 }
 
-/* 드롭다운 메뉴 */
 .dropdown-menu {
   position: absolute;
   top: 100%;
@@ -72,7 +70,6 @@
   transition: opacity 0.2s ease;
 }
 
-/* ✅ a 태그 스타일 초기화 */
 .dropdown-menu li a {
   display: block;
   padding: 8px 16px;
@@ -82,13 +79,11 @@
   font-weight: 500;
 }
 
-/* ✅ hover 스타일 */
 .dropdown-menu li a:hover {
   background-color: #f3f3f3;
   color: #9b197f;           
 }
 
-/* 오른쪽 유틸 메뉴 */
 .header-right {
   display: flex;
   align-items: center;
@@ -122,7 +117,6 @@
   line-height: 1;
 }
 
-/* 검색 슬라이드 */
 .search-slide-full {
   position: absolute;  
   top: 40px;           
@@ -186,7 +180,6 @@
   color: #555;
 }
 
-/* 스크롤 시 내부만 축소 */
 .header-top.scrolled .header-inner {
   transform: scale(0.9);
 }

@@ -2,7 +2,6 @@
   import { Link, useNavigate } from "react-router-dom";
   import "../css/Home.css";
   import MainSlider from "../component/MainSlider";
-  import TopHeader from "../component/TopHeader";
   import ProductList from "../component/ProductList";
   import { Button } from "../util/Buttons";
   
@@ -17,11 +16,7 @@
     
     return (
       <div className="home-container">
-        {/* 🔝 상단 고객센터 / 커뮤니티 */}
-        <TopHeader />
-        {/* 🔝 헤더 */}
         <header className="home-header">
-          {/* <img src="/logo.png" alt="고벤져스 로고" className="logo" /> */}
           <div className="logo">
             <Button type={"logo"} onClick={homeBtnClick} />
           </div>         
@@ -33,11 +28,10 @@
           </nav>
         </header>
 
-        {/* 메인 영역 */}
         <main className="home-main">
           <MainSlider />
           <p className="home-description">
-            PREMIUM ONLINE BUTCHER SHOP GOVENGERS``
+            PREMIUM ONLINE BUTCHER SHOP GOVENGERS
           </p>
           <h1 className="home-title">
             신선한 고기를
@@ -55,26 +49,26 @@
           </p>
         </main>
 
-    <div className="info-banner-section">
-  <div className="info-banner-card">
-    <img src="/postoffice.png" alt="우체국 배송 안내" />
-    <h3>우체국배송 안내</h3>
-    <p>우체국배송 토요일 휴무지역</p>
-  </div>
-  <div className="info-banner-card">
-    <img src="/point.png" alt="포인트 적립" />
-    <h3>포인트 적립</h3>
-    <p>포인트 적립하세용~</p>
-  </div>
-  <div className="info-banner-card">
-    <img src="/recipe.png" alt="고기 굽는 법" />
-    <h3>고기 맛있게 굽는 방법</h3>
-    <p>고깃간이 알려주는 고기 굽는법</p>
-  </div>
-</div>
-<ProductList />
+        <div className="info-banner-section">
+          <div className="info-banner-card">
+            <img src="/postoffice.png" alt="우체국 배송 안내" />
+            <h3>우체국배송 안내</h3>
+            <p>우체국배송 토요일 휴무지역</p>
+          </div>
+          <div className="info-banner-card">
+            <img src="/point.png" alt="포인트 적립" />
+            <h3>포인트 적립</h3>
+            <p>포인트 적립하세용~</p>
+          </div>
+          <div className="info-banner-card">
+            <img src="/recipe.png" alt="고기 굽는 법" />
+            <h3>고기 맛있게 굽는 방법</h3>
+            <p>고깃간이 알려주는 고기 굽는법</p>
+          </div>
+        </div>
+        <ProductList />
       </div>
     );
   };
 
-  export default Home;
+export default Home;

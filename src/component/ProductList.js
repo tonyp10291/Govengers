@@ -4,7 +4,7 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch('/api/products') // 백엔드 API 주소
+    fetch('/api/products')
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.error('상품 불러오기 실패:', err));
