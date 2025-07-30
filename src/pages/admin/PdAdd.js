@@ -1,20 +1,10 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import { Button } from "../util/Buttons";
-// 만약 AuthContext 또는 user관리방식 다르면 수정해서 적용!
-
-// 예시: 유저 정보/권한 전역관리 컨텍스트(필요시)
-import { AuthContext } from "../context/AuthContext"; // 실제 경로 맞게 조정
+import { Button } from "../../util/Buttons";
+import { AuthContext } from "../../context/AuthContext";
 
 function PdAdd() {
-  const { user } = useContext(AuthContext); // 예시: 전역 로그인 유저
-  // (만약 props, redux, recoil 등 다르게 관리 중이면 거기에 맞게 수정!)
-
-  // 권한체크
-  if (!user || (user.role !== "admin" && user.role !== "seller")) {
-    return <div>접근 권한이 없습니다.</div>;
-    // 또는 <Navigate to="/" /> 등 라우터 사용도 가능
-  }
+  const { user } = useContext(AuthContext);
 
   const [form, setForm] = useState({
     name: "",
@@ -24,6 +14,11 @@ function PdAdd() {
     stock: "",
     image: null,
   });
+
+  // 권한: ROLE_ADMIN, ROLE_SELLER 만 통과!
+  if (!user || (user.role !== "ROLE_ADMIN" && user.role !== "ROLE_SELLER")) {
+    return <div>접근 권한이 없습니다.</div>;
+  }
 
   const handleChange = (e) => {
     if (e.target.name === "image") {
@@ -69,8 +64,6 @@ function PdAdd() {
       <input name="stock" type="number" value={form.stock} onChange={handleChange} placeholder="재고" required />
       <input name="description" value={form.description} onChange={handleChange} placeholder="설명" required />
       <input name="image" type="file" accept="image/*" onChange={handleChange} required />
-
-      {/* 공통 버튼 사용 */}
       <Button
         text="등록"
         type="submit"

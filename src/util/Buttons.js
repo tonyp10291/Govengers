@@ -1,4 +1,4 @@
-import "../css/util/Buttons.css";
+import "../css/util/Button.css";
 
 /*
 버튼 사용법!
@@ -24,15 +24,29 @@ export const Button = ({text, type, style, onClick}) => {
         "submit"
     ].includes(type) ? type : "default";
 
-    return (
-        <>
-            <button
-                type="button"
-                className={["btn", `btn_${btnType}`].join(" ")}
-                style={style}
-                onClick={onClick}
-            >{text}
-            </button>
-        </>
-    );
+    if (btnType === "submit"){
+        return (
+            <>
+                <button
+                    type="submit"
+                    className={["btn", `btn_${btnType}`].join(" ")}
+                    style={style}
+                    onClick={onClick}
+                >{text}
+                </button>
+            </>
+        );
+    } else {
+        return (
+            <>
+                <button
+                    type="button"
+                    className={["btn", `btn_${btnType}`].join(" ")}
+                    style={style}
+                    onClick={onClick}
+                >{text}
+                </button>
+            </>
+        );
+    }
 }
