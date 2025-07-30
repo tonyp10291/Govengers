@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import TopHeader from "../../component/TopHeader";
-import "../../css/admin/NTWrt.css";
-import "../../css/util/Buttons.css";
+import "./../../css/admin/NTWrt.css";
+import "./../../css/util/Buttons.css";
 import { Button } from "../../util/Buttons";
 
 export default function NTWrt() {
