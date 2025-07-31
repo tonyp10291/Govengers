@@ -11,8 +11,6 @@
     const homeBtnClick = () => {
         navigate("/");
     }
-
-    /* UUID 생성 및 localstorage 저장 함수 생성 구역 */
     
     return (
       <div className="home-container">
