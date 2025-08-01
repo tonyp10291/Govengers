@@ -1,30 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import '../css/admin/ProductList.css';  
-const ProductList = () => {
+import axios from 'axios';
+import "../../css/common/PdList.css";
+
+const PdList = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:8090/api/products',{
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem("token")}`
-      },
-      credentials: 'include' // 쿠키와 인증 헤더를 함께 보냅니다.
+    axios.get('/api/products')
+      .then(response => {
+        setProducts(response.data); 
       })
-      .then(res => res.json())
-      .then(data =>{
-         console.log('data: ', data);
-         setProducts(data);
-      })
-      .catch(err => console.error('상품 불러오기 실패:', err));
+      .catch(err => {
+        console.error('상품 불러오기 실패:', err);
+      });
   }, []);
 
   return (
     <section className="product-section">
       <h2>PRODUCT</h2>
-      <p className="bar">고깃간 베스트 상품 백엔드 완료 후 재수정</p>
+      <p className="bar">고깃간 베스트 상품</p>
       <ul className="product-list">
-        {products.map((item, index) => (
+        {Array.isArray(products) && products.map((item, index) => (
           <li key={index} className="product-item">
             <img src={item.imageUrl} alt={item.name} />
             <h3>{item.name}</h3>
@@ -36,9 +32,9 @@ const ProductList = () => {
             </div>
           </li>
         ))}
-      </ul>``
+      </ul>
     </section>
   );
 };
 
-export default ProductList;
+export default PdList;
