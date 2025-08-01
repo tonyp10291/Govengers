@@ -45,7 +45,7 @@ function Join() {
     const handleSendEmailCode = async () => {
         if (!userInfo.umail) { setError("이메일을 입력해주세요."); return; }
         try {
-            const response = await axios.post('/api/email/send-code', { email: userInfo.umail });
+            const response = await axios.post('http://localhost:8090/api/email/send-code', { umail: userInfo.umail }, {withCredentials : true});
             alert(response.data);
             setUiState(prev => ({ ...prev, showSmsCodeInput: false, showEmailCodeInput: true, emailTimer: 180 }));
         } catch (err) { setError(err.response?.data || "이메일 발송에 실패했습니다."); }
@@ -53,7 +53,7 @@ function Join() {
 
     const handleVerifyEmailCode = async () => {
         try {
-            const response = await axios.post('/api/email/verify-code', { email: userInfo.umail, code: verifications.emailCode });
+            const response = await axios.post('http://localhost:8090/api/email/verify-code', { email: userInfo.umail, code: verifications.emailCode }, {withCredentials : true});
             alert(response.data);
             setVerifications(prev => ({ ...prev, emailVerified: true, smsVerified: false }));
             setUiState(prev => ({ ...prev, showEmailCodeInput: false, emailTimer: 0 }));
@@ -63,7 +63,7 @@ function Join() {
     const handleSendSmsCode = async () => {
         if (!userInfo.utel) { setError("전화번호를 입력해주세요."); return; }
         try {
-            const response = await axios.post('/api/sms/send-code', { phone: userInfo.utel });
+            const response = await axios.post('http://localhost:8090/api/sms/send-code', { phone: userInfo.utel }, {withCredentials : true});
             alert(response.data);
             setUiState(prev => ({ ...prev, showEmailCodeInput: false, showSmsCodeInput: true, smsTimer: 180 }));
         } catch (err) { setError(err.response?.data || "SMS 발송에 실패했습니다."); }
@@ -71,7 +71,7 @@ function Join() {
 
     const handleVerifySmsCode = async () => {
         try {
-            const response = await axios.post('/api/sms/verify-code', { phone: userInfo.utel, code: verifications.smsCode });
+            const response = await axios.post('http://localhost:8090/api/sms/verify-code', { phone: userInfo.utel, code: verifications.smsCode }, {withCredentials : true});
             alert(response.data);
             setVerifications(prev => ({ ...prev, smsVerified: true, emailVerified: false }));
             setUiState(prev => ({ ...prev, showSmsCodeInput: false, smsTimer: 0 }));
@@ -87,7 +87,7 @@ function Join() {
         }
         const finalUserInfo = { ...userInfo, emailVerified: verifications.emailVerified, smsVerified: verifications.smsVerified, enabled: true };
         try {
-            await axios.post('/api/join', finalUserInfo);
+            await axios.post('http://localhost:8090/api/join', finalUserInfo, {withCredentials : true});
             alert('회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.');
             navigate('/login');
         } catch (err) { setError(err.response?.data || '회원가입 중 오류가 발생했습니다.'); }

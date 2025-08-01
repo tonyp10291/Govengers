@@ -28,11 +28,11 @@ function Login() {
         }
 
         try {
-            const response = await axios.post('/api/login', userInfo, {
+            const response = await axios.post('http://localhost:8090/api/login', userInfo, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
-            });
+            }, {withCredentials : true});
 
             const receivedToken = response.data.token;
             login(receivedToken);

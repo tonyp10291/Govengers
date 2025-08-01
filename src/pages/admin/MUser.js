@@ -6,7 +6,8 @@ const MUser = () => {
   const [user, setUser] = useState([]);
 
   useEffect(() => {
-    axios.get("/api/admin/user")
+    // axios.get("/api/admin/user")
+    axios.get("http://localhost:8090/api/admin/user")
       .then((res) => {
         setUser(res.data);
       })

@@ -42,7 +42,7 @@ function Find() {
         }
         try {
             // 백엔드에 인증번호 발송 요청
-            const response = await axios.post('/api/sms/send-code', { phone: findIdInfo.phone });
+            const response = await axios.post('http://localhost:8090/api/sms/send-code', { phone: findIdInfo.phone });
             setMessage(response.data);
             setShowCodeInput(true);
             setTimer(180);
@@ -58,7 +58,7 @@ function Find() {
             return;
         }
         try {
-            const response = await axios.post('/api/sms/verify-code', { phone: findIdInfo.phone, code: findIdInfo.code });
+            const response = await axios.post('http://localhost:8090/api/sms/verify-code', { phone: findIdInfo.phone, code: findIdInfo.code });
             setMessage(response.data);
             setIsVerified(true);
             setShowCodeInput(false);
