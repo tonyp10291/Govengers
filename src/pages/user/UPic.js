@@ -1,10 +1,55 @@
 import { Button } from "../../util/Buttons";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import '../../css/user/UPic.css';
+import axios from "axios";
 
-const WishList = () => {
+const Wishlist = () => {
 
+    const navigate = useNavigate();
     const contentsExist = true;
+    const [products, setProducts] = useState('');
+
+    useEffect(() => {
+        const fetchWishlist = async () => {
+            let user_token = localStorage.getItem("token");
+            if (!user_token){
+                let guest_id = localStorage.getItem("guest_id");
+                if (!guest_id){
+                    alert('잘못된 접근입니다.\n메인페이지로 돌아갑니다.');
+                } else {
+                    try{
+                        const response = await axios.post('/api/wishlist', {guestId: guest_id}, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        setProducts(response.data);
+                    } catch(err){
+                        console.error("찜 목록 조회 오류:", err);
+                        alert('서버와 통신중 오류가 발생 했습니다.\n메인페이지로 돌아갑니다.');
+                        navigate('/');
+                    }
+                }           
+            } else {
+                alert('로그인 했을시');
+                try {
+                const response = await axios.get('/api/wishlist/user', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${user_token}`
+                    }
+                });
+                setProducts(response.data);
+                } catch (err) {
+                    console.error("로그인 찜 목록 조회 오류:", err);
+                    alert('로그인된 찜 목록을 가져오는 중 오류가 발생했습니다.\n메인페이지로 돌아갑니다.');
+                    navigate('/');
+                }
+            }
+        }
+    }, []);
+        
 
     return (
         <div className="wishList_wrap"> 
@@ -63,4 +108,4 @@ const WishList = () => {
     );
 }
 
-export default WishList;
+export default Wishlist;

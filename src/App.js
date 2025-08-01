@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import Login from './pages/common/Login';
 import Join from './pages/common/Join';
 import Find from './pages/common/Find';
-import WishList from './pages/user/UPic';
+import Wishlist from './pages/user/UPic';
 import ProductList from './component/ProductList';
 import NTWrt from './pages/admin/NTWrt';
 import UQnA from './pages/user/UQnA';
@@ -31,7 +31,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/join" element={<Join />} />
           <Route path="/find" element={<Find />} />
-          <Route path="/wishlist" element={<WishList />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/ntwrt" element={<NTWrt />} />
           <Route path="/uqna" element={<UQnA />} />
           <Route 
