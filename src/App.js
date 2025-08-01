@@ -4,19 +4,11 @@ import { ProductProvider } from './context/ProductContext';
 import TopHeader from './component/TopHeader';
 import Footer from './component/Footer';
 import Home from './pages/Home';
-<<<<<<< HEAD
-import Login from './common/Login';
-import Join from './common/Join';
-import Find from './common/Find';
-import ProductList from './component/ProductList';
-import NTWrt from './pages/admin/NTWrt';
-=======
 import Login from './pages/common/Login';
 import Join from './pages/common/Join';
 import Find from './pages/common/Find';
 import ResetPassword from './pages/common/ResetPassword';
 import PdList from './pages/common/PdList'; 
->>>>>>> origin/JongYun_merge
 import UQnA from './pages/user/UQnA';
 import UQAdd from "./pages/user/UQAdd";
 import MQnA from './pages/admin/MQnA';
