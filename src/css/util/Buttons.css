@@ -6,8 +6,8 @@
 }
 
 .btn_logo{
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     border: 0;
     background-image: url("../../../public/logo.png");
     background-repeat: no-repeat;

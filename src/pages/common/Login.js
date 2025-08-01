@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AuthContext from '../../context/AuthContext';
-import '../../css/common/Login.css';
+import "../../css/common/Login.css";
 
 function Login() {
     const { login } = useContext(AuthContext);
@@ -16,7 +16,6 @@ function Login() {
             [e.target.name]: e.target.value,
         });
     };
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -28,11 +27,11 @@ function Login() {
         }
 
         try {
-            const response = await axios.post('http://localhost:8090/api/login', userInfo, {
+            const response = await axios.post('/api/login', userInfo, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
-            }, {withCredentials : true});
+            });
 
             const receivedToken = response.data.token;
             login(receivedToken);

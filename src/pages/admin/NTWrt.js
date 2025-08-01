@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios"; 
 import TopHeader from "../../component/TopHeader";
-import "./../../css/admin/NTWrt.css";
-import "./../../css/util/Buttons.css";
+import "../../css/admin/NTWrt.css";
+import "../../css/util/Buttons.css";
 import { Button } from "../../util/Buttons";
 
 export default function NTWrt() {
@@ -48,13 +49,13 @@ export default function NTWrt() {
     }
 
     try {
-      const response = await fetch("http://localhost:8090/api/notices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(notice),
+      const response = await axios.post("/api/notices", notice, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         alert("공지 등록이 완료되었습니다.");
         localStorage.setItem("lastNoticeId", noticeId);
         navigate("/noticeList");
@@ -69,68 +70,65 @@ export default function NTWrt() {
 
   return (
     <div>
-    <TopHeader />
-    <div className="notice-container">
+      <TopHeader />
+      <div className="notice-container">
+        <h2 className="notice-title">공지사항 / 이벤트 등록</h2>
+        <form className="notice-form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="noticeId">공지 번호</label>
+            <input
+              type="text"
+              id="noticeId"
+              value={noticeId !== null ? noticeId : "로딩 중..."}
+              readOnly
+            />
+          </div>
 
-      <h2 className="notice-title">공지사항 / 이벤트 등록</h2>
-      <form className="notice-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="noticeId">공지 번호</label>
-          <input
-            type="text"
-            id="noticeId"
-            value={noticeId !== null ? noticeId : "로딩 중..."}
-            readOnly
-          />
-        </div>
-  
-        <div className="form-group">
-          <label htmlFor="is_event">카테고리</label>
-          <select
-            id="is_event"
-            value={notice.is_event ? "event" : "notice"}
-            onChange={(e) =>
-              setNotice((prev) => ({
-                ...prev,
-                is_event: e.target.value === "event",
-              }))
-            }
-          >
-            <option value="notice">공지</option>
-            <option value="event">이벤트</option>
-          </select>
-        </div>
-  
-        <div className="form-group">
-          <label htmlFor="title">제목</label>
-          <input
-            type="text"
-            id="title"
-            value={notice.title}
-            maxLength={50}
-            onChange={handleChange}
-            placeholder="제목을 입력해주세요 (최대 50자)"
-          />
-        </div>
-  
-        <div className="form-group">
-          <label htmlFor="content">내용</label>
-          <textarea
-            id="content"
-            value={notice.content}
-            maxLength={1500}
-            onChange={handleChange}
-            placeholder="내용을 입력해주세요 (최대 1500자)"
-          ></textarea>
-        </div>
-  
-        <div className="notice-buttons">
-          <Button text={"등록"} type={"submit"} />
-          {/* <button type="submit" className="submit-btn">등록</button> */}
-          <Button text={"취소"} type={"cancel"} onClick={() => navigate("/noticeList")} />
-          {/* <button type="button" className="cancel-btn" onClick={() => navigate("/noticeList")}>취소</button> */}
-        </div>
-      </form>
+          <div className="form-group">
+            <label htmlFor="is_event">카테고리</label>
+            <select
+              id="is_event"
+              value={notice.is_event ? "event" : "notice"}
+              onChange={(e) =>
+                setNotice((prev) => ({
+                  ...prev,
+                  is_event: e.target.value === "event",
+                }))
+              }
+            >
+              <option value="notice">공지</option>
+              <option value="event">이벤트</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="title">제목</label>
+            <input
+              type="text"
+              id="title"
+              value={notice.title}
+              maxLength={50}
+              onChange={handleChange}
+              placeholder="제목을 입력해주세요 (최대 50자)"
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="content">내용</label>
+            <textarea
+              id="content"
+              value={notice.content}
+              maxLength={1500}
+              onChange={handleChange}
+              placeholder="내용을 입력해주세요 (최대 1500자)"
+            ></textarea>
+          </div>
+
+          <div className="notice-buttons">
+            <Button text={"등록"} type={"submit"} />
+            <Button text={"취소"} type={"cancel"} onClick={() => navigate("/noticeList")} />
+          </div>
+        </form>
       </div>
     </div>
   );

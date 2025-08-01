@@ -1,0 +1,105 @@
+/* src/css/GuidePage.css */
+
+.guide-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  background: white;
+}
+
+.guide-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.guide-header h1 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.guide-header p {
+  font-size: 16px;
+  color: #666;
+}
+
+.guide-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 50px;
+  align-items: start;
+}
+
+.guide-image-section {
+  text-align: center;
+}
+
+.guide-image {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.guide-text-section {
+  text-align: left;
+}
+
+.guide-text-section h3 {
+  font-size: 20px;
+  color: #333;
+  margin: 30px 0 15px 0;
+  border-bottom: 2px solid #9b197f;
+  padding-bottom: 8px;
+}
+
+.guide-text-section h3:first-child {
+  margin-top: 0;
+}
+
+.guide-text-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.guide-text-section li {
+  padding: 8px 0 8px 20px;
+  position: relative;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #555;
+}
+
+.guide-text-section li::before {
+  content: '•';
+  color: #9b197f;
+  font-weight: bold;
+  position: absolute;
+  left: 0;
+}
+
+.guide-text-section strong {
+  color: #9b197f;
+  font-weight: 600;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .guide-content {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .guide-header h1 {
+    font-size: 24px;
+  }
+  
+  .guide-text-section h3 {
+    font-size: 18px;
+  }
+  
+  .guide-container {
+    padding: 30px 15px;
+  }
+}

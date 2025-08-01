@@ -24,6 +24,7 @@
   transition: transform 0.3s ease; 
 }
 
+/* 왼쪽 영역 */
 .header-left {
   display: flex;
   align-items: center;
@@ -35,6 +36,18 @@
 .cs-center {
   color: #333;
   font-size: 11px;
+}
+
+.home-link {
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: #333;
+}
+
+.home-link:hover {
+  color: #9b197f;
+  text-decoration: none;
 }
 
 .community-wrapper {
@@ -84,6 +97,7 @@
   color: #9b197f;           
 }
 
+/* 오른쪽 유틸 메뉴 */
 .header-right {
   display: flex;
   align-items: center;
@@ -115,8 +129,10 @@
   cursor: pointer;
   padding: 4px 6px;          
   line-height: 1;
+  margin-right: 30px;
 }
 
+/* 검색 슬라이드 */
 .search-slide-full {
   position: absolute;  
   top: 40px;           
@@ -135,7 +151,6 @@
   opacity: 1;
   visibility: visible;
 }
-
 
 .search-container {
   max-width: 1200px;
@@ -182,4 +197,117 @@
 
 .header-top.scrolled .header-inner {
   transform: scale(0.9);
+}
+
+@media screen and (max-width: 768px) {
+  .header-top {
+    padding: 10px 15px;
+    position: fixed;
+  }
+
+  .header-inner {
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .cs-center {
+    display: none; 
+  }
+
+  .home-link {
+    font-size: 12px;
+  }
+
+  .community-btn .text {
+    display: none;
+  }
+
+  .community-btn {
+    font-size: 18px;
+    padding: 5px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .header-right::-webkit-scrollbar {
+    display: none;
+  }
+
+  .util-link {
+    font-size: 11px;
+    min-width: max-content;
+  }
+
+  .search-btn {
+    font-size: 16px;
+    padding: 3px 5px;
+  }
+
+  .dropdown-menu {
+    left: -50px; 
+    width: 120px;
+    font-size: 13px;
+  }
+
+  .dropdown-menu li a {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .search-slide-full {
+    top: 100%;
+    padding: 20px 15px 40px 15px;
+  }
+
+  .search-container {
+    padding: 20px 0;
+  }
+
+  .search-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    font-size: 16px;
+  }
+
+  .search-bar label {
+    min-width: auto;
+    text-align: center;
+  }
+
+  .search-bar input {
+    padding: 12px;
+    font-size: 16px;
+    text-align: center;
+  }
+
+  .go-btn,
+  .close-btn {
+    align-self: center;
+    padding: 8px 16px;
+    background: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .header-top.scrolled .header-inner {
+    transform: scale(1);
+  }
 }

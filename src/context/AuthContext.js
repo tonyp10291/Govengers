@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [token, setToken] = useState(null);
     const [userRole, setUserRole] = useState(null);
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
@@ -16,6 +17,7 @@ export const AuthProvider = ({ children }) => {
                 if (decodedToken.exp * 1000 > Date.now()) {
                     setToken(storedToken);
                     setUserRole(decodedToken.role);
+                    setUserId(decodedToken.sub);
                     setIsLoggedIn(true);
                 } else {
                     localStorage.removeItem('token');
@@ -33,6 +35,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('token', newToken);
             setToken(newToken);
             setUserRole(decodedToken.role);
+            setUserId(decodedToken.sub);
             setIsLoggedIn(true);
         } catch (error) {
             console.error("Failed to decode token on login:", error);
@@ -44,10 +47,11 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         setUserRole(null);
         setIsLoggedIn(false);
+        setUserId(null);
     };
 
     return (
-        <AuthContext.Provider value={{ isLoggedIn, token, userRole, login, logout }}>
+        <AuthContext.Provider value={{ isLoggedIn, token, userRole, userId, login, logout }}>
             {children}
         </AuthContext.Provider>
     );
