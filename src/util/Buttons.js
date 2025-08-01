@@ -26,15 +26,29 @@ export const Button = ({text, type, style, onClick}) => {
         "cancel"
     ].includes(type) ? type : "default";
 
-    return (
-        <>
-            <button
-                type="button"
-                className={["btn", `btn_${btnType}`].join(" ")}
-                style={style}
-                onClick={onClick}
-            >{text}
-            </button>
-        </>
-    );
+    if (btnType === "submit"){
+        return (
+            <>
+                <button
+                    type="submit"
+                    className={["btn", `btn_${btnType}`].join(" ")}
+                    style={style}
+                    onClick={onClick}
+                >{text}
+                </button>
+            </>
+        );
+    } else {
+        return (
+            <>
+                <button
+                    type="button"
+                    className={["btn", `btn_${btnType}`].join(" ")}
+                    style={style}
+                    onClick={onClick}
+                >{text}
+                </button>
+            </>
+        );
+    }
 }

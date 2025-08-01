@@ -4,9 +4,18 @@ const ProductList = () => {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch('http://localhost:8090/api/products',{
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem("token")}`
+      },
+      credentials: 'include' // 쿠키와 인증 헤더를 함께 보냅니다.
+      })
       .then(res => res.json())
-      .then(data => setProducts(data))
+      .then(data =>{
+         console.log('data: ', data);
+         setProducts(data);
+      })
       .catch(err => console.error('상품 불러오기 실패:', err));
   }, []);
 

@@ -48,7 +48,7 @@ export default function NTWrt() {
     }
 
     try {
-      const response = await fetch("/api/notices", {
+      const response = await fetch("http://localhost:8090/api/notices", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(notice),

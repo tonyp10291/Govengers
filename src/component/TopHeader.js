@@ -70,6 +70,7 @@ function TopHeader() {
               <>
                 <button onClick={handleLogout} className="util-link logout-btn">LOGOUT</button>
                 <Link to="/cart" className="util-link">CART</Link>
+                <Link to="/wishlist" className="util-link">WISHLIST</Link>
                 <Link to="/order" className="util-link">ORDER</Link>
                 <Link to="/mypage" className="util-link">MY PAGE</Link>
               </>
@@ -78,6 +79,8 @@ function TopHeader() {
             <>
               <Link to="/login" className="util-link">LOGIN</Link>
               <Link to="/join" className="util-link">JOIN</Link>
+              <Link to="/cart" className="util-link">CART</Link>
+              <Link to="/wishlist" className="util-link">WISHLIST</Link>
             </>
           )}
           {!isAdmin && ( <button className="search-btn" onClick={toggleSearch}>🔍</button> )}
