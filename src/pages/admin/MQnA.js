@@ -12,7 +12,6 @@ const MQnA = () => {
   const [answerStatusFilter, setAnswerStatusFilter] = useState("");
   const [privacyFilter, setPrivacyFilter] = useState("");
   const [replyText, setReplyText] = useState("");
-
   const token = localStorage.getItem("token");
 
   // 카테고리별 한글 표시

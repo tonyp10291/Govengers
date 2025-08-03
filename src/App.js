@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ProductProvider } from './context/ProductContext';
 import TopHeader from './component/TopHeader';
@@ -19,8 +19,16 @@ import NTWrt from './pages/admin/NTWrt';
 import MUser from './pages/admin/MUser';
 import PdAdd from './pages/admin/PdAdd';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import Wishlist from './pages/user/UPic';
 
 function App() {
+
+  useEffect(() => {
+    const guestId = localStorage.getItem("guest_id");
+    if (!guestId) {
+      localStorage.setItem("guest_id", crypto.randomUUID());
+    }
+  }, []);
   return (
       <BrowserRouter>
         <TopHeader />
@@ -40,12 +48,10 @@ function App() {
               </ProductProvider>
             } />
 
-
             <Route path="/shipping-guide" element={<ShippingGuide />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/point-guide" element={<PointGuide />} />
             <Route path="/cooking-guide" element={<CookingGuide />} />
-
-
             <Route path="/admin/ntwrt" element={<NTWrt />} />
             <Route path="/admin/muser" element={<MUser />} />
             <Route path="/admin/mqna" element={<MQnA />} /> 

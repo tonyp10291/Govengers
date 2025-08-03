@@ -8,7 +8,7 @@ const PdList = () => {
   useEffect(() => {
     axios.get('/api/products')
       .then(response => {
-        setProducts(response.data); 
+        setProducts(response.data);
       })
       .catch(err => {
         console.error('상품 불러오기 실패:', err);
