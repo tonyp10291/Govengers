@@ -18,6 +18,7 @@ import CookingGuide from './pages/guides/CookingGuide';
 import NTWrt from './pages/admin/NTWrt';
 import MUser from './pages/admin/MUser';
 import PdAdd from './pages/admin/PdAdd';
+import PdOrder from './pages/admin/PdOrder'; 
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Wishlist from './pages/user/UPic';
 
@@ -55,7 +56,8 @@ function App() {
             <Route path="/admin/ntwrt" element={<NTWrt />} />
             <Route path="/admin/muser" element={<MUser />} />
             <Route path="/admin/mqna" element={<MQnA />} /> 
-            <Route path="/admin/pdAdd" element={<PdAdd />} /> 
+            <Route path="/admin/pdAdd" element={<PdAdd />} />
+            <Route path="/admin/pdorder" element={<PdOrder />} />
           </Routes>
         </main>
         <Footer />

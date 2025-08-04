@@ -29,7 +29,7 @@ const UQAdd = () => {
       await axios.post("/api/uqna", newInquiry, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Bearer 반드시 붙이기
+          'Authorization': `Bearer ${token}`, // Bearer 반드시 붙이기
         },
       });
 
