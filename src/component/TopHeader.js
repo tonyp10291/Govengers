@@ -27,7 +27,7 @@ function TopHeader() {
 
   const toggleSearch = () => {
     setShowSearch(prev => !prev);
-    // 검색창이 열릴 때 검색어 초기화
+
     if (!showSearch) {
       setSearchTerm("");
     }
@@ -39,29 +39,29 @@ function TopHeader() {
     navigate("/");
   };
 
-  // 검색 실행 함수
+
   const handleSearch = () => {
     if (!searchTerm.trim()) {
       alert("검색어를 입력해주세요.");
       return;
     }
 
-    // 검색 결과 페이지로 이동 (쿼리 파라미터로 검색어 전달)
+
     navigate(`/search?keyword=${encodeURIComponent(searchTerm.trim())}`);
     
-    // 검색창 닫기
+
     setShowSearch(false);
     setSearchTerm("");
   };
 
-  // 엔터 키 검색
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
 
-  // 검색어 입력 핸들러
+
   const handleSearchInputChange = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -124,7 +124,7 @@ function TopHeader() {
               <>
                 <button onClick={handleLogout} className="util-link logout-btn">LOGOUT</button>
                 <Link to="/admin/product" className="util-link">상품목록</Link>
-                <Link to="/admin/order" className="util-link">주문목록</Link>
+                <Link to="/admin/pdorder" className="util-link">주문목록</Link>
                 <Link to="/admin/muser" className="util-link">회원목록</Link>
                 
               </>

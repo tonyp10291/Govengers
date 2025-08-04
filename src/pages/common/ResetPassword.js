@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import '../../css/common/Find.css'; // Find.js와 동일한 스타일 사용
+import '../../css/common/Find.css'; 
 
 function ResetPassword() {
     const navigate = useNavigate();

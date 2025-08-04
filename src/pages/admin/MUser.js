@@ -11,7 +11,6 @@ const MUser = () => {
 
   const token = localStorage.getItem("token");
 
-  // ✅ 검색 핸들러
   const handleSearch = () => {
     axios.get(`/api/admin/users?page=0&keyword=${searchTerm}`, {
       headers: {
@@ -53,12 +52,10 @@ const MUser = () => {
     setExpandedUid(prev => (prev === uid ? null : uid));
   };
 
-  // ✅ 페이지네이션 렌더링 함수
   const renderPagination = () => {
-    const maxVisiblePages = 5; // 5개씩만 보여주기
+    const maxVisiblePages = 5; 
     let startPage, endPage;
 
-    // 5개씩 그룹으로 나누기
     const currentGroup = Math.floor(page / maxVisiblePages);
     startPage = currentGroup * maxVisiblePages;
     endPage = Math.min(startPage + maxVisiblePages, totalPages);
@@ -75,7 +72,6 @@ const MUser = () => {
         </div>
         
         <div className="pagination">
-          {/* 5칸 뒤로 */}
           <button 
             onClick={() => setPage((prev) => Math.max(prev - 5, 0))}
             disabled={page < 5}
@@ -85,7 +81,6 @@ const MUser = () => {
             ⟪
           </button>
 
-          {/* 이전 */}
           <button 
             onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
             disabled={page === 0}
@@ -95,7 +90,6 @@ const MUser = () => {
             ‹
           </button>
 
-          {/* 첫 페이지가 안 보이면 1 표시 */}
           {startPage > 0 && (
             <>
               <button
@@ -108,7 +102,6 @@ const MUser = () => {
             </>
           )}
 
-          {/* 페이지 번호들 (5개씩) */}
           {pageNumbers.map(pageNum => (
             <button
               key={pageNum}
@@ -119,7 +112,6 @@ const MUser = () => {
             </button>
           ))}
 
-          {/* 마지막 페이지가 안 보이면 마지막 번호 표시 */}
           {endPage < totalPages && (
             <>
               <span className="pagination-dots">...</span>
@@ -132,7 +124,6 @@ const MUser = () => {
             </>
           )}
 
-          {/* 다음 */}
           <button 
             onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
             disabled={page === totalPages - 1}
@@ -142,7 +133,6 @@ const MUser = () => {
             ›
           </button>
 
-          {/* 5칸 앞으로 */}
           <button 
             onClick={() => setPage((prev) => Math.min(prev + 5, totalPages - 1))}
             disabled={page >= totalPages - 5}
@@ -214,7 +204,6 @@ const MUser = () => {
             </tbody>
           </table>
 
-          {/* ✅ 이쁜 페이지네이션 */}
           {renderPagination()}
         </div>
       </div>

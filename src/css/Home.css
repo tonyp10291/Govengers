@@ -14,7 +14,6 @@ html {
 }
 
 .home-header {
-  /* display: flex; */
   align-items: center;
   background-color: white;
   margin-bottom: 24px;
@@ -68,7 +67,7 @@ html {
 
 .info-banner-section {
   display: flex;
-  justify-content: space-between;  /* ✅ 좌우로 쫙 벌림 */
+  justify-content: space-between; 
   flex-wrap: wrap;
   max-width: 1200px;
   margin: 0 auto;
@@ -104,22 +103,18 @@ html {
   margin: 0;
 }
 
-/* 기존 Home.css에 추가하거나 수정할 부분만 */
-
 .info-banner-card {
   flex: 1 1 300px;
   max-width: 320px;
   text-align: center;
   
-  /* ✅ 링크 기능을 위한 추가 스타일 */
   text-decoration: none;
   color: inherit;
   cursor: pointer;
   transition: all 0.3s ease;
-  display: block; /* 링크가 전체 영역을 덮도록 */
+  display: block; 
 }
 
-/* ✅ 호버 효과 추가 */
 .info-banner-card:hover {
   transform: translateY(-3px);
   text-decoration: none;
@@ -132,12 +127,78 @@ html {
 }
 
 .info-banner-card:hover h3 {
-  color: #9b197f; /* TopHeader와 같은 포인트 컬러 */
+  color: #9b197f; 
 }
 
-/* ✅ 링크 상태에서도 기본 스타일 유지 */
 .info-banner-card:visited,
 .info-banner-card:focus {
   text-decoration: none;
   color: inherit;
 }
+
+
+.product-section {
+  margin: 40px 0;
+  padding: 0 20px;
+}
+
+.product-section h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.bar {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.product-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  justify-content: center;
+}
+
+.product-item {
+  width: 200px;
+  text-align: center;
+}
+
+.product-item img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.product-item h3 {
+  margin: 10px 0 5px 0;
+  font-size: 1.1rem;
+}
+
+.price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin: 5px 0;
+}
+
+.badges {
+  margin-top: 10px;
+}
+
+.badge {
+  display: inline-block;
+  margin: 3px;
+  padding: 2px 6px;
+  font-size: 11px;
+  border-radius: 4px;
+  color: white;
+}
+
+.badge.soldout { background: #d00; }
+.badge.hit     { background: #f80; }
+.badge.new     { background: #2a7; }

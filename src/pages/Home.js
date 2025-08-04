@@ -1,20 +1,30 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from 'axios';
 import "../css/Home.css";
 import MainSlider from "../component/MainSlider";
-import PdList from "./common/PdList";
 import { Button } from "../util/Buttons";
 
 const Home = () => {
     const navigate = useNavigate();
+    const [products, setProducts] = useState([]);
     
     const homeBtnClick = () => {
         navigate("/");
     };
 
+    useEffect(() => {
+        axios.get('/api/products')
+            .then(response => {
+                setProducts(response.data); 
+            })
+            .catch(err => {
+                console.error('상품 불러오기 실패:', err);
+            });
+    }, []);
+
     return (
         <div className="home-container">
-
             <header className="home-header">
                 <div className="logo">
                     <Button type={"logo"} onClick={homeBtnClick} />
@@ -45,6 +55,7 @@ const Home = () => {
                     그리고 그것들 중 또 한번 전문가들의 선별 작업을 거쳐 통과된 고기만이 고객님의 집으로 배달됩니다
                 </p>
             </main>
+            
             <div className="info-banner-section">
                 <Link to="/shipping-guide" className="info-banner-card">
                     <img src="/postoffice.png" alt="우체국 배송 안내" />
@@ -64,7 +75,25 @@ const Home = () => {
                     <p>고벤저스가 알려주는 고기 굽는법</p>
                 </Link>
             </div>
-            <PdList />
+
+            <section className="product-section">
+                <h2>PRODUCT</h2>
+                <p className="bar">고깃간 베스트 상품</p>
+                <ul className="product-list">
+                    {Array.isArray(products) && products.map((item, index) => (
+                        <li key={index} className="product-item">
+                            <img src={item.imageUrl} alt={item.name} />
+                            <h3>{item.name}</h3>
+                            <p className="price">₩{item.price.toLocaleString()}</p>
+                            <div className="badges">
+                                {item.soldOut && <span className="badge soldout">SOLD OUT</span>}
+                                {item.hit && <span className="badge hit">HIT</span>}
+                                {item.new && <span className="badge new">NEW</span>}
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            </section>
         </div>
     );
 };

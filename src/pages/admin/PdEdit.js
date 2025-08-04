@@ -1,14 +1,18 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../util/Buttons";
-import "../../css/admin/PdAdd.css";
+import "../../css/admin/PdEdit.css";
 
 const MAIN_CATEGORY = ["소고기", "돼지고기", "선물세트"];
 const SUB_CATEGORY = ["등심", "안심", "목살", "갈비", "삼겹살", "앞다리살", "뒷다리살"];
 const ADMIN_STATUS = ["배송완료", "배송중", "배송준비중", "주문완료", "주문취소"];
 const USER_STATUS = ["배송완료", "배송중", "배송준비중", "주문완료", "주문취소"];
 
-function PdAdd() {
+function PdEdit() {
+  const { pid } = useParams();
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     pnm: "",
     mainCategory: "",
@@ -21,25 +25,58 @@ function PdAdd() {
     soldout: 0,
     userStatus: "배송완료",
     adminStatus: "배송완료",
-    image: null,
+    image: null,         
+    oldImage: "",        
   });
-
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef();
 
+  useEffect(() => {
+    async function fetchProduct() {
+      try {
+        const res = await axios.get(`/api/products/${pid}`);
+        const data = res.data;
+        setForm({
+          ...form,
+          pnm: data.pnm || "",
+          mainCategory: data.mainCategory || "",
+          subCategory: data.subCategory || "",
+          price: data.price || "",
+          pdesc: data.pdesc || "",
+          origin: data.origin || "",
+          expDate: data.expDate || "",
+          hit: data.hit || 0,
+          soldout: data.soldout || 0,
+          userStatus: data.userStatus || "배송완료",
+          adminStatus: data.adminStatus || "배송완료",
+          image: null,
+          oldImage: data.image || ""
+        });
+        if (data.image) {
+          setPreview(`/api/images/${data.image}`);
+        }
+      } catch (err) {
+        alert("상품 정보를 불러오지 못했습니다.");
+        navigate(-1);
+      }
+    }
+    fetchProduct();
+    // eslint-disable-next-line
+  }, [pid]);
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, files } = e.target;
     if (type === "checkbox") {
       setForm({ ...form, [name]: checked ? 1 : 0 });
     } else if (type === "file") {
-      const file = e.target.files[0];
+      const file = files[0];
       setForm({ ...form, image: file });
       if (file) {
         const reader = new FileReader();
         reader.onload = (ev) => setPreview(ev.target.result);
         reader.readAsDataURL(file);
       } else {
-        setPreview(null);
+        setPreview(form.oldImage ? `/api/images/${form.oldImage}` : null);
       }
     } else {
       setForm({ ...form, [name]: value });
@@ -63,41 +100,26 @@ function PdAdd() {
     });
 
     try {
-      await axios.post("/api/products/register", formData, {
+      await axios.put(`/api/products/${pid}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true, 
+        withCredentials: true,
       });
-      alert("상품이 등록되었습니다!");
-      setForm({
-        pnm: "",
-        mainCategory: "",
-        subCategory: "",
-        price: "",
-        pdesc: "",
-        origin: "",
-        expDate: "",
-        hit: 0,
-        soldout: 0,
-        userStatus: "배송완료",
-        adminStatus: "배송완료",
-        image: null,
-      });
-      setPreview(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      alert("상품이 수정되었습니다!");
+      navigate("/admin/pdlist");
     } catch (err) {
-      alert("상품 등록 실패! " + (err.response?.data?.message || err.message));
+      alert("수정 실패! " + (err.response?.data?.message || err.message));
     }
   };
 
   return (
-    <div className="pdadd-container">
-      <h2>상품 등록</h2>
-      <form className="pdadd-form" onSubmit={handleSubmit}>
-        <div className="pdadd-form-group">
+    <div className="pdedit-container">
+      <h2>상품 정보 수정</h2>
+      <form className="pdedit-form" onSubmit={handleSubmit}>
+        <div className="pdedit-form-group">
           <label>상품명</label>
           <input name="pnm" value={form.pnm} onChange={handleChange} required />
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>메인카테고리</label>
           <select name="mainCategory" value={form.mainCategory} onChange={handleMainCategoryChange} required>
             <option value="">선택</option>
@@ -106,7 +128,7 @@ function PdAdd() {
             ))}
           </select>
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>서브카테고리</label>
           <select name="subCategory" value={form.subCategory} onChange={handleChange} required>
             <option value="">선택</option>
@@ -115,23 +137,23 @@ function PdAdd() {
             ))}
           </select>
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>가격</label>
           <input type="number" name="price" value={form.price} onChange={handleChange} required />
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>상품설명</label>
           <textarea name="pdesc" value={form.pdesc} onChange={handleChange} required />
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>원산지</label>
           <input name="origin" value={form.origin} onChange={handleChange} required />
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>유통기한</label>
           <input type="date" name="expDate" value={form.expDate} onChange={handleChange} required />
         </div>
-        <div className="pdadd-form-group-checkbox">
+        <div className="pdedit-form-group-checkbox">
           <label>
             <input type="checkbox" name="hit" checked={form.hit === 1} onChange={handleChange} />
             히트상품
@@ -141,7 +163,7 @@ function PdAdd() {
             품절
           </label>
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>관리자 상태</label>
           <select name="adminStatus" value={form.adminStatus} onChange={handleChange} required>
             {ADMIN_STATUS.map((s) => (
@@ -149,7 +171,7 @@ function PdAdd() {
             ))}
           </select>
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>유저 상태</label>
           <select name="userStatus" value={form.userStatus} onChange={handleChange} required>
             {USER_STATUS.map((s) => (
@@ -157,7 +179,7 @@ function PdAdd() {
             ))}
           </select>
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>상품이미지</label>
           <input
             type="file"
@@ -165,25 +187,23 @@ function PdAdd() {
             accept="image/*"
             onChange={handleChange}
             ref={fileInputRef}
-            required
           />
+          <span className="pdedit-fileinfo">※ 이미지를 새로 등록하지 않으면 기존 이미지가 유지됩니다.</span>
         </div>
-        <div className="pdadd-btn-box">
-          <div className="pdadd-btn-box">
-            <Button type="submit" text="상품 등록" />
-          </div>
+        <div className="pdedit-btn-box">
+          <Button type="submit" text="수정 완료" />
         </div>
       </form>
-
-      <div className="pdadd-preview">
-        <div className="pdadd-preview-title">미리보기</div>
-        <div className="pdadd-preview-box">
+      
+      <div className="pdedit-preview">
+        <div className="pdedit-preview-title">미리보기</div>
+        <div className="pdedit-preview-box">
           {preview ? (
-            <img src={preview} alt="미리보기" className="pdadd-preview-img" />
+            <img src={preview} alt="미리보기" className="pdedit-preview-img" />
           ) : (
-            <div className="pdadd-preview-img" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ccc' }}>이미지 없음</div>
+            <div className="pdedit-preview-img" style={{display:'flex',alignItems:'center',justifyContent:'center',color:'#ccc'}}>이미지 없음</div>
           )}
-          <div className="pdadd-preview-info">
+          <div className="pdedit-preview-info">
             <div className="prod-name">
               {form.pnm}
               {form.hit ? <span className="prod-hit">HIT!</span> : null}
@@ -204,7 +224,7 @@ function PdAdd() {
             </div>
             <div>
               <span className="prod-label">관리자상태:</span> {form.adminStatus}
-              <span style={{ marginLeft: "8px" }} />
+              <span style={{marginLeft:"8px"}} />
               <span className="prod-label">유저상태:</span> {form.userStatus}
             </div>
           </div>
@@ -214,4 +234,4 @@ function PdAdd() {
   );
 }
 
-export default PdAdd;
+export default PdEdit;

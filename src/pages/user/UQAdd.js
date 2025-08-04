@@ -9,27 +9,22 @@ const UQAdd = () => {
   const [category, setCategory] = useState("상품문의");
   const [isPrivate, setIsPrivate] = useState(false);
 
-  // 문의 등록
   const handleSubmit = async () => {
     try {
-      // 토큰 가져오기
       const token = localStorage.getItem("token");
 
-      // 로그인 안 된 경우
       if (!token) {
         alert("로그인 후 이용 가능합니다.");
         window.location.href = "/login";
         return;
       }
 
-      // 새 문의 데이터
       const newInquiry = { title, content, category, isPrivate };
 
-      // 요청 보내기 (Bearer 명시적으로 붙임)
       await axios.post("/api/uqna", newInquiry, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Bearer 반드시 붙이기
+          Authorization: `Bearer ${token}`, 
         },
       });
 

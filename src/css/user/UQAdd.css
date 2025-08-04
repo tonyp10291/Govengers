@@ -1,4 +1,3 @@
-/* ================== 작성 페이지 컨테이너 ================== */
 .uqadd-container {
   width: 80%;
   margin: 55px auto;
@@ -6,19 +5,16 @@
   font-family: 'Noto Sans KR', sans-serif;
 }
 
-/* 제목 (페이지 타이틀) */
 .uqadd-container .uqadd-title {
   text-align: center;
   font-size: 32px;
   margin-bottom: 20px;
 }
 
-/* ================== 작성 폼 ================== */
 .uqadd-container .uqadd-form {
-  margin-bottom: 10px; /* 기존 30px → 10px로 줄임 */
+  margin-bottom: 10px; 
 }
 
-/* 입력 그룹 */
 .uqadd-container .form-group {
   display: flex;
   flex-direction: column;
@@ -34,7 +30,6 @@
   font-size: 15px;
 }
 
-/* input, textarea, select 공통 스타일 */
 .uqadd-container .form-group input[type="text"],
 .uqadd-container .form-group textarea,
 .uqadd-container .form-group select {
@@ -48,13 +43,11 @@
   background-color: #fff;
 }
 
-/* textarea 크기 고정 */
 .uqadd-container .form-group textarea {
   height: 150px;
   resize: none;
 }
 
-/* select 스타일 + 가로 너비 줄이기 */
 .uqadd-container .form-group select {
   border: 1px solid #ccc;
   outline: none;
@@ -62,14 +55,12 @@
   width: 120px;
 }
 
-/* ================== 유형 + 비밀글 배치 ================== */
 .uqadd-container .type-flex {
   display: flex;
   align-items: center;
   gap: 15px;
 }
 
-/* ================== 비밀글 체크박스 ================== */
 .uqadd-container .secret-check {
   display: flex;
   align-items: center;
@@ -94,7 +85,6 @@
   margin: 0;
 }
 
-/* ================== 유의사항 섹션 ================== */
 .uqadd-container .notice-section {
   margin-top: 20px;
   border-top: 1px solid #aaa;
@@ -102,7 +92,6 @@
   text-align: left;
 }
 
-/* 유의사항 헤더 (제목 + 버튼 가로 정렬) */
 .uqadd-container .notice-header {
   display: flex;
   justify-content: space-between;
@@ -110,7 +99,6 @@
   margin-bottom: 8px;
 }
 
-/* 유의사항 제목 */
 .uqadd-container .notice-title {
   font-size: 15px;
   font-weight: normal;
@@ -119,7 +107,6 @@
   margin-top: -3px;
 }
 
-/* 버튼 그룹 (제목 오른쪽 정렬) */
 .uqadd-container .notice-buttons {
   display: flex;
   justify-content: flex-end;
@@ -127,9 +114,8 @@
   margin-top: -5px;
 }
 
-/* ================== 버튼 초기화 + 재지정 ================== */
 .uqadd-container .notice-buttons button {
-  all: unset;              /* 버튼 기본 스타일 초기화 */
+  all: unset;             
   display: inline-flex;
   justify-content: center;
   align-items: center;
@@ -142,7 +128,6 @@
   box-sizing: border-box;
 }
 
-/* 등록 버튼 */
 .uqadd-container .notice-buttons .submit-btn {
   background-color: #000;
   color: #fff;
@@ -152,7 +137,6 @@
   opacity: 0.6;
 }
 
-/* 삭제 버튼 */
 .uqadd-container .notice-buttons .delete-btn {
   background-color: #eaeaea;
   color: #333;
@@ -163,9 +147,8 @@
   opacity: 0.6;
 }
 
-/* 유의사항 텍스트 */
 .uqadd-container .notice-text {
-  margin-top: -80px; /* 텍스트만 위로 살짝 올림 */
+  margin-top: -80px; 
 }
 
 .uqadd-container .notice-text ul {
@@ -181,12 +164,10 @@
   line-height: 1.2;
 }
 
-/* 제목 아래 간격 (제목 → 내용) */
 .uqadd-container .form-group:nth-child(1) {
   margin-bottom: 20px;
 }
 
-/* 내용 아래 간격 (내용 → 유형) */
 .uqadd-container .form-group:nth-child(2) {
   margin-bottom: 20px;
 }

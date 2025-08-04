@@ -1,0 +1,159 @@
+.pdedit-container {
+  max-width: 520px;
+  margin: 40px auto;
+  padding: 36px 28px 28px 28px;
+  border-radius: 18px;
+  background: #f8f8fb;
+  box-shadow: 0 6px 20px 0 rgba(140, 140, 160, 0.13);
+  color: #25262c;
+}
+.pdedit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.pdedit-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.pdedit-form-group label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #22223b;
+}
+.pdedit-form-group input,
+.pdedit-form-group textarea,
+.pdedit-form-group select {
+  padding: 8px 12px;
+  border-radius: 7px;
+  border: 1.5px solid #e0e0e0;
+  background: #fff;
+  color: #222;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+.pdedit-form-group textarea {
+  min-height: 60px;
+  max-height: 180px;
+  resize: vertical;
+  overflow-y: auto;
+  padding: 10px 14px;
+  line-height: 1.5;
+}
+.pdedit-form-group-checkbox {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  font-weight: 500;
+}
+.pdedit-form-group-checkbox input[type="checkbox"] {
+  accent-color: #ff7657;
+  margin-right: 6px;
+}
+.pdedit-btn-box {
+  margin-top: 10px;
+  text-align: center;
+}
+.pdedit-btn-box button,
+.pdedit-btn-box .govengers-btn {
+  background: #2185d0 !important;
+  color: #fff !important;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  min-width: 140px;
+  padding: 10px 0;
+  box-shadow: 0 3px 10px 0 rgba(0,90,140,0.08);
+  font-size: 1.07rem;
+  transition: background 0.2s;
+}
+.pdedit-btn-box button:hover,
+.pdedit-btn-box .govengers-btn:hover {
+  background: #136ba3 !important;
+}
+
+/* 誘몃━蹂닿린 */
+.pdedit-preview {
+  margin-top: 34px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px 18px;
+  box-shadow: 0 2px 12px 0 rgba(160,110,80,0.10);
+}
+.pdedit-preview-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2185d0;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+.pdedit-preview-box {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  min-height: 150px;
+}
+.pdedit-preview-img {
+  width: 130px;
+  height: 130px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1.5px solid #eee;
+  background: #f9f9fb;
+  box-shadow: 0 1px 4px 0 rgba(140,140,140,0.05);
+}
+.pdedit-preview-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: 1.07rem;
+  color: #36363c;
+  gap: 3px;
+}
+.pdedit-preview-info .prod-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2185d0;
+}
+.pdedit-preview-info .prod-price {
+  font-size: 1.13rem;
+  font-weight: 700;
+  color: #ff7657;
+  margin-bottom: 3px;
+}
+.pdedit-preview-info .prod-hit {
+  display: inline-block;
+  color: #ff7657;
+  font-weight: bold;
+  margin-left: 7px;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+.pdedit-preview-info .prod-soldout {
+  display: inline-block;
+  color: #6c757d;
+  font-weight: bold;
+  margin-left: 7px;
+  font-size: 1rem;
+  vertical-align: middle;
+}
+.pdedit-preview-info .prod-desc {
+  color: #666;
+  margin: 3px 0 6px 0;
+  font-size: 0.99rem;
+}
+.pdedit-preview-info .prod-label {
+  font-weight: 600;
+  color: #656565;
+  margin-right: 2px;
+}
+.pdedit-fileinfo {
+  display: block;
+  color: #888;
+  font-size: 0.93rem;
+  margin-top: 4px;
+  margin-left: 2px;
+}
