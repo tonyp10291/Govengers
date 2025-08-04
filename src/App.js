@@ -8,7 +8,7 @@ import Login from './pages/common/Login';
 import Join from './pages/common/Join';
 import Find from './pages/common/Find';
 import ResetPassword from './pages/common/ResetPassword';
-import PdList from './pages/common/PdList'; 
+import UPdList from './pages/user/UPdList';
 import UQnA from './pages/user/UQnA';
 import UQAdd from "./pages/user/UQAdd";
 import MQnA from './pages/admin/MQnA';
@@ -31,10 +31,10 @@ function App() {
     }
   }, []);
   return (
-      <BrowserRouter>
-        <TopHeader />
-        <main>
-          <Routes>
+    <BrowserRouter>
+      <TopHeader />
+      <main>
+        <Routes>
 
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -49,15 +49,16 @@ function App() {
               </ProductProvider>
             } />
 
+
             <Route path="/shipping-guide" element={<ShippingGuide />} />
-            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/point-guide" element={<PointGuide />} />
             <Route path="/cooking-guide" element={<CookingGuide />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/admin/pdorder" element={<PdOrder />} />
             <Route path="/admin/ntwrt" element={<NTWrt />} />
             <Route path="/admin/muser" element={<MUser />} />
             <Route path="/admin/mqna" element={<MQnA />} /> 
-            <Route path="/admin/pdAdd" element={<PdAdd />} />
-            <Route path="/admin/pdorder" element={<PdOrder />} />
+            <Route path="/admin/pdAdd" element={<PdAdd />} /> 
           </Routes>
         </main>
         <Footer />

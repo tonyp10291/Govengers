@@ -1,4 +1,3 @@
-/* ✅ 전체 레이아웃 박스 */
 .admin-mqna-wrap {
   width: 100%;
   min-height: 100vh;
@@ -11,7 +10,6 @@
   font-family: 'Noto Sans KR', sans-serif;
 }
 
-/* ✅ 제목 중앙 정렬 */
 .mqna-title {
   text-align: center;
   font-size: 32px;
@@ -19,7 +17,6 @@
   color: #333;
 }
 
-/* ✅ 필터 섹션 */
 .filter-section {
   display: flex;
   justify-content: space-between;
@@ -65,6 +62,7 @@
 .filter-controls {
   display: flex;
   gap: 10px;
+  margin-bottom: 10px;
 }
 
 .filter-select {
@@ -81,7 +79,6 @@
   border-color: #007bff;
 }
 
-/* ✅ 테이블 */
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -105,14 +102,13 @@
 }
 
 .admin-table .title-cell {
-  text-align: left;
+  text-align: center;
   max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ✅ 카테고리 배지 */
 .category-badge {
   padding: 4px 8px;
   border-radius: 12px;
@@ -127,7 +123,6 @@
 .category-member { background: #17a2b8; }
 .category-other { background: #6c757d; }
 
-/* ✅ 답변 상태 배지 */
 .status-badge {
   padding: 4px 8px;
   border-radius: 12px;
@@ -145,7 +140,6 @@
   background: #28a745; 
 }
 
-/* ✅ 공개/비공개 배지 */
 .privacy-badge {
   padding: 4px 8px;
   border-radius: 12px;
@@ -163,7 +157,6 @@
   color: #cc0000;
 }
 
-/* ✅ 삭제 버튼 */
 .delete-btn {
   background: none;
   border: none;
@@ -179,7 +172,7 @@
   transform: scale(1.1);
 }
 
-/* ✅ 요약행 */
+
 .summary-row {
   cursor: pointer;
   background: #fafafa;
@@ -211,8 +204,7 @@
   transform: translateY(-50%) rotate(90deg);
 }
 
-/* ✅ 상세 펼침 영역 */
-.detail-row {
+.mqna-detail-row {
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -221,68 +213,75 @@
   to { opacity: 1; }
 }
 
-.detail-row .detail-box {
+.mqna-detail-box {
   background: #f8f9fa;
   margin: 0;
   padding: 24px;
   border-top: 1px solid #dee2e6;
+  text-align: center;
 }
 
-.detail-content {
-  max-width: 100%;
+.mqna-detail-content {
+  display: inline-block;
+  text-align: left;
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
 }
 
-.detail-section {
+.mqna-detail-section {
   margin-bottom: 24px;
 }
 
-.detail-section:last-child {
+.mqna-detail-section:last-child {
   margin-bottom: 0;
 }
 
-.detail-section h4 {
+.mqna-detail-section h4 {
   font-size: 16px;
   font-weight: 600;
   color: #495057;
   margin-bottom: 12px;
   padding-bottom: 6px;
-  border-bottom: 2px solid #007bff;
-  display: inline-block;
+  text-align: center;
 }
 
-.content-text,
-.reply-text {
+.mqna-content-text,
+.mqna-reply-text {
   background: white;
   padding: 16px;
   border-radius: 8px;
-  border-left: 4px solid #007bff;
   line-height: 1.6;
   font-size: 14px;
   color: #495057;
   margin: 0 0 8px 0;
   word-wrap: break-word;
   white-space: pre-wrap;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.reply-text {
+.mqna-reply-text {
   border-left-color: #28a745;
   background: #f8fff8;
 }
 
-.answer-date {
+.mqna-answer-date {
   color: #6c757d;
   font-size: 12px;
   font-style: italic;
+  text-align: right;
+  margin-top: 8px;
 }
 
-/* ✅ 답변 작성 폼 */
-.reply-form {
+.mqna-reply-form {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
 }
 
-.reply-textarea {
+.mqna-reply-textarea {
   width: 100%;
   padding: 12px;
   border: 1px solid #ddd;
@@ -290,17 +289,21 @@
   font-family: inherit;
   font-size: 14px;
   line-height: 1.5;
-  resize: vertical;
+  resize: none; 
   min-height: 100px;
+  max-height: 100px; 
+  height: 100px; 
+  overflow-y: auto; 
+  box-sizing: border-box;
 }
 
-.reply-textarea:focus {
+.mqna-reply-textarea:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-.reply-submit-btn {
+.mqna-reply-submit-btn {
   align-self: flex-start;
   padding: 8px 20px;
   background: #007bff;
@@ -313,11 +316,10 @@
   transition: background 0.2s ease;
 }
 
-.reply-submit-btn:hover {
+.mqna-reply-submit-btn:hover {
   background: #0056b3;
 }
 
-/* ✅ 페이지네이션 (MUser와 동일) */
 .pagination-container {
   display: flex;
   flex-direction: column;
@@ -437,15 +439,19 @@
     padding: 2px 6px;
   }
 
-  .detail-box {
+  .mqna-detail-box {
     padding: 16px;
   }
 
-  .reply-form {
+  .mqna-detail-content {
+    max-width: 100%;
+  }
+
+  .mqna-reply-form {
     gap: 8px;
   }
 
-  .reply-textarea {
+  .mqna-reply-textarea {
     min-height: 80px;
   }
 

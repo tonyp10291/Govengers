@@ -145,7 +145,7 @@
 
 .search-box-container {
   display: flex;
-  justify-content: flex-end;
+  /* justify-content: flex-end; 보류 */
   margin-bottom: 10px;
 }
 

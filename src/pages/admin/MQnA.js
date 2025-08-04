@@ -14,7 +14,6 @@ const MQnA = () => {
   const [replyText, setReplyText] = useState("");
   const token = localStorage.getItem("token");
 
-  // 카테고리별 한글 표시
   const getCategoryText = (category) => {
     const categoryMap = {
       '상품문의': '상품문의',
@@ -26,7 +25,6 @@ const MQnA = () => {
     return categoryMap[category] || category;
   };
 
-  // 카테고리별 색상 클래스
   const getCategoryClass = (category) => {
     const classMap = {
       '상품문의': 'category-product',
@@ -38,7 +36,6 @@ const MQnA = () => {
     return classMap[category] || 'category-other';
   };
 
-  // 답변 상태 표시
   const getAnswerStatusText = (inquiry) => {
     return inquiry.answer ? '답변완료' : '답변대기';
   };
@@ -47,7 +44,6 @@ const MQnA = () => {
     return inquiry.answer ? 'status-answered' : 'status-pending';
   };
 
-  // 검색 핸들러
   const handleSearch = () => {
     const params = new URLSearchParams();
     params.append('page', '0');
@@ -75,7 +71,6 @@ const MQnA = () => {
       });
   };
 
-  // 페이지 로드
   useEffect(() => {
     if (searchTerm.trim() === "" && !categoryFilter && !answerStatusFilter && !privacyFilter) {
       axios.get(`/api/admin/inquiries?page=${page}`, {
@@ -93,13 +88,11 @@ const MQnA = () => {
     }
   }, [page, token, searchTerm, categoryFilter, answerStatusFilter, privacyFilter]);
 
-  // 상세보기 토글
   const toggleExpand = (id) => {
     setExpandedId(prev => (prev === id ? null : id));
-    setReplyText(""); // 답변 텍스트 초기화
+    setReplyText(""); 
   };
 
-  // 답변 등록/수정
   const handleReply = (inquiryId) => {
     if (!replyText.trim()) {
       alert("답변 내용을 입력해주세요.");
@@ -109,7 +102,7 @@ const MQnA = () => {
     axios.post(`/api/admin/inquiries/${inquiryId}/answer`, 
       { 
         answer: replyText,
-        adminId: "admin" // JWT에서 추출한 관리자 ID로 변경
+        adminId: "admin" 
       }, 
       {
         headers: {
@@ -120,7 +113,6 @@ const MQnA = () => {
       .then(() => {
         alert("답변이 등록되었습니다.");
         setReplyText("");
-        // 목록 새로고침
         window.location.reload();
       })
       .catch(err => {
@@ -129,7 +121,6 @@ const MQnA = () => {
       });
   };
 
-  // 문의 삭제
   const handleDelete = (inquiryId) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) {
       return;
@@ -142,7 +133,6 @@ const MQnA = () => {
     })
       .then(() => {
         alert("문의가 삭제되었습니다.");
-        // 목록 새로고침
         window.location.reload();
       })
       .catch(err => {
@@ -151,7 +141,6 @@ const MQnA = () => {
       });
   };
 
-  // 페이지네이션 렌더링
   const renderPagination = () => {
     const maxVisiblePages = 5;
     const currentGroup = Math.floor(page / maxVisiblePages);
@@ -343,48 +332,48 @@ const MQnA = () => {
                     </td>
                   </tr>
                   {expandedId === inquiry.inquiryId && (
-                    <tr className="detail-row">
-                      <td colSpan="7">
-                        <div className="detail-box">
-                          <div className="detail-content">
-                            <div className="detail-section">
-                              <h4>문의 내용</h4>
-                              <p className="content-text">{inquiry.content}</p>
-                            </div>
-                            
-                            {inquiry.answer && (
-                              <div className="detail-section">
-                                <h4>관리자 답변</h4>
-                                <p className="reply-text">{inquiry.answer}</p>
-                                <small className="answer-date">
-                                  답변일: {new Date(inquiry.answerAt).toLocaleString()}
-                                </small>
-                              </div>
-                            )}
-                            
-                            <div className="detail-section">
-                              <h4>답변 작성/수정</h4>
-                              <div className="reply-form">
-                                <textarea
-                                  value={replyText}
-                                  onChange={(e) => setReplyText(e.target.value)}
-                                  placeholder="답변을 입력하세요..."
-                                  className="reply-textarea"
-                                  rows="4"
-                                />
-                                <button 
-                                  className="reply-submit-btn"
-                                  onClick={() => handleReply(inquiry.inquiryId)}
-                                >
-                                  {inquiry.answer ? '답변 수정' : '답변 등록'}
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
+  <tr className="mqna-detail-row">
+    <td colSpan="7">
+      <div className="mqna-detail-box">
+        <div className="mqna-detail-content">
+          <div className="mqna-detail-section">
+            <h4>문의 내용</h4>
+            <p className="mqna-content-text">{inquiry.content}</p>
+          </div>
+          
+          {inquiry.answer && (
+            <div className="mqna-detail-section">
+              <h4>관리자 답변</h4>
+              <p className="mqna-reply-text">{inquiry.answer}</p>
+              <small className="mqna-answer-date">
+                답변일: {new Date(inquiry.answerAt).toLocaleString()}
+              </small>
+            </div>
+          )}
+          
+          <div className="mqna-detail-section">
+            <h4>답변 작성/수정</h4>
+            <div className="mqna-reply-form">
+              <textarea
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder="답변을 입력하세요..."
+                className="mqna-reply-textarea"
+                rows="4"
+              />
+              <button 
+                className="mqna-reply-submit-btn"
+                onClick={() => handleReply(inquiry.inquiryId)}
+              >
+                {inquiry.answer ? '답변 수정' : '답변 등록'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </td>
+  </tr>
+)}
                 </React.Fragment>
               ))}
             </tbody>

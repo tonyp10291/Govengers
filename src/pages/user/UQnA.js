@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios"; // 실제 API 사용시 주석 해제
 import AuthContext from "../../context/AuthContext";
 import TopHeader from "../../component/TopHeader";
 import "../../css/user/UQnA.css";
@@ -19,7 +18,6 @@ const UQnA = () => {
         try {
             setLoading(true);
             
-            // --- 임시 데이터 ---
             const tempData = [
                 { 
                     inquiryId: 1, 
