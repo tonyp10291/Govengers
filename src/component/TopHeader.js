@@ -101,13 +101,13 @@ function TopHeader() {
                 
                 {isAdmin ? (
                   <>
-                    <li><Link to="/notice-admin">공지 관리</Link></li>
-                    <li><Link to="/review-admin">리뷰 관리</Link></li>
-                    <li><Link to="/admin/mqna">문의 관리</Link></li>
+                    <li><Link to="/ntlist">공지 관리</Link></li>
+                    <li><Link to="/admin/mrv">리뷰 관리</Link></li>
+                    <li><Link to="/contact-admin">문의 관리</Link></li>
                   </>
                 ) : (
                   <>
-                    <li><Link to="/notice">공지사항</Link></li>
+                    <li><Link to="/ntlist">공지사항</Link></li>
                     <li><Link to="/cooking-guide">레시피</Link></li>
                     <li><Link to="/uqna">문의하기</Link></li>
                     <li><Link to="/review">구매리뷰</Link></li>
@@ -123,7 +123,8 @@ function TopHeader() {
             isAdmin ? (
               <>
                 <button onClick={handleLogout} className="util-link logout-btn">LOGOUT</button>
-                <Link to="/admin/product" className="util-link">상품목록</Link>
+                <Link to="/admin/pdadd" className="util-link">상품등록</Link>
+                <Link to="/admin/pdlist" className="util-link">상품목록</Link>
                 <Link to="/admin/pdorder" className="util-link">주문목록</Link>
                 <Link to="/admin/muser" className="util-link">회원목록</Link>
                 

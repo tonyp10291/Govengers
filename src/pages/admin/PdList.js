@@ -11,24 +11,15 @@ const MAIN_CATEGORY = [
   { value: "돼지고기", label: "돼지고기" },
   { value: "선물세트", label: "선물세트" },
 ];
-const SUB_CATEGORY = [
-  { value: "", label: "전체" },
-  { value: "등심", label: "등심" },
-  { value: "안심", label: "안심" },
-  { value: "목살", label: "목살" },
-  { value: "갈비", label: "갈비" },
-  { value: "삼겹살", label: "삼겹살" },
-  { value: "앞다리살", label: "앞다리살" },
-  { value: "뒷다리살", label: "뒷다리살" },
-];
 
 const ITEMS_PER_PAGE = 10;
 
 function PdList() {
   const [mainCategory, setMainCategory] = useState("");
-  const [subCategory, setSubCategory] = useState("");
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProducts] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
 
   const navigate = useNavigate();
   const btnStyle = {
@@ -45,95 +36,117 @@ function PdList() {
     transition: "background 0.14s"
   };
 
-  const [products, setProducts] = useState([]);
-const [totalPages, setTotalPages] = useState(1);
-
-useEffect(() => {
-  fetch('/api/products')
-    .then(res => res.json())
-    .then(data => {
-      setProducts(Array.isArray(data.content) ? data.content : []);
-      setTotalPages(data.totalPages || 1);
-    })
-    .catch(err => console.error('상품 불러오기 실패:', err));
-}, []);
-  
+  // 상품 데이터 불러오기
   const fetchProducts = async (page = 1) => {
     try {
-      const res = await axios.get("/api/products", {
+      console.log('상품 목록 요청:', { page, mainCategory, search });
+      
+      const res = await axios.get("/api/admin/products", {
         params: {
           page,
           size: ITEMS_PER_PAGE,
           mainCategory: mainCategory || undefined,
-          subCategory: subCategory || undefined,
           search: search || undefined,
         },
+        headers: {
+          "Authorization": "Bearer " + localStorage.getItem("token")
+        }
       });
-      let arr = [];
+
+      console.log('응답 데이터:', res.data);
+
       if (res.data && Array.isArray(res.data.content)) {
-        arr = res.data.content;
-      } else if (res.data && res.data.content && typeof res.data.content === "object" && res.data.content !== null) {
-        arr = Object.values(res.data.content);
+        setProducts(res.data.content);
+        setTotalPages(res.data.totalPages || 1);
+        setCurrentPage(page);
+      } else {
+        console.error('잘못된 응답 형식:', res.data);
+        setProducts([]);
+        setTotalPages(1);
       }
-      setProducts(arr);
-      setTotalPages(res.data.totalPages || 1);
-      setCurrentPage(page);
     } catch (e) {
-      setProducts([]);  
-      alert("상품 목록을 불러오지 못했습니다.");
+      console.error('상품 목록 불러오기 실패:', e);
+      setProducts([]);
+      setTotalPages(1);
+      alert("상품 목록을 불러오지 못했습니다: " + (e.response?.data?.message || e.message));
     }
   };
 
- useEffect(() => {
-  fetch('/api/products')
-    .then(res => res.json())
-    .then(data => {
-      setProducts(Array.isArray(data.content) ? data.content : []);
-    })
-    .catch(err => console.error('상품 불러오기 실패:', err));
-}, []);
+  // 초기 로딩
+  useEffect(() => {
+    fetchProducts(1);
+  }, []);
 
+  // 검색/필터 변경 시
+  useEffect(() => {
+    fetchProducts(1);
+  }, [mainCategory, search]);
+
+  // 페이징 이동
   const goPage = (page) => {
     if (page < 1 || page > totalPages) return;
     fetchProducts(page);
   };
 
+  // HIT 토글
   const handleHit = async (pid, isHit) => {
     try {
-      await axios.patch(`/api/products/${pid}/hit`, { hit: isHit ? 0 : 1 });
+      await axios.patch(`/api/admin/products/${pid}/hit`, 
+        { hit: isHit ? 0 : 1 },
+        {
+          headers: {
+            "Authorization": "Bearer " + localStorage.getItem("token")
+          }
+        }
+      );
       fetchProducts(currentPage);
     } catch (e) {
-      alert("HIT 변경 실패");
+      console.error('HIT 변경 실패:', e);
+      alert("HIT 변경 실패: " + (e.response?.data?.message || e.message));
     }
   };
 
+  // 품절 토글
   const handleSoldout = async (pid, isSoldout) => {
     try {
-      await axios.patch(`/api/products/${pid}/soldout`, { soldout: isSoldout ? 0 : 1 });
+      await axios.patch(`/api/admin/products/${pid}/soldout`, 
+        { soldout: isSoldout ? 0 : 1 },
+        {
+          headers: {
+            "Authorization": "Bearer " + localStorage.getItem("token")
+          }
+        }
+      );
       fetchProducts(currentPage);
     } catch (e) {
-      alert("품절 변경 실패");
+      console.error('품절 변경 실패:', e);
+      alert("품절 변경 실패: " + (e.response?.data?.message || e.message));
     }
   };
 
-
+  // 삭제
   const handleDelete = async (pid) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
-      await axios.delete(`/api/products/${pid}`);
+      await axios.delete(`/api/admin/products/${pid}`, {
+        headers: {
+          "Authorization": "Bearer " + localStorage.getItem("token")
+        }
+      });
       fetchProducts(currentPage);
     } catch (e) {
-      alert("삭제 실패");
+      console.error('삭제 실패:', e);
+      alert("삭제 실패: " + (e.response?.data?.message || e.message));
     }
   };
 
-
+  // 수정페이지 이동
   const goEdit = (pid) => navigate(`/admin/PdEdit/${pid}`);
 
   return (
     <div className="admin-pdlist-root">
       <TopHeader />
-
+      {/* 네비+검색 */}
       <div className="admin-pdlist-nav">
         <div className="nav-category-group">
           <select
@@ -142,13 +155,6 @@ useEffect(() => {
             onChange={e => { setMainCategory(e.target.value); }}
           >
             {MAIN_CATEGORY.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-          </select>
-          <select
-            className="nav-category sub"
-            value={subCategory}
-            onChange={e => setSubCategory(e.target.value)}
-          >
-            {SUB_CATEGORY.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
           </select>
         </div>
         <input
@@ -159,6 +165,7 @@ useEffect(() => {
           onChange={e => setSearch(e.target.value)}
         />
       </div>
+      {/* 테이블 */}
       <div className="admin-pdlist-table-wrapper">
         <table className="admin-pdlist-table">
           <thead>
@@ -167,7 +174,7 @@ useEffect(() => {
               <th>이미지</th>
               <th>상품명</th>
               <th>메인카테고리</th>
-              <th>서브카테고리</th>
+              <th>가격</th>
               <th>유통기한</th>
               <th>상태</th>
               <th>관리</th>
@@ -192,7 +199,7 @@ useEffect(() => {
                   </td>
                   <td>{p.pnm}</td>
                   <td>{p.mainCategory || "-"}</td>
-                  <td>{p.subCategory || "-"}</td>
+                  <td>{p.price ? p.price.toLocaleString() + "원" : "-"}</td>
                   <td>{p.expDate || "-"}</td>
                   <td>
                     {p.hit === 1 && <span className="status-hit">HIT</span>}
@@ -217,7 +224,7 @@ useEffect(() => {
           </tbody>
         </table>
       </div>
-
+      {/* 페이징 */}
       <div className="paging-wrapper" style={{ margin: "16px 0", display: "flex", justifyContent: "center" }}>
         <Button
           text="이전"

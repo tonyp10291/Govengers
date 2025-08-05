@@ -110,9 +110,10 @@
 }
 
 .admin-pdlist-root {
-  padding-top: 80px; 
+  padding-top: 80px; /* 필요시 값 조정 */
 }
 
+/* 관리자 상품리스트 버튼 강제 스타일 */
 .btn-edit,
 .btn-delete,
 .btn-hit,

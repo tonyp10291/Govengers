@@ -1,0 +1,127 @@
+.ntlist-container {
+  width: 80%;
+  margin: 40px auto;
+  padding-top: 30px;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.ntlist-title {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.ntlist-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  table-layout: fixed;
+}
+
+.ntlist-table th:nth-child(1) { width: 10%; }
+.ntlist-table th:nth-child(2) { width: 15%; }
+.ntlist-table th:nth-child(3) { width: 55%; }
+.ntlist-table th:nth-child(4) { width: 20%; }
+
+.ntlist-table th,
+.ntlist-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+}
+
+.ntlist-table th {
+  background-color: #eaeaea;
+}
+
+.ntlist-table .title-cell {
+  text-align: left;
+  cursor: pointer;
+  color: #333;
+}
+
+.ntlist-table .title-cell:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* 상단 고정 행 스타일 개선 */
+.fixed-row {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  font-weight: 600;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.08);
+}
+
+.fixed-row td {
+  color: #495057;
+  border-bottom: 1px solid #00000020;
+}
+
+.fixed-row .title-cell {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.fixed-row:hover {
+  background: linear-gradient(135deg, #f1f3f4 0%, #e2e6ea 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.12);
+  transition: all 0.2s ease;
+}
+
+.ntlist-table tbody tr:not(.fixed-row):hover {
+  background-color: #f8f9fa;
+  transition: background-color 0.2s ease;
+}
+
+.btn-wrap {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .ntlist-container {
+    width: 95%;
+    margin: 20px auto;
+  }
+  
+  .ntlist-title {
+    font-size: 24px;
+  }
+  
+  .ntlist-table {
+    font-size: 14px;
+  }
+  
+  .ntlist-table th,
+  .ntlist-table td {
+    padding: 8px 4px;
+  }
+  
+  .category-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+  
+  .ntlist-table th:nth-child(1),
+  .ntlist-table td:nth-child(1) {
+    display: none;
+  }
+  
+  .ntlist-table th:nth-child(2) { width: 25%; }
+  .ntlist-table th:nth-child(3) { width: 55%; }
+  .ntlist-table th:nth-child(4) { width: 20%; }
+ 
+  .ntlist-table th:last-child,
+  .ntlist-table td:last-child {
+    width: 100px;
+    font-size: 12px;
+  }
+
+
+  
+  .fixed-row:hover {
+    transform: none; /* 모바일에서는 transform 효과 제거 */
+  }
+}

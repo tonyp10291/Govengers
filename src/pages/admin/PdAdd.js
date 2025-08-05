@@ -4,23 +4,17 @@ import { Button } from "../../util/Buttons";
 import "../../css/admin/PdAdd.css";
 
 const MAIN_CATEGORY = ["소고기", "돼지고기", "선물세트"];
-const SUB_CATEGORY = ["등심", "안심", "목살", "갈비", "삼겹살", "앞다리살", "뒷다리살"];
-const ADMIN_STATUS = ["배송완료", "배송중", "배송준비중", "주문완료", "주문취소"];
-const USER_STATUS = ["배송완료", "배송중", "배송준비중", "주문완료", "주문취소"];
 
 function PdAdd() {
   const [form, setForm] = useState({
     pnm: "",
     mainCategory: "",
-    subCategory: "",
     price: "",
     pdesc: "",
     origin: "",
     expDate: "",
     hit: 0,
     soldout: 0,
-    userStatus: "배송완료",
-    adminStatus: "배송완료",
     image: null,
   });
 
@@ -47,7 +41,7 @@ function PdAdd() {
   };
 
   const handleMainCategoryChange = (e) => {
-    setForm({ ...form, mainCategory: e.target.value, subCategory: "" });
+    setForm({ ...form, mainCategory: e.target.value});
   };
 
   const handleSubmit = async (e) => {
@@ -63,23 +57,24 @@ function PdAdd() {
     });
 
     try {
-      await axios.post("/api/products/register", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true, 
+      // ✅ 여기서 토큰을 localStorage에서 꺼내서 Authorization에 실어서 전송!
+      await axios.post("/api/admin/products/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": "Bearer " + localStorage.getItem("token")
+        },
+        withCredentials: true,  // (JWT면 사실 안 써도 되지만, 세션 유지용이면 필요)
       });
       alert("상품이 등록되었습니다!");
       setForm({
         pnm: "",
         mainCategory: "",
-        subCategory: "",
         price: "",
         pdesc: "",
         origin: "",
         expDate: "",
         hit: 0,
         soldout: 0,
-        userStatus: "배송완료",
-        adminStatus: "배송완료",
         image: null,
       });
       setPreview(null);
@@ -103,15 +98,6 @@ function PdAdd() {
             <option value="">선택</option>
             {MAIN_CATEGORY.map((m) => (
               <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-        </div>
-        <div className="pdadd-form-group">
-          <label>서브카테고리</label>
-          <select name="subCategory" value={form.subCategory} onChange={handleChange} required>
-            <option value="">선택</option>
-            {SUB_CATEGORY.map((s) => (
-              <option key={s} value={s}>{s}</option>
             ))}
           </select>
         </div>
@@ -142,22 +128,6 @@ function PdAdd() {
           </label>
         </div>
         <div className="pdadd-form-group">
-          <label>관리자 상태</label>
-          <select name="adminStatus" value={form.adminStatus} onChange={handleChange} required>
-            {ADMIN_STATUS.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </div>
-        <div className="pdadd-form-group">
-          <label>유저 상태</label>
-          <select name="userStatus" value={form.userStatus} onChange={handleChange} required>
-            {USER_STATUS.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </div>
-        <div className="pdadd-form-group">
           <label>상품이미지</label>
           <input
             type="file"
@@ -169,12 +139,9 @@ function PdAdd() {
           />
         </div>
         <div className="pdadd-btn-box">
-          <div className="pdadd-btn-box">
-            <Button type="submit" text="상품 등록" />
-          </div>
+          <Button type="submit" text="상품 등록" />
         </div>
       </form>
-
       <div className="pdadd-preview">
         <div className="pdadd-preview-title">미리보기</div>
         <div className="pdadd-preview-box">
@@ -193,7 +160,7 @@ function PdAdd() {
               {form.price ? form.price.toLocaleString() + "원" : ""}
             </div>
             <div>
-              <span className="prod-label">카테고리:</span> {form.mainCategory} / {form.subCategory}
+              <span className="prod-label">카테고리:</span> {form.mainCategory}
             </div>
             <div>
               <span className="prod-label">유통기한:</span> {form.expDate}
@@ -201,11 +168,6 @@ function PdAdd() {
             <div className="prod-desc">{form.pdesc}</div>
             <div>
               <span className="prod-label">원산지:</span> {form.origin}
-            </div>
-            <div>
-              <span className="prod-label">관리자상태:</span> {form.adminStatus}
-              <span style={{ marginLeft: "8px" }} />
-              <span className="prod-label">유저상태:</span> {form.userStatus}
             </div>
           </div>
         </div>

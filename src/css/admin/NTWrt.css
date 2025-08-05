@@ -68,6 +68,42 @@
 .cancel-btn {
   background: #888;
 }
+.category-fixed-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.category-fixed-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fixed-checkbox span {
+  margin-left: 4px;
+}
+
+.fixed-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin-left: 20px;
+  margin-right: 5px;
+  padding: 0;
+  appearance: checkbox;
+  vertical-align: middle;
+}
+
+.category-fixed-inline select {
+  min-width: 200px;
+}
+
+.fixed-checkbox {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  white-space: nowrap;
+}
 
 @media screen and (max-width: 768px) {
   .notice-container {

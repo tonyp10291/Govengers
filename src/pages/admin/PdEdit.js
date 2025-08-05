@@ -4,19 +4,27 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../util/Buttons";
 import "../../css/admin/PdEdit.css";
 
+// ENUM 옵션
 const MAIN_CATEGORY = ["소고기", "돼지고기", "선물세트"];
-const SUB_CATEGORY = ["등심", "안심", "목살", "갈비", "삼겹살", "앞다리살", "뒷다리살"];
 const ADMIN_STATUS = ["배송완료", "배송중", "배송준비중", "주문완료", "주문취소"];
 const USER_STATUS = ["배송완료", "배송중", "배송준비중", "주문완료", "주문취소"];
 
 function PdEdit() {
-  const { pid } = useParams();
+  const params = useParams();
   const navigate = useNavigate();
+  const { pid } = useParams();
+  
+  // 디버깅 로그 추가
+  console.log('=== PdEdit Component Rendered ===');
+  console.log('All params:', params);
+  console.log('params.pid:', params.pid);
+  console.log('Current URL:', window.location.href);
+  console.log('Current pathname:', window.location.pathname);
+  console.log('Extracted pid:', pid);
 
   const [form, setForm] = useState({
     pnm: "",
     mainCategory: "",
-    subCategory: "",
     price: "",
     pdesc: "",
     origin: "",
@@ -25,22 +33,32 @@ function PdEdit() {
     soldout: 0,
     userStatus: "배송완료",
     adminStatus: "배송완료",
-    image: null,         
-    oldImage: "",        
+    image: null,         // 새로 등록할 이미지
+    oldImage: "",        // 기존 이미지 파일명(수정 전)
   });
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef();
 
+  // 1. 상품 데이터 불러오기
   useEffect(() => {
     async function fetchProduct() {
+      console.log(`🔄 Fetching product with ID: ${pid}`);
       try {
-        const res = await axios.get(`/api/products/${pid}`);
+        const token = localStorage.getItem("token");
+        console.log('Using token:', token ? 'Present' : 'Missing');
+        
+        const res = await axios.get(`/api/admin/products/${pid}`, {
+          headers: {
+            "Authorization": "Bearer " + token
+          }
+        });
+        console.log('✅ Product data received:', res.data);
+        
         const data = res.data;
         setForm({
           ...form,
           pnm: data.pnm || "",
           mainCategory: data.mainCategory || "",
-          subCategory: data.subCategory || "",
           price: data.price || "",
           pdesc: data.pdesc || "",
           origin: data.origin || "",
@@ -56,14 +74,23 @@ function PdEdit() {
           setPreview(`/api/images/${data.image}`);
         }
       } catch (err) {
+        console.error('❌ Error fetching product:', err);
+        console.error('Error response:', err.response?.data);
+        console.error('Error status:', err.response?.status);
         alert("상품 정보를 불러오지 못했습니다.");
         navigate(-1);
       }
     }
-    fetchProduct();
+    
+    if (pid) {
+      fetchProduct();
+    } else {
+      console.error('❌ Cannot fetch product: pid is undefined');
+    }
     // eslint-disable-next-line
   }, [pid]);
 
+  // 2. 입력 변경 핸들러
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     if (type === "checkbox") {
@@ -76,6 +103,7 @@ function PdEdit() {
         reader.onload = (ev) => setPreview(ev.target.result);
         reader.readAsDataURL(file);
       } else {
+        // 이미지 파일을 새로 안 올릴 때는 기존 이미지 미리보기 그대로
         setPreview(form.oldImage ? `/api/images/${form.oldImage}` : null);
       }
     } else {
@@ -83,26 +111,35 @@ function PdEdit() {
     }
   };
 
+  // 3. 메인카테고리 변경 시 서브카테고리 리셋
   const handleMainCategoryChange = (e) => {
-    setForm({ ...form, mainCategory: e.target.value, subCategory: "" });
+    setForm({ ...form, mainCategory: e.target.value});
   };
 
+  // 4. 수정 저장 (PUT)
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-
-    Object.entries(form).forEach(([key, val]) => {
-      if (key === "image") {
-        if (val) formData.append("image", val);
-      } else {
-        formData.append(key, val);
-      }
-    });
-
+    
+    // 이미지 제외하고 JSON으로 전송
+    const productData = {
+      pnm: form.pnm,
+      mainCategory: form.mainCategory,
+      price: parseInt(form.price),
+      pdesc: form.pdesc,
+      origin: form.origin,
+      expDate: form.expDate,
+      hit: form.hit,
+      soldout: form.soldout,
+      userStatus: form.userStatus,
+      adminStatus: form.adminStatus
+    };
+  
     try {
-      await axios.put(`/api/products/${pid}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        withCredentials: true,
+      await axios.put(`/api/admin/products/${pid}`, productData, {
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + localStorage.getItem("token")
+        },
       });
       alert("상품이 수정되었습니다!");
       navigate("/admin/pdlist");
@@ -111,9 +148,21 @@ function PdEdit() {
     }
   };
 
+  // pid가 없으면 에러 처리 (조건부 렌더링을 맨 아래로)
+  if (!pid) {
+    console.error('❌ PID is missing from URL parameters');
+    return (
+      <div style={{padding: '20px', textAlign: 'center'}}>
+        <h2>오류: 상품 ID가 없습니다</h2>
+        <p>URL: {window.location.href}</p>
+        <button onClick={() => navigate('/admin/pdlist')}>목록으로 돌아가기</button>
+      </div>
+    );
+  }
+
   return (
     <div className="pdedit-container">
-      <h2>상품 정보 수정</h2>
+      <h2>상품 정보 수정 (ID: {pid})</h2>
       <form className="pdedit-form" onSubmit={handleSubmit}>
         <div className="pdedit-form-group">
           <label>상품명</label>
@@ -125,15 +174,6 @@ function PdEdit() {
             <option value="">선택</option>
             {MAIN_CATEGORY.map((m) => (
               <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
-        </div>
-        <div className="pdedit-form-group">
-          <label>서브카테고리</label>
-          <select name="subCategory" value={form.subCategory} onChange={handleChange} required>
-            <option value="">선택</option>
-            {SUB_CATEGORY.map((s) => (
-              <option key={s} value={s}>{s}</option>
             ))}
           </select>
         </div>
@@ -194,7 +234,7 @@ function PdEdit() {
           <Button type="submit" text="수정 완료" />
         </div>
       </form>
-      
+      {/* ---- 미리보기 ---- */}
       <div className="pdedit-preview">
         <div className="pdedit-preview-title">미리보기</div>
         <div className="pdedit-preview-box">
@@ -213,7 +253,7 @@ function PdEdit() {
               {form.price ? form.price.toLocaleString() + "원" : ""}
             </div>
             <div>
-              <span className="prod-label">카테고리:</span> {form.mainCategory} / {form.subCategory}
+              <span className="prod-label">카테고리:</span> {form.mainCategory}
             </div>
             <div>
               <span className="prod-label">유통기한:</span> {form.expDate}

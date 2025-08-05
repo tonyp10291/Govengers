@@ -1,0 +1,247 @@
+.ntview-container {
+  width: min(95%, 900px);
+  margin: 20px auto;
+  padding: clamp(10px, 3vw, 20px);
+  font-family: 'Noto Sans KR', sans-serif;
+  background: #f5f5f5;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.ntview-loading,
+.ntview-error {
+  text-align: center;
+  padding: clamp(30px, 8vw, 60px) 20px;
+  font-size: clamp(14px, 2.5vw, 18px);
+  color: #666;
+}
+
+.ntview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: clamp(15px, 4vw, 25px);
+  padding-bottom: clamp(10px, 2vw, 15px);
+  border-bottom: 1px solid #ddd;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.ntview-btn-wrap-left,
+.ntview-btn-wrap-right,
+.ntview-btn-wrap-center {
+  display: flex;
+  gap: clamp(6px, 1.5vw, 10px);
+  flex-wrap: wrap;
+}
+
+.ntview-btn-wrap-left,
+.ntview-btn-wrap-right {
+  justify-content: center;
+}
+
+.ntview-btn-wrap-center {
+  justify-content: center;
+}
+
+.ntview-content {
+  background: #fff;
+  border-radius: clamp(6px, 1.5vw, 12px);
+  overflow: hidden;
+  margin-bottom: clamp(15px, 4vw, 25px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ntview-meta {
+  background: #f8f9fa;
+  padding: clamp(15px, 3vw, 25px);
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(15px, 4vw, 25px);
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.ntview-meta-item {
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1vw, 8px);
+  white-space: nowrap;
+}
+
+.ntview-meta-label {
+  font-weight: 600;
+  color: #555;
+  font-size: clamp(12px, 2vw, 14px);
+}
+
+.ntview-meta-value {
+  color: #333;
+  font-size: clamp(12px, 2vw, 14px);
+  margin-left: clamp(4px, 1vw, 6px);
+}
+
+.event-badge,
+.notice-badge,
+.ntview-fixed-badge {
+  padding: clamp(3px, 0.8vw, 5px) clamp(6px, 1.5vw, 10px);
+  border-radius: clamp(8px, 1.5vw, 12px);
+  font-size: clamp(10px, 1.8vw, 12px);
+  font-weight: 500;
+  text-align: center;
+  min-width: clamp(30px, 6vw, 40px);
+  display: inline-block;
+}
+
+.notice-badge {
+  background-color: rgba(135, 206, 250, 0.2);
+  color: #4682B4;
+  border: 1px solid rgba(135, 206, 250, 0.3);
+}
+
+.event-badge {
+  background-color: rgba(255, 182, 193, 0.2);
+  color: #CD5C5C;
+  border: 1px solid rgba(255, 182, 193, 0.3);
+}
+
+.ntview-fixed-badge {
+  background-color: rgba(255, 215, 0, 0.2);
+  color: #B8860B;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.ntview-title {
+  padding: clamp(15px, 4vw, 30px) clamp(12px, 3vw, 25px);
+  font-size: clamp(18px, 4vw, 26px);
+  font-weight: 700;
+  color: #222;
+  line-height: 1.3;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  word-break: break-word;
+}
+
+.ntview-body {
+  padding: clamp(15px, 4vw, 30px) clamp(12px, 3vw, 25px);
+  font-size: clamp(14px, 2.5vw, 16px);
+  line-height: 1.6;
+  color: #444;
+  background: #fff;
+  min-height: clamp(120px, 25vw, 200px);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ntview-body p {
+  margin-bottom: clamp(12px, 2.5vw, 16px);
+}
+
+.ntview-body img {
+  max-width: 100%;
+  height: auto;
+  margin: clamp(12px, 3vw, 20px) 0;
+  border-radius: clamp(4px, 1vw, 8px);
+  display: block;
+}
+
+.ntview-footer {
+  padding: clamp(12px, 3vw, 20px) 0;
+  text-align: center;
+}
+
+.ntview-content {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ntview-container.fixed-notice .ntview-content {
+  border: 1px solid #ffd700;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+}
+
+.ntview-container.fixed-notice .ntview-title {
+  background: linear-gradient(135deg, #fffbf0, #ffffff);
+}
+
+@media (max-width: 768px) {
+  .ntview-container {
+    width: 100%;
+    margin: 15px auto;
+    padding: 10px;
+  }
+
+  .ntview-header {
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    margin-top: 25px;
+  }
+
+  .ntview-btn-wrap-right {
+    margin-top: 10px;
+  }
+
+  .ntview-meta {
+    padding: 12px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .ntview-meta-item {
+    width: 100%;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #eee;
+  }
+
+  .ntview-meta-item:last-child {
+    border-bottom: none;
+  }
+
+  .ntview-meta-value {
+    margin-left: 0;
+  }
+
+  .ntview-title {
+    font-size: 18px;
+    padding: 15px 12px;
+  }
+
+  .ntview-body {
+    font-size: 14px;
+    padding: 15px 12px;
+    min-height: 120px;
+  }
+
+  .ntview-footer {
+    padding: 12px 0;
+  }
+
+  .event-badge,
+  .notice-badge,
+  .ntview-fixed-badge {
+    font-size: 10px;
+    padding: 3px 6px;
+    min-width: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ntview-content {
+    animation: none;
+  }
+}
