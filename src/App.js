@@ -19,6 +19,12 @@ import NTWrt from './pages/admin/NTWrt';
 import MUser from './pages/admin/MUser';
 import PdAdd from './pages/admin/PdAdd';
 import PdOrder from './pages/admin/PdOrder'; 
+import NTList from "./pages/common/NTList";
+import NTView from './pages/common/NTView';
+import NTEdit from './pages/admin/NTEdit';
+import MRv from './pages/admin/MRv';
+import PdList from './pages/admin/PdList';
+import PdEdit from './pages/admin/PdEdit';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Wishlist from './pages/user/UPic';
 
@@ -49,20 +55,27 @@ function App() {
               </ProductProvider>
             } />
 
+          <Route path="/admin/ntwrt" element={<NTWrt />} />
+          <Route path="/admin/notice/edit/:id" element={<NTEdit />} />
+          <Route path="/ntlist" element={<NTList />} />
+          <Route path="/notice/view/:id" element={<NTView />} /> 
+          <Route path="/admin/mrv" element={<MRv />} /> 
 
-            <Route path="/shipping-guide" element={<ShippingGuide />} />
-            <Route path="/point-guide" element={<PointGuide />} />
-            <Route path="/cooking-guide" element={<CookingGuide />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/admin/pdorder" element={<PdOrder />} />
-            <Route path="/admin/ntwrt" element={<NTWrt />} />
-            <Route path="/admin/muser" element={<MUser />} />
-            <Route path="/admin/mqna" element={<MQnA />} /> 
-            <Route path="/admin/pdAdd" element={<PdAdd />} /> 
-          </Routes>
-        </main>
-        <Footer />
-      </BrowserRouter>
+          <Route path="/shipping-guide" element={<ShippingGuide />} />
+          <Route path="/point-guide" element={<PointGuide />} />
+          <Route path="/cooking-guide" element={<CookingGuide />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/admin/muser" element={<MUser />} />
+          <Route path="/admin/mqna" element={<MQnA />} />
+          <Route path="/admin/pdAdd" element={<PdAdd />} />
+          <Route path="/admin/pdorder" element={<PdOrder />} />
+          <Route path="/admin/pdlist" element={<PdList />} />
+          <Route path="/admin/PdEdit/:pid" element={<PdEdit />} />
+          
+        </Routes>
+      </main>
+      <Footer />
+    </BrowserRouter>
   );
 }
 
