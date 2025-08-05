@@ -45,7 +45,7 @@ function App() {
             <Route path="/uqadd" element={<UQAdd />} /> 
             <Route path="/products" element={
               <ProductProvider>
-                <PdList />
+                <UPdList />
               </ProductProvider>
             } />
 

@@ -14,25 +14,44 @@ const Wishlist = () => {
     const token = localStorage.getItem("token");
     const guest_id = localStorage.getItem("guest_id");
 
+    const wishlistTest = () => {
+        const testFunction = async () => {
+            try{
+                await axios.post(`/api/wishlist/guest?guestId=${guest_id}&pid=4`, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            }catch(err){
+                console.error(err.response.data);
+            }
+            
+        }
+        testFunction();
+    }
+
     useEffect(() => {  
         if (!token){
             if (!guest_id){
                 alert('잘못된 접근입니다.\n메인페이지로 돌아갑니다.');
                 navigate('/');
             } else {
-                try{
+                const fetchWishlist = async () => {
+                    try{
                     const response = axios.get(`/api/wishlist/guest?page=${page}&guestId=${guest_id}`, {
                         headers: {
                             'Content-Type': 'application/json',
                         }
                     });
-                    setWishlist(response.data);
+                    setWishlist(response.data.content);
                     setTotalPages(response.data.totalPages);
-                } catch(err){
-                    console.error("찜 목록 조회 오류:", err);
-                    // alert('서버와 통신중 오류가 발생 했습니다.\n메인페이지로 돌아갑니다.');
-                    // navigate('/');
+                    } catch(err){
+                        console.error("찜 목록 조회 오류:", err);
+                        // alert('서버와 통신중 오류가 발생 했습니다.\n메인페이지로 돌아갑니다.');
+                        // navigate('/');
+                    }
                 }
+                fetchWishlist();
             }           
         } else {
             // alert('로그인 했을시');
@@ -51,7 +70,7 @@ const Wishlist = () => {
                 // navigate('/');
             }
         }
-    }, [page, token]);
+    }, [page, token, guest_id]);
 
     //페이징
     const renderPagination = () => {
@@ -133,7 +152,8 @@ const Wishlist = () => {
         <div className="wishList_wrap"> 
             <div className="wishList_contents">
                 <div className="title_area">
-                    <h2>WISH LIST</h2>    
+                    <h2>WISH LIST</h2>
+                    <button onClick={wishlistTest}>상품등록</button>
                 </div>
                 <div className="table_wrap">
                 {/* wishlist존재시만 랜더링 */}
