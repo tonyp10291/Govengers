@@ -42,6 +42,7 @@
     box-sizing: border-box;
 }
 
+/* 기존 submit-btn 스타일 */
 .submit-btn {
     width: 100%;
     padding: 12px;
@@ -60,6 +61,11 @@
     background-color: #0056b3;
 }
 
+.submit-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
 .error-box {
     padding: 15px;
     margin-bottom: 20px;
@@ -68,4 +74,152 @@
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+.input-with-button {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.input-with-button input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.input-with-button input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.input-with-button button {
+    min-width: 120px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: black;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+
+.input-with-button button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.input-with-button button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.verified-text {
+    color: #28a745;
+    font-weight: bold;
+    font-size: 14px;
+    margin-top: 5px;
+    display: inline-block;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group input:not(.input-with-button input) {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.form-group input:not(.input-with-button input):focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.form-group input:read-only {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+.user-form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.user-form {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.user-form h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 24px;
+}
+
+@media (max-width: 768px) {
+    .user-form-container {
+        padding: 10px;
+    }
+    
+    .user-form {
+        padding: 20px;
+    }
+    
+    .input-with-button {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .input-with-button button {
+        min-width: auto;
+        width: 100%;
+    }
+}
+
+.input-with-button button[disabled] {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.input-with-button button:focus,
+.submit-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+.input-with-button button:active:not(:disabled),
+.submit-btn:active:not(:disabled) {
+    transform: translateY(1px);
 }

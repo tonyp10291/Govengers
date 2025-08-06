@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '../../util/Buttons';
-import '../../css/Home.css'; 
+import '../../css/Home.css';
 import '../../css/user/UPdList.css';
 
 const UPdList = () => {
@@ -13,7 +13,7 @@ const UPdList = () => {
     const [cartItems, setCartItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
-    const itemsPerPage = 12; 
+    const itemsPerPage = 12;
 
     const [searchParams] = useSearchParams();
     const urlCategory = searchParams.get('cate') || '전체';
@@ -34,12 +34,12 @@ const UPdList = () => {
                 response = await axios.get('/api/products/list');
             }
 
-            console.log('API 응답:', response.data); 
+            console.log('API 응답:', response.data);
             setProducts(response.data);
         } catch (error) {
             console.error('상품 조회 실패:', error);
             alert('상품을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
-            setProducts([]); 
+            setProducts([]);
         } finally {
             setLoading(false);
         }
@@ -47,7 +47,7 @@ const UPdList = () => {
 
     useEffect(() => {
         fetchProducts();
-        setCurrentPage(1); 
+        setCurrentPage(1);
     }, [fetchProducts, urlCategory]);
 
     const totalPages = Math.ceil(products.length / itemsPerPage);
@@ -128,8 +128,8 @@ const UPdList = () => {
                 <nav className="nav-menu">
                     <Link to="/products?cate=소고기">소고기</Link>
                     <Link to="/products?cate=돼지고기">돼지고기</Link>
+                    <Link to="/products?cate=닭고기">닭고기</Link>
                     <Link to="/products?cate=선물세트">선물세트</Link>
-                    <Link to="/review">구매리뷰</Link>
                 </nav>
             </header>
 
@@ -144,7 +144,8 @@ const UPdList = () => {
                     </div>
                 ) : (
                     currentProducts.map(product => (
-                        <div key={product.pid} className="product-card">
+                        <div key={product.pid} className="product-card" onClick={() => navigate(`/product/${product.pid}`)}
+                            style={{ cursor: 'pointer' }}>
                             <div className="product-image">
                                 <img
                                     src={product.imgFilename ? `/api/imgs/${product.imgFilename}` : '/img/default-product.jpg'}

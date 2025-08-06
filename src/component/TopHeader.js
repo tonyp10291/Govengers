@@ -103,7 +103,7 @@ function TopHeader() {
                   <>
                     <li><Link to="/ntlist">공지 관리</Link></li>
                     <li><Link to="/admin/mrv">리뷰 관리</Link></li>
-                    <li><Link to="/contact-admin">문의 관리</Link></li>
+                    <li><Link to="/admin/mqna">문의 관리</Link></li>
                   </>
                 ) : (
                   <>
@@ -144,6 +144,7 @@ function TopHeader() {
               <Link to="/login" className="util-link">LOGIN</Link>
               <Link to="/join" className="util-link">JOIN</Link>
               <Link to="/cart" className="util-link">CART</Link>
+              <Link to="/wishlist" className="util-link">WISHLIST</Link>
               <Link to="/order" className="util-link">ORDER</Link>
               <Link to="/mypage" className="util-link">MY PAGE</Link>
               <button className="search-btn" onClick={toggleSearch}>🔍</button>

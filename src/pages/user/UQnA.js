@@ -2,7 +2,12 @@ import React, { useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthContext from "../../context/AuthContext";
 import TopHeader from "../../component/TopHeader";
+import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import "../../css/user/UQnA.css";
+
+const PAGE_SIZE = 5;
 
 const UQnA = () => {
     const navigate = useNavigate();
@@ -13,63 +18,60 @@ const UQnA = () => {
     const [activeCategory, setActiveCategory] = useState("전체");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [loading, setLoading] = useState(false);
-
+    const [currentPage, setCurrentPage] = useState(1);
     const fetchInquiries = useCallback(async () => {
         try {
             setLoading(true);
-            
-            const tempData = [
-                { 
-                    inquiryId: 1, 
-                    title: "비밀글 문의입니다.", 
-                    category: "상품문의", 
-                    content: "이것은 비밀글 내용입니다.", 
-                    isPrivate: true, 
-                    user: { uid: userId || "test" },
-                    createdAt: "2024-01-15"
-                },
-                { 
-                    inquiryId: 2, 
-                    title: "배송 언제 오나요?", 
-                    category: "배송문의", 
-                    content: "배송 관련 내용입니다.", 
-                    isPrivate: false, 
-                    user: { uid: "다른사람" },
-                    createdAt: "2024-01-14"
-                },
-                { 
-                    inquiryId: 3, 
-                    title: "결제 오류 문의", 
-                    category: "결제문의", 
-                    content: "결제 오류 내용입니다.", 
-                    isPrivate: false, 
-                    user: { uid: "test" },
-                    createdAt: "2024-01-13"
-                },
-            ];
-            setInquiries(tempData);
+            const params = {};
+            if (activeCategory && activeCategory !== "전체") params.category = activeCategory;
+            if (searchKeyword) params.keyword = searchKeyword;
 
+            const response = await axios.get("/api/uqna", { params });
+            setInquiries(response.data || []);
         } catch (error) {
             console.error("목록 불러오기 실패:", error);
             alert("문의 목록을 불러오는데 실패했습니다.");
         } finally {
             setLoading(false);
         }
-    }, [userId]);
-
+    }, [activeCategory, searchKeyword]);
     useEffect(() => {
         fetchInquiries();
+        setCurrentPage(1); 
     }, [fetchInquiries]);
-
-    const filteredInquiries = inquiries.filter((inq) => {
-        const categoryMatch = activeCategory === "전체" || inq.category === activeCategory;
-        const keywordMatch = !searchKeyword || 
-            inq.title.toLowerCase().includes(searchKeyword.toLowerCase());
-        return categoryMatch && keywordMatch;
-    });
+    const filteredInquiries = inquiries;
+    const totalPages = Math.ceil(filteredInquiries.length / PAGE_SIZE);
+    const paginatedInquiries = filteredInquiries.slice(
+        (currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE
+    );
+    const renderPagination = () => (
+        <div className="pagination">
+            <button 
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
+                disabled={currentPage === 1}
+            >
+                &lt;
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                    key={i+1}
+                    className={currentPage === i+1 ? "active" : ""}
+                    onClick={() => setCurrentPage(i + 1)}
+                >
+                    {i + 1}
+                </button>
+            ))}
+            <button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+            >
+                &gt;
+            </button>
+        </div>
+    );
 
     const handleToggle = (inq) => {
-        if (inq.isPrivate && (!isLoggedIn || inq.user.uid !== userId)) {
+        if (inq.isPrivate && (!isLoggedIn || inq.user?.uid !== userId)) {
             alert("비밀글은 작성자만 볼 수 있습니다.");
             return;
         }
@@ -81,13 +83,12 @@ const UQnA = () => {
             alert("로그인이 필요한 기능입니다.");
             navigate("/login");
         } else {
-            navigate("/uqadd"); 
+            navigate("/uqadd");
         }
     };
 
     const handleSearch = () => {
-
-        console.log("검색 실행:", searchKeyword);
+        fetchInquiries();
     };
 
     const handleKeyPress = (e) => {
@@ -123,47 +124,63 @@ const UQnA = () => {
                             onChange={(e) => setSearchKeyword(e.target.value)}
                             onKeyPress={handleKeyPress}
                         />
-                        <button onClick={handleSearch}>검색</button>
+                        <button className="uqna-search-btn" onClick={handleSearch}>
+                          <FontAwesomeIcon icon={faSearch} />
+                        </button>
                     </div>
                     <button className="write-btn" onClick={handleWriteClick}>
                         글쓰기
                     </button>
                 </div>
 
+                <div className="uqna-header">
+                    <span>No</span>
+                    <span>카테고리</span>
+                    <span>제목</span>
+                    <span>작성자</span>
+                    <span>작성시간</span>
+                </div>
+
                 {loading ? (
                     <div className="loading">로딩 중...</div>
                 ) : (
-                    <ul className="uqna-list">
-                        {filteredInquiries.length > 0 ? (
-                            filteredInquiries.map((inq) => (
-                                <li key={inq.inquiryId} className="uqna-item">
-                                    <div
-                                        className={`inquiry-title ${openId === inq.inquiryId ? "open" : ""}`}
-                                        onClick={() => handleToggle(inq)}
-                                    >
-                                        <span>
-                                            {inq.title} {inq.isPrivate && "🔒"}
-                                        </span>
-                                        <div className="inquiry-meta">
-                                            <span className="category">{inq.category}</span>
-                                            {inq.createdAt && (
-                                                <span className="date">{inq.createdAt}</span>
-                                            )}
+                    <>
+                        <ul className="uqna-list">
+                            {paginatedInquiries.length > 0 ? (
+                                paginatedInquiries.map((inq, index) => (
+                                    <li key={inq.inquiryId || inq.id} className="uqna-item">
+                                        <div
+                                            className={`inquiry-title ${openId === inq.inquiryId ? "open" : ""}`}
+                                            onClick={() => handleToggle(inq)}
+                                        >
+                                            <span>{(currentPage - 1) * PAGE_SIZE + index + 1}</span>
+                                            <span>{inq.category}</span>
+                                            <span>
+                                                {inq.isPrivate && (!isLoggedIn || inq.user?.uid !== userId)
+                                                    ? "비밀글입니다"
+                                                    : inq.title}
+                                                {inq.isPrivate && " 🔒"}
+                                            </span>
+                                            <span>{inq.user?.uid || inq.uid || "-"}</span>
+                                            <span>{inq.createdAt?.slice(0,10) || "-"}</span>
                                         </div>
-                                    </div>
-                                    {openId === inq.inquiryId && (
-                                        <div className="inquiry-content">
-                                            <p>{inq.content}</p>
-                                        </div>
-                                    )}
+                                        {openId === inq.inquiryId && (
+                                            <div className="inquiry-content">
+                                                {(inq.isPrivate && (!isLoggedIn || inq.user?.uid !== userId))
+                                                    ? <p>비밀글은 작성자만 볼 수 있습니다.</p>
+                                                    : <p>{inq.content}</p>}
+                                            </div>
+                                        )}
+                                    </li>
+                                ))
+                            ) : (
+                                <li className="no-results">
+                                    검색 결과가 없습니다.
                                 </li>
-                            ))
-                        ) : (
-                            <li className="no-results">
-                                검색 결과가 없습니다.
-                            </li>
-                        )}
-                    </ul>
+                            )}
+                        </ul>
+                        {totalPages > 1 && renderPagination()}
+                    </>
                 )}
             </div>
         </div>

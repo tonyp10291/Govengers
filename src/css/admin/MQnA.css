@@ -392,7 +392,6 @@
   font-weight: bold;
 }
 
-/* ✅ 반응형 */
 @media (max-width: 768px) {
   .mqna-container {
     width: 95%;
