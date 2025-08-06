@@ -27,6 +27,7 @@ import PdList from './pages/admin/PdList';
 import PdEdit from './pages/admin/PdEdit';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Wishlist from './pages/user/UPic';
+import Cart from './pages/user/UCart';
 
 function App() {
 
@@ -64,6 +65,7 @@ function App() {
           <Route path="/shipping-guide" element={<ShippingGuide />} />
           <Route path="/point-guide" element={<PointGuide />} />
           <Route path="/cooking-guide" element={<CookingGuide />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/admin/muser" element={<MUser />} />
           <Route path="/admin/mqna" element={<MQnA />} />
