@@ -3,9 +3,10 @@ import axios from "axios";
 import { Button } from "../../util/Buttons";
 import "../../css/admin/PdAdd.css";
 
-const MAIN_CATEGORY = ["소고기", "돼지고기", "선물세트"];
+const MAIN_CATEGORY = ["소고기", "돼지고기", "닭고기", "선물세트", "소스류" ];
 
 function PdAdd() {
+  const today = new Date().toISOString().split("T")[0];
   const [form, setForm] = useState({
     pnm: "",
     mainCategory: "",
@@ -41,7 +42,7 @@ function PdAdd() {
   };
 
   const handleMainCategoryChange = (e) => {
-    setForm({ ...form, mainCategory: e.target.value});
+    setForm({ ...form, mainCategory: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -57,13 +58,12 @@ function PdAdd() {
     });
 
     try {
-      // ✅ 여기서 토큰을 localStorage에서 꺼내서 Authorization에 실어서 전송!
       await axios.post("/api/admin/products/register", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           "Authorization": "Bearer " + localStorage.getItem("token")
         },
-        withCredentials: true,  // (JWT면 사실 안 써도 되지만, 세션 유지용이면 필요)
+        withCredentials: true,  
       });
       alert("상품이 등록되었습니다!");
       setForm({
@@ -101,21 +101,60 @@ function PdAdd() {
             ))}
           </select>
         </div>
-        <div className="pdadd-form-group">
+         <div className="pdedit-form-group">
           <label>가격</label>
-          <input type="number" name="price" value={form.price} onChange={handleChange} required />
+          <input
+            type="number"
+            name="price"
+            min="0"
+            value={form.price}
+            onChange={e => {
+              const value = Math.max(0, Number(e.target.value));
+              setForm(prev => ({ ...prev, price: value }));
+            }}
+            required
+          />
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>상품설명</label>
-          <textarea name="pdesc" value={form.pdesc} onChange={handleChange} required />
+          <textarea
+            name="pdesc"
+            maxLength={200}
+            rows={5}
+            style={{
+              resize: "none",        
+              overflowY: "auto",      
+              width: "100%",
+              minHeight: "100px",
+              maxHeight: "120px"
+            }}
+            value={form.pdesc}
+            onChange={e => {
+              setForm(prev => ({
+                ...prev,
+                pdesc: e.target.value.slice(0, 200)
+              }));
+            }}
+            required
+          />
+          <div style={{ textAlign: "right", fontSize: 12, color: "#888" }}>
+            {form.pdesc.length}/200
+          </div>
         </div>
         <div className="pdadd-form-group">
           <label>원산지</label>
           <input name="origin" value={form.origin} onChange={handleChange} required />
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>유통기한</label>
-          <input type="date" name="expDate" value={form.expDate} onChange={handleChange} required />
+          <input
+            type="date"
+            name="expDate"
+            value={form.expDate}
+            onChange={handleChange}
+            required
+            min={today}
+          />
         </div>
         <div className="pdadd-form-group-checkbox">
           <label>

@@ -9,7 +9,9 @@ const MAIN_CATEGORY = [
   { value: "", label: "전체" },
   { value: "소고기", label: "소고기" },
   { value: "돼지고기", label: "돼지고기" },
+  { value: "닭고기", label: "닭고기" },
   { value: "선물세트", label: "선물세트" },
+  { value: "소스류", label: "소스류" },
 ];
 
 const ITEMS_PER_PAGE = 10;
@@ -36,12 +38,11 @@ function PdList() {
     transition: "background 0.14s"
   };
 
-  // 상품 데이터 불러오기
   const fetchProducts = async (page = 1) => {
     try {
       console.log('상품 목록 요청:', { page, mainCategory, search });
-      
-      const res = await axios.get("/api/admin/products", {
+
+      const res = await axios.get("/api/admin/products/paging", {
         params: {
           page,
           size: ITEMS_PER_PAGE,
@@ -55,14 +56,10 @@ function PdList() {
 
       console.log('응답 데이터:', res.data);
 
-      if (res.data && Array.isArray(res.data.content)) {
-        setProducts(res.data.content);
+      if (res.data && res.data.content !== undefined) {
+        setProducts(res.data.content || []);
         setTotalPages(res.data.totalPages || 1);
         setCurrentPage(page);
-      } else {
-        console.error('잘못된 응답 형식:', res.data);
-        setProducts([]);
-        setTotalPages(1);
       }
     } catch (e) {
       console.error('상품 목록 불러오기 실패:', e);
@@ -72,26 +69,22 @@ function PdList() {
     }
   };
 
-  // 초기 로딩
   useEffect(() => {
     fetchProducts(1);
   }, []);
 
-  // 검색/필터 변경 시
   useEffect(() => {
     fetchProducts(1);
   }, [mainCategory, search]);
 
-  // 페이징 이동
   const goPage = (page) => {
     if (page < 1 || page > totalPages) return;
     fetchProducts(page);
   };
 
-  // HIT 토글
   const handleHit = async (pid, isHit) => {
     try {
-      await axios.patch(`/api/admin/products/${pid}/hit`, 
+      await axios.patch(`/api/admin/products/${pid}/hit`,
         { hit: isHit ? 0 : 1 },
         {
           headers: {
@@ -106,10 +99,9 @@ function PdList() {
     }
   };
 
-  // 품절 토글
   const handleSoldout = async (pid, isSoldout) => {
     try {
-      await axios.patch(`/api/admin/products/${pid}/soldout`, 
+      await axios.patch(`/api/admin/products/${pid}/soldout`,
         { soldout: isSoldout ? 0 : 1 },
         {
           headers: {
@@ -124,7 +116,6 @@ function PdList() {
     }
   };
 
-  // 삭제
   const handleDelete = async (pid) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
@@ -140,13 +131,16 @@ function PdList() {
     }
   };
 
-  // 수정페이지 이동
   const goEdit = (pid) => navigate(`/admin/PdEdit/${pid}`);
+  const handleImageError = (e) => {
+    console.error('이미지 로드 실패:', e.target.src);
+    e.target.style.display = 'none';
+    e.target.nextSibling.style.display = 'block';
+  };
 
   return (
     <div className="admin-pdlist-root">
       <TopHeader />
-      {/* 네비+검색 */}
       <div className="admin-pdlist-nav">
         <div className="nav-category-group">
           <select
@@ -187,39 +181,53 @@ function PdList() {
               </tr>
             ) : (
               Array.isArray(products) ?
-              products.map((p, idx) => (
-                <tr key={p.pid}>
-                  <td>{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</td>
-                  <td>
-                    {p.image ? (
-                      <img src={`/api/images/${p.image}`} alt={p.pnm} className="pdlist-img" />
-                    ) : (
-                      <span className="img-none">-</span>
-                    )}
-                  </td>
-                  <td>{p.pnm}</td>
-                  <td>{p.mainCategory || "-"}</td>
-                  <td>{p.price ? p.price.toLocaleString() + "원" : "-"}</td>
-                  <td>{p.expDate || "-"}</td>
-                  <td>
-                    {p.hit === 1 && <span className="status-hit">HIT</span>}
-                    {p.soldout === 1 && <span className="status-soldout">품절</span>}
-                  </td>
-                  <td>
-                    <div className="btn-group">
-                      <Button text="수정" style={{ ...btnStyle, background: "#3b82f6", color: "#fff" }} onClick={() => goEdit(p.pid)} />
-                      <Button text="삭제" style={{ ...btnStyle, background: "#ef4444", color: "#fff" }} onClick={() => handleDelete(p.pid)} />
-                      <Button text={p.hit === 1 ? "히트해제" : "히트"} style={{ ...btnStyle, background: "#fde047", color: "#333" }} onClick={() => handleHit(p.pid, p.hit === 1)} />
-                      <Button text={p.soldout === 1 ? "판매중" : "품절"} style={{ ...btnStyle, background: "#a1a1aa", color: "#fff" }} onClick={() => handleSoldout(p.pid, p.soldout === 1)} />
-                    </div>
-                  </td>
-                </tr>
-              ))
-              : (
-                <tr>
-                  <td colSpan={8} className="empty-row">데이터 오류</td>
-                </tr>
-              )
+                products.map((p, idx) => (
+                  <tr key={p.pid}>
+                    <td>{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</td>
+                    <td>
+                      {p.image ? (
+                        <div style={{ position: 'relative' }}>
+                          <img
+                            src={`http://localhost/api/images/${p.image}`}
+                            alt={p.pnm}
+                            className="pdlist-img"
+                            onError={handleImageError}
+                            onLoad={() => console.log(`이미지 로드 성공: /api/images/${p.image}`)}
+                          />
+                          <span
+                            className="img-none"
+                            style={{ display: 'none' }}
+                          >
+                            이미지 없음
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="img-none">-</span>
+                      )}
+                    </td>
+                    <td>{p.pnm}</td>
+                    <td>{p.mainCategory || "-"}</td>
+                    <td>{p.price ? p.price.toLocaleString() + "원" : "-"}</td>
+                    <td>{p.expDate || "-"}</td>
+                    <td>
+                      {p.hit === 1 && <span className="status-hit">HIT</span>}
+                      {p.soldout === 1 && <span className="status-soldout">품절</span>}
+                    </td>
+                    <td>
+                      <div className="btn-group">
+                        <Button text="수정" style={{ ...btnStyle, background: "#3b82f6", color: "#fff" }} onClick={() => goEdit(p.pid)} />
+                        <Button text="삭제" style={{ ...btnStyle, background: "#ef4444", color: "#fff" }} onClick={() => handleDelete(p.pid)} />
+                        <Button text={p.hit === 1 ? "히트해제" : "히트"} style={{ ...btnStyle, background: "#fde047", color: "#333" }} onClick={() => handleHit(p.pid, p.hit === 1)} />
+                        <Button text={p.soldout === 1 ? "판매중" : "품절"} style={{ ...btnStyle, background: "#a1a1aa", color: "#fff" }} onClick={() => handleSoldout(p.pid, p.soldout === 1)} />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+                : (
+                  <tr>
+                    <td colSpan={8} className="empty-row">데이터 오류</td>
+                  </tr>
+                )
             )}
           </tbody>
         </table>

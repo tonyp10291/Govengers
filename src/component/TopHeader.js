@@ -103,7 +103,7 @@ function TopHeader() {
                   <>
                     <li><Link to="/ntlist">공지 관리</Link></li>
                     <li><Link to="/admin/mrv">리뷰 관리</Link></li>
-                    <li><Link to="/contact-admin">문의 관리</Link></li>
+                    <li><Link to="/admin/mqna">문의 관리</Link></li>
                   </>
                 ) : (
                   <>

@@ -1,0 +1,282 @@
+.user-form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.find-form {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tab-buttons {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.tab-buttons button {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background: transparent;
+    color: #666;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-buttons button:hover {
+    color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.tab-buttons button.active {
+    color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.find-form h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 24px;
+}
+
+.auth-method-selector {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    justify-content: center;
+}
+
+.auth-method-selector label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.auth-method-selector input[type="radio"] {
+    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+    accent-color: #007bff;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+    font-size: 14px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.form-group input:read-only {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.form-group input::placeholder {
+    color: #999;
+}
+
+.input-with-button {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+.input-with-button input {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.input-with-button button {
+    min-width: 120px;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: black;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    white-space: nowrap;
+}
+
+.input-with-button button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.input-with-button button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.submit-btn:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+}
+
+.info-box {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    text-align: center;
+    background-color: white;
+    color: black;
+}
+
+.error-box {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    text-align: center;
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.link-group {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.link-group span {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: black;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    border: none;
+    text-decoration: none;
+}
+
+.link-group span:hover {
+    background-color: #5a6268;
+}
+
+.password-reset-form {
+    padding-top: 20px;
+    margin-top: 20px;
+}
+
+.password-reset-form h3 {
+    color: #007bff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.id-result {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    margin: 20px 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.tab-buttons button:focus,
+.input-with-button button:focus,
+.submit-btn:focus,
+.link-group span:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.5);
+}
+
+.input-with-button button:active:not(:disabled),
+.submit-btn:active:not(:disabled),
+.link-group span:active {
+    transform: translateY(1px);
+}
+
+@media (max-width: 768px) {
+    .user-form-container {
+        padding: 10px;
+    }
+    
+    .find-form {
+        padding: 20px;
+    }
+    
+    .tab-buttons button {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+    
+    .auth-method-selector {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .input-with-button {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .input-with-button button {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .find-form h2 {
+        font-size: 20px;
+    }
+}

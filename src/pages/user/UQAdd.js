@@ -12,16 +12,20 @@ const UQAdd = () => {
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
-
+      console.log('token777: ', token);
       if (!token) {
         alert("로그인 후 이용 가능합니다.");
         window.location.href = "/login";
         return;
       }
-
+    console.log("등록 요청 값:", {
+      title,
+      content,
+      category,
+      isPrivate,
+    });
       const newInquiry = { title, content, category, isPrivate };
-
-      await axios.post("/api/uqna", newInquiry, {
+      await axios.post("/api/uqna", newInquiry, { 
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`, 
@@ -35,8 +39,6 @@ const UQAdd = () => {
       alert("등록 실패: 알 수 없는 오류");
     }
   };
-
-  // 작성 취소
   const handleCancel = () => {
     if (window.confirm("작성을 취소하고 목록으로 돌아가시겠습니까?")) {
       window.location.href = "/uqna";

@@ -1,0 +1,129 @@
+.mypageWrapper {
+  min-height: 100vh;
+  background: #fff;
+  padding-top: 44px;
+}
+.mypageContainer {
+  width: 100%;
+  max-width: 1500px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  border: 1px solid #ececec;
+  padding: 0 24px 24px 24px;
+}
+
+.statusBox {
+  width: 100%;
+  background: #f7f7f7;
+  border-radius: 10px 10px 0 0;
+  padding: 32px 24px 24px 24px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 0;
+}
+.statusHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.statusTitle {
+  font-size: 34px;
+  font-weight: bold;
+  color: #111;
+}
+.statusPeriod {
+  font-size: 18px;
+  color: #aaa;
+}
+.statusContent {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 56px;
+  position: relative;
+}
+.statusLabel {
+  font-size: 24px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.statusNum {
+  font-size: 34px;
+  font-weight: 700;
+  color: #222;
+  text-align: center;
+}
+.statusContent > div:not(:last-child) {
+  flex: 1 1 0;
+  border-right: 1px dashed #ddd;
+  padding-right: 32px;
+}
+.statusContent > div:last-child {
+  min-width: 150px;
+  padding-left: 32px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  color: #444;
+  gap: 6px;
+  border-right: none;
+}
+.statusExtra div {
+  font-size: 17px;
+}
+
+.menuGrid {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 0 0 10px 10px;
+  border-top: none;
+}
+.menuBox {
+  flex: 1 1 0;
+  padding: 38px 0 28px 0;
+  text-align: center;
+  background: #fff;
+  border-right: 1px solid #eee;
+  cursor: pointer;
+  transition: background 0.16s;
+}
+.menuBox:last-child {
+  border-right: none;
+}
+.menuBox:hover {
+  background: #f5f5f5;
+}
+.menuBox:hover .menuIcon {
+  stroke: #3b82f6;
+}
+
+.menuIcon {
+  display: block;
+  margin: 0 auto 12px auto;
+  width: 38px !important;
+  height: 38px !important;
+  stroke: #666;
+  stroke-width: 1.7;
+  color: unset !important;
+  background: none !important;
+}
+
+.menuLabel {
+  font-size: 26px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin-top: 8px;
+  color: #111;
+}
+.menuSub {
+  font-size: 18px;
+  color: #b0b0b0;
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+}
