@@ -5,11 +5,12 @@ import "../css/Home.css";
 import MainSlider from "../component/MainSlider";
 import { Button } from "../util/Buttons";
 
-const PRODUCTS_PER_ROW = 4; // 한 줄에 4개씩
 
 const Home = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
+    const PRODUCTS_PER_ROW = 4;
+    const PRODUCT_LIMIT = 12;
 
     const homeBtnClick = () => {
         navigate("/");
@@ -24,6 +25,9 @@ const Home = () => {
                 console.error('상품 불러오기 실패:', err);
             });
     }, []);
+
+    const visibleProducts = products.slice(0, PRODUCT_LIMIT);
+
 
     // 4개씩 상품을 나누는 유틸 함수
     const chunkProducts = (arr, size) => {
@@ -69,19 +73,19 @@ const Home = () => {
                 </p>
             </main>
 
-            return (
+
             <section className="product-section">
                 <h2>PRODUCT</h2>
                 <p className="bar">고깃간 베스트 상품</p>
                 <div className="product-list-wrapper">
-                    {chunkProducts(products, PRODUCTS_PER_ROW).map((row, rowIdx) => (
+                    {chunkProducts(visibleProducts, PRODUCTS_PER_ROW).map((row, rowIdx) => (
                         <ul className="product-list-row" key={rowIdx}>
                             {row.map((item) => (
                                 <li
                                     key={item.pid}
                                     className="product-item"
                                     onClick={() => navigate(`/product/${item.pid}`)}
-                                    style={{ cursor: "pointer" }} // 마우스 커서 변경
+                                    style={{ cursor: "pointer" }}
                                 >
                                     <img
                                         src={item.image ? `/api/images/${item.image}` : '/api/images/default-product.jpg'}
@@ -101,7 +105,7 @@ const Home = () => {
                     ))}
                 </div>
             </section>
-            );
+
 
 
             <div className="info-banner-section">
