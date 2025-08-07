@@ -12,6 +12,7 @@ export default function NTList() {
   const [notices, setNotices] = useState([]);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
+  // 화면 크기 변화 감지
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);

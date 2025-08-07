@@ -335,7 +335,6 @@ import axios from "axios";
                  </div>                 
                  {wishlist && wishlist.length > 0 && <Button text={"✖️선택 삭제"} style={{fontSize : "13px"}} onClick={(e) => deleteWishlistChecked()} />}
                  <div className="table_wrap">
-                 {/* wishlist존재시만 랜더링 */}
                  {wishlist && wishlist.length > 0 ? (
                              <table className="contents_wrap">
                                  <colgroup>
