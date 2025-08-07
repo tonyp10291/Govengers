@@ -3,7 +3,7 @@ import axios from "axios";
 import { Button } from "../../util/Buttons";
 import "../../css/admin/PdAdd.css";
 
-const MAIN_CATEGORY = ["소고기", "돼지고기", "선물세트"];
+const MAIN_CATEGORY = ["소고기", "돼지고기", "닭고기", "선물세트", "소스류" ];
 
 function PdAdd() {
   const today = new Date().toISOString().split("T")[0];
@@ -101,13 +101,45 @@ function PdAdd() {
             ))}
           </select>
         </div>
-        <div className="pdadd-form-group">
+         <div className="pdedit-form-group">
           <label>가격</label>
-          <input type="number" name="price" value={form.price} onChange={handleChange} required />
+          <input
+            type="number"
+            name="price"
+            min="0"
+            value={form.price}
+            onChange={e => {
+              const value = Math.max(0, Number(e.target.value));
+              setForm(prev => ({ ...prev, price: value }));
+            }}
+            required
+          />
         </div>
-        <div className="pdadd-form-group">
+        <div className="pdedit-form-group">
           <label>상품설명</label>
-          <textarea name="pdesc" value={form.pdesc} onChange={handleChange} required />
+          <textarea
+            name="pdesc"
+            maxLength={200}
+            rows={5}
+            style={{
+              resize: "none",        
+              overflowY: "auto",      
+              width: "100%",
+              minHeight: "100px",
+              maxHeight: "120px"
+            }}
+            value={form.pdesc}
+            onChange={e => {
+              setForm(prev => ({
+                ...prev,
+                pdesc: e.target.value.slice(0, 200)
+              }));
+            }}
+            required
+          />
+          <div style={{ textAlign: "right", fontSize: 12, color: "#888" }}>
+            {form.pdesc.length}/200
+          </div>
         </div>
         <div className="pdadd-form-group">
           <label>원산지</label>

@@ -99,21 +99,6 @@
   color: #fff !important;
 }
 
-.pdadd-form-group textarea {
-  min-height: 60px;
-  max-height: 180px;
-  resize: vertical;
-  overflow-y: auto;
-  padding: 10px 14px;
-  line-height: 1.5;
-  font-size: 1rem;
-  border-radius: 7px;
-  border: 1.5px solid #e0e0e0;
-  background: #fff;
-  color: #222;
-  outline: none;
-  transition: border 0.2s;
-}
 .pdadd-form-group textarea:focus {
   border: 1.5px solid #ff7657;
 }
@@ -199,4 +184,16 @@
   font-weight: 600;
   color: #656565;
   margin-right: 2px;
+}
+
+.pdadd-form-group input,
+.pdadd-form-group textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
 }

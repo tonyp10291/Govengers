@@ -6,7 +6,7 @@ import '../../css/user/UPdPage.css';
 const UPdPage = () => {
     const { pid } = useParams();
     const navigate = useNavigate();
-
+    const API_BASE_URL = "http://localhost:8090";
     const [product, setProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -91,7 +91,8 @@ const UPdPage = () => {
                         <div className="image-section">
                             <div className="main-image">
                                 <img
-                                    src={`/uploads/${images[selectedImage]}`}
+                                    // src={`/uploads/${images[selectedImage]}`}
+                                    src={product.image ? `${API_BASE_URL}/api/images/${images[selectedImage]}` : `${API_BASE_URL}/api/images/default-product.jpg`}
                                     alt={product.pnm}
                                     className="product-image"
                                 />
@@ -104,7 +105,8 @@ const UPdPage = () => {
                                         onClick={() => setSelectedImage(idx)}
                                     >
                                         <img
-                                            src={`/uploads/${img}`}
+                                            // src={`/uploads/${img}`}
+                                            src={product.image ? `${API_BASE_URL}/api/images/${img}` : `${API_BASE_URL}/api/images/default-product.jpg`}
                                             alt={`${product.pnm} ${idx + 1}`}
                                             className="thumbnail-image"
                                         />

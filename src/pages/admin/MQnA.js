@@ -12,7 +12,6 @@ const MQnA = () => {
   const [answerStatusFilter, setAnswerStatusFilter] = useState("");
   const [privacyFilter, setPrivacyFilter] = useState("");
   const [replyText, setReplyText] = useState("");
-
   const token = localStorage.getItem("token");
 
   const getCategoryText = (category) => {
@@ -311,7 +310,7 @@ const MQnA = () => {
                       </span>
                     </td>
                     <td className="title-cell">{inquiry.title}</td>
-                    <td>{inquiry.user?.unm || '탈퇴회원'}</td>
+                    <td>{inquiry.user?.uid || '탈퇴회원'}</td>
                     <td>{new Date(inquiry.createdAt).toLocaleDateString()}</td>
                     <td>
                       <span className={`status-badge ${getAnswerStatusClass(inquiry)}`}>

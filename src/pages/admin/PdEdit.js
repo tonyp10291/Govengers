@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../util/Buttons";
 import "../../css/admin/PdEdit.css";
 
-const MAIN_CATEGORY = ["소고기", "돼지고기", "선물세트"];
+const MAIN_CATEGORY = ["소고기", "돼지고기", "닭고기", "선물세트", "소스류" ];
 const ADMIN_STATUS = ["배송완료", "배송중", "배송준비중", "주문완료", "주문취소"];
 const USER_STATUS = ["배송완료", "배송중", "배송준비중", "주문완료", "주문취소"];
 
@@ -24,8 +24,8 @@ function PdEdit() {
     soldout: 0,
     userStatus: "배송완료",
     adminStatus: "배송완료",
-    file: null,         
-    oldImage: "",       
+    file: null,
+    oldImage: "",
   });
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef();
@@ -72,7 +72,7 @@ function PdEdit() {
       setForm({ ...form, [name]: checked ? 1 : 0 });
     } else if (type === "file") {
       const file = files[0];
-      
+
       setForm({ ...form, file: file });
       if (file) {
         const reader = new FileReader();
@@ -92,41 +92,41 @@ function PdEdit() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const token = localStorage.getItem("token");
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
 
-    const formData = new FormData();
-    const productDto = {
-      pnm: form.pnm,
-      mainCategory: form.mainCategory,
-      price: form.price,
-      pdesc: form.pdesc,
-      origin: form.origin,
-      expDate: form.expDate,
-      hit: form.hit,
-      soldout: form.soldout,
-    };
-    formData.append("productData", JSON.stringify(productDto));
-    
-    if (form.file) {
-      formData.append("file", form.file);
+      const formData = new FormData();
+      const productDto = {
+        pnm: form.pnm,
+        mainCategory: form.mainCategory,
+        price: form.price,
+        pdesc: form.pdesc,
+        origin: form.origin,
+        expDate: form.expDate,
+        hit: form.hit,
+        soldout: form.soldout,
+      };
+      formData.append("productData", JSON.stringify(productDto));
+
+      if (form.file) {
+        formData.append("file", form.file);
+      }
+
+      await axios.post(`/api/admin/products/${pid}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      alert("상품이 수정되었습니다!");
+      navigate("/admin/pdlist");
+    } catch (err) {
+      console.error("수정 에러:", err.response);
+      alert("수정 실패!\n" + (err.response?.data?.message || err.message));
     }
-
-    await axios.post(`/api/admin/products/${pid}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": `Bearer ${token}`,
-      },
-    });
-
-    alert("상품이 수정되었습니다!");
-    navigate("/admin/pdlist");
-  } catch (err) {
-    console.error("수정 에러:", err.response);
-    alert("수정 실패!\n" + (err.response?.data?.message || err.message));
-  }
-};
+  };
 
   const handleImageError = (e) => {
     e.target.style.display = 'none';
@@ -165,11 +165,43 @@ function PdEdit() {
         </div>
         <div className="pdedit-form-group">
           <label>가격</label>
-          <input type="number" name="price" value={form.price} onChange={handleChange} required />
+          <input
+            type="number"
+            name="price"
+            min="0"
+            value={form.price}
+            onChange={e => {
+              const value = Math.max(0, Number(e.target.value));
+              setForm(prev => ({ ...prev, price: value }));
+            }}
+            required
+          />
         </div>
         <div className="pdedit-form-group">
           <label>상품설명</label>
-          <textarea name="pdesc" value={form.pdesc} onChange={handleChange} required />
+          <textarea
+            name="pdesc"
+            maxLength={200}
+            rows={5}
+            style={{
+              resize: "none",        
+              overflowY: "auto",      
+              width: "100%",
+              minHeight: "100px",
+              maxHeight: "120px"
+            }}
+            value={form.pdesc}
+            onChange={e => {
+              setForm(prev => ({
+                ...prev,
+                pdesc: e.target.value.slice(0, 200)
+              }));
+            }}
+            required
+          />
+          <div style={{ textAlign: "right", fontSize: 12, color: "#888" }}>
+            {form.pdesc.length}/200
+          </div>
         </div>
         <div className="pdedit-form-group">
           <label>원산지</label>

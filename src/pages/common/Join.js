@@ -16,7 +16,7 @@ function Join() {
         showEmailCodeInput: false, showSmsCodeInput: false, emailTimer: 0, smsTimer: 0,
     });
 
-    // 이메일 타이머 useEffect
+
     useEffect(() => {
         let timer;
         if (uiState.emailTimer > 0) {
@@ -25,7 +25,6 @@ function Join() {
         return () => clearInterval(timer);
     }, [uiState.emailTimer]);
 
-    // SMS 타이머 useEffect
     useEffect(() => {
         let timer;
         if (uiState.smsTimer > 0) {
@@ -34,7 +33,6 @@ function Join() {
         return () => clearInterval(timer);
     }, [uiState.smsTimer]);
 
-    // 컴포넌트 언마운트 시 타이머 정리
     useEffect(() => {
         return () => {
             setUiState(prev => ({ ...prev, emailTimer: 0, smsTimer: 0 }));
@@ -48,7 +46,6 @@ function Join() {
         } else {
             setUserInfo(prev => ({ ...prev, [name]: value }));
             
-            // 이메일이 변경되면 즉시 타이머 중단 및 인증 상태 초기화
             if (name === 'umail') {
                 setVerifications(prev => ({ ...prev, emailVerified: false, emailCode: '' }));
                 setUiState(prev => ({ 
@@ -58,7 +55,6 @@ function Join() {
                 }));
             }
             
-            // 전화번호가 변경되면 즉시 타이머 중단 및 SMS 인증 상태 초기화
             if (name === 'utel') {
                 setVerifications(prev => ({ ...prev, smsVerified: false, smsCode: '' }));
                 setUiState(prev => ({ 
@@ -68,7 +64,6 @@ function Join() {
                 }));
             }
             
-            // 해당 필드의 에러 메시지 제거
             if (errors[name]) {
                 setErrors(prev => ({ ...prev, [name]: '' }));
             }
@@ -276,7 +271,6 @@ function Join() {
             const errorMessage = typeof err.response?.data === 'string' ? err.response.data :
                                err.response?.data?.message || '회원가입 중 오류가 발생했습니다.';
             
-            // 이메일 관련 에러인 경우 이메일 인증 상태 초기화
             if (errorMessage.includes('이메일') || 
                 errorMessage.includes('email') || 
                 errorMessage.includes('이미 가입된') || 
