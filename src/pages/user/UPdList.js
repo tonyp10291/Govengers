@@ -10,11 +10,10 @@ const UPdList = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCartModalOpen, setIsCartModalOpen] = useState(false);
-    const [cartItems, setCartItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const itemsPerPage = 12;
-
+    const API_BASE_URL = "http://localhost:8090";
     const [searchParams] = useSearchParams();
     const urlCategory = searchParams.get('cate') || '전체';
     const navigate = useNavigate();
@@ -83,30 +82,96 @@ const UPdList = () => {
         closeModal();
     };
 
-    const handleAddToCart = (product, quantity = 1, fromModal = false) => {
-        const existingItem = cartItems.find(item => item.pid === product.pid);
+    const handleAddToCart = async (product, quantity = 1, fromModal = false) => {
+        const guest_id = localStorage.getItem('guest_id');
+        const token = localStorage.getItem('token');
 
-        if (existingItem) {
-            setCartItems(cartItems.map(item =>
-                item.pid === product.pid
-                    ? { ...item, quantity: item.quantity + quantity }
-                    : item
-            ));
+        if (!guest_id && !token) {
+            alert('로그인 또는 비회원 ID가 필요합니다.');
+            return;
+        }
+
+        let url = '';
+        let headers = {};
+
+        if (token) {
+            url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
+            headers = { 'Authorization': `Bearer ${token}` };
         } else {
-            setCartItems([...cartItems, { ...product, quantity }]);
+            url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
         }
 
-        if (fromModal) {
+        try {
+            await axios.post(url, {}, { headers });
+            alert("상품이 장바구니에 담겼습니다.");
+            if (fromModal) {
+                closeModal();
+            }
+            openCartModal(); // 장바구니 모달 열기
+        } catch (err) {
+            if (err.response && err.response.data) {
+                if (err.response.data.includes("이미 리스트에 있는 상품입니다.")) {
+                    console.error(err.response.data);
+                    let result = window.confirm("이미 리스트에 있는 상품입니다.\n장바구니로 이동하시겠습니까?");
+                    if (result) {
+                        navigate("/cart");
+                    }
+                } else if (err.response.data === "사용자 정보가 없습니다.") {
+                    alert("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.");
+                } else if (err.response.data === "장바구니 추가 실패") {
+                    alert("장바구니 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
+                } else {
+                    alert("알 수 없는 에러: " + err.response.data);
+                }
+            } else {
+                alert("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+                console.error(err);
+            }
+        }
+    };
+
+    const handleAddWishlist = async (product) => {
+        const guest_id = localStorage.getItem('guest_id');
+        const token = localStorage.getItem('token');
+        
+        if (!guest_id && !token) {
+            alert("로그인 또는 비회원 ID가 필요합니다.");
+            return;
+        }
+
+        let url = '';
+        let headers = { 'Content-Type': 'application/json' };
+
+        if (token) {
+            url = `/api/wishlist/user/add?pid=${product.pid}`;
+            headers = { ...headers, 'Authorization': `Bearer ${token}` };
+        } else {
+            url = `/api/wishlist/guest/add?guestId=${guest_id}&pid=${product.pid}`;
+        }
+
+        try {
+            await axios.post(url, {}, { headers });
+            alert('찜하기가 완료되었습니다.');
             closeModal();
+        } catch (err) {
+            if (err.response && err.response.data) {
+                if (err.response.data === "wishlist 추가 실패") {
+                    console.error(err.response.data);
+                    let result = window.confirm("이미 리스트에 있는 상품입니다.\n찜목록으로 이동하시겠습니까?");
+                    if (result) {
+                        navigate("/wishlist");
+                    }
+                } else {
+                    alert("알 수 없는 에러: " + err.response.data);
+                }
+            } else {
+                alert("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+                console.error(err);
+            }
         }
-
-        openCartModal();
     };
-
-    const handleWishlist = () => {
-        alert('찜하기가 완료되었습니다.');
-    };
-
+    
+    const cartItems = []; // 임시 상태
     const getTotalQuantity = () => {
         return cartItems.reduce((total, item) => total + item.quantity, 0);
     };
@@ -148,10 +213,10 @@ const UPdList = () => {
                             style={{ cursor: 'pointer' }}>
                             <div className="product-image">
                                 <img
-                                    src={product.imgFilename ? `/api/imgs/${product.imgFilename}` : '/img/default-product.jpg'}
+                                    src={product.image ? `${API_BASE_URL}/api/images/${product.image}` : '/api/images/default-product.jpg'}
                                     alt={product.pnm}
                                     onError={(e) => {
-                                        e.target.src = '/img/default-product.jpg';
+                                        e.target.src = '/api/images/default-product.jpg';
                                     }}
                                 />
                                 <div className="product-actions">
@@ -240,7 +305,7 @@ const UPdList = () => {
                         <div className="modal-body">
                             <div className="modal-image">
                                 <img
-                                    src={selectedProduct.imgFilename ? `/api/imgs/${selectedProduct.imgFilename}` : '/img/default-product.jpg'}
+                                    src={selectedProduct.image ? `${API_BASE_URL}/api/images/${selectedProduct.image}` : '/img/default-product.jpg'}
                                     alt={selectedProduct.pnm}
                                     onError={(e) => {
                                         e.target.src = '/img/default-product.jpg';
@@ -286,7 +351,7 @@ const UPdList = () => {
                                     >
                                         장바구니 담기
                                     </button>
-                                    <button className="btn-wishlist" onClick={handleWishlist}>
+                                    <button className="btn-wishlist" onClick={() => handleAddWishlist(selectedProduct)}>
                                         찜하기
                                     </button>
                                 </div>
@@ -309,25 +374,7 @@ const UPdList = () => {
                         </div>
 
                         <div className="cart-items">
-                            {cartItems.map(item => (
-                                <div key={item.pid} className="cart-item">
-                                    <img
-                                        src={item.imgFilename ? `/api/imgs/${item.imgFilename}` : '/img/default-product.jpg'}
-                                        alt={item.pnm}
-                                        className="cart-item-image"
-                                        onError={(e) => {
-                                            e.target.src = '/img/default-product.jpg';
-                                        }}
-                                    />
-                                    <div className="cart-item-info">
-                                        <h4>{item.pnm}</h4>
-                                        <p className="cart-item-price">₩{formatPrice(item.price)}</p>
-                                        <div className="cart-quantity-controls">
-                                            <span>수량: {item.quantity}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                             {/* 장바구니 상품 목록은 실제 API 호출로 가져와야 합니다. */}
                         </div>
 
                         <div className="cart-pagination">
@@ -338,7 +385,7 @@ const UPdList = () => {
 
                         <div className="cart-modal-buttons">
                             <button className="btn-direct-purchase">바로 구매하기</button>
-                            <button className="btn-continue-shopping" onClick={closeCartModal}>장바구니 이동</button>
+                            <button className="btn-continue-shopping" onClick={() => navigate("/cart")}>장바구니 이동</button>
                             <button className="btn-shopping-continue" onClick={closeCartModal}>쇼핑계속하기</button>
                         </div>
                     </div>

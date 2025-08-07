@@ -14,7 +14,7 @@ const UCart = () => {
     const [checkedItems, setCheckedItems] = useState([]);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
+    const API_BASE_URL = "http://localhost:8090";
     const [totalProductPrice, setTotalProductPrice] = useState(0);
     const [totalShippingCost, setTotalShippingCost] = useState(0);
     const [finalTotalPrice, setFinalTotalPrice] = useState(0);
@@ -30,65 +30,15 @@ const UCart = () => {
 
     useEffect(() => {
         calculateTotals();
-        console.log("현재 체크된 상품 ID:", checkedItems);
-        console.log("현재 장바구니 상품 목록:", cartItems);
-        console.log("계산된 총 상품 금액:", totalProductPrice);
     }, [cartItems, checkedItems]);
 
     const calculateTotals = () => {
         const checkedItemsData = cartItems.filter(item => checkedItems.includes(item.cartId));
-
         const productPrice = checkedItemsData.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
         const shippingCost = checkedItemsData.reduce((sum, item) => sum + item.shippingCost, 0);
-
         setTotalProductPrice(productPrice);
         setTotalShippingCost(shippingCost);
         setFinalTotalPrice(productPrice + shippingCost);
-    };
-
-    const cartTest = () => {
-        const testFunction = async () => {
-            if (!guest_id && !token) {
-                alert('로그인 또는 비회원 ID가 필요합니다.');
-                return;
-            }
-            const pid = 3;
-            const quantity = 1;
-            let url = '';
-            let headers = {};
-            if (token) {
-                url = `/api/cart/add?pid=${pid}&quantity=${quantity}`;
-                headers = { 'Authorization': `Bearer ${token}` };
-            } else {
-                url = `/api/cart/add?guestId=${guest_id}&pid=${pid}&quantity=${quantity}`;
-            }
-            try {
-                await axios.post(url, {}, { headers });
-                alert("상품이 장바구니에 담겼습니다.");
-                fetchCartItems();
-            } catch (err) {
-                if (err.response && err.response.data) {
-                    if(err.response.data.includes("이미 리스트에 있는 상품입니다.")){
-                        console.error(err.response.data);
-                        let result = window.confirm("이미 리스트에 있는 상품입니다.\n장바구니로 이동하시겠습니까?");
-                        if(result){
-                            navigate("/cart");
-                        }
-                    } else if (err.response.data === "사용자 정보가 없습니다.") {
-                        alert("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.");
-                    } else if (err.response.data === "장바구니 추가 실패") {
-                        alert("장바구니 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
-                    } else {
-                        alert("알 수 없는 에러: " + err.response.data);
-                    }
-                } else {
-                    alert("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
-                    console.error(err);
-                }
-            }
-        };
-        testFunction();
     };
 
     const fetchCartItems = async () => {
@@ -96,9 +46,13 @@ const UCart = () => {
         try {
             let response;
             if (token) {
-                response = await axios.get(`/api/cart?page=${page}`, { headers: { 'Authorization': `Bearer ${token}` } });
+                if (guest_id) {
+                    await axios.post(`/api/cart/migrate?guestId=${guest_id}`, {}, { headers: { 'Authorization': `Bearer ${token}` } });
+                    localStorage.removeItem("guest_id");
+                }
+                response = await axios.get(`/api/cart/user?page=${page}`, { headers: { 'Authorization': `Bearer ${token}` } });
             } else {
-                response = await axios.get(`/api/cart?page=${page}&guestId=${guest_id}`);
+                response = await axios.get(`/api/cart/guest?page=${page}&guestId=${guest_id}`);
             }
             setCartItems(response.data.content);
             setTotalPages(response.data.totalPages);
@@ -125,15 +79,7 @@ const UCart = () => {
     const handleQuantityChange = async (cartId, newQuantity) => {
         if (newQuantity < 1) newQuantity = 1;
         try {
-            let url = '';
-            let headers = {};
-            if (token) {
-                url = `/api/cart/update-quantity?cartId=${cartId}&quantity=${newQuantity}`;
-                headers = { 'Authorization': `Bearer ${token}` };
-            } else if (guest_id) {
-                url = `/api/cart/update-quantity?cartId=${cartId}&quantity=${newQuantity}`;
-            }
-            await axios.post(url, {}, { headers });
+            await axios.post(`/api/cart/update-quantity?cartId=${cartId}&quantity=${newQuantity}`, {}, { headers: token ? { 'Authorization': `Bearer ${token}` } : {} });
             setCartItems(prevItems =>
                 prevItems.map(item =>
                     item.cartId === cartId ? { ...item, quantity: newQuantity } : item
@@ -146,42 +92,38 @@ const UCart = () => {
     };
 
     const deleteItems = async (ids, type) => {
-        if(ids.length === 0 && type !== 'all'){
+        if (ids.length === 0 && type !== 'all') {
             alert("선택된 상품이 없습니다.");
             return;
         }
         const confirmationMsg = type === 'all' ? "장바구니를 비우시겠습니까?" : "선택한 상품을 삭제하시겠습니까?";
         if (!window.confirm(confirmationMsg)) return;
+
         try {
             let url = '';
             let headers = {};
             let data = {};
             let method = 'post';
+
             if (token) {
                 headers = { 'Authorization': `Bearer ${token}` };
                 if (type === 'all') {
-                    url = '/api/cart/delete/all';
+                    url = `/api/cart/user/clear`;
                 } else if (type === 'checked') {
-                    url = '/api/cart/delete/checked';
+                    url = `/api/cart/user/delete-checked`;
                     data = ids;
                 } else {
-                    if (ids[0] === undefined) {
-                        throw new Error("삭제할 상품 ID가 유효하지 않습니다.");
-                    }
-                    url = `/api/cart/delete/${ids[0]}`;
+                    url = `/api/cart/user/delete/${ids[0]}`;
                     method = 'delete';
                 }
             } else {
                 if (type === 'all') {
-                    url = `/api/cart/delete/all?guestId=${guest_id}`;
+                    url = `/api/cart/guest/clear?guestId=${guest_id}`;
                 } else if (type === 'checked') {
-                    url = `/api/cart/delete/checked?guestId=${guest_id}`;
+                    url = `/api/cart/guest/delete-checked?guestId=${guest_id}`;
                     data = ids;
                 } else {
-                    if (ids[0] === undefined) {
-                        throw new Error("삭제할 상품 ID가 유효하지 않습니다.");
-                    }
-                    url = `/api/cart/delete/${ids[0]}?guestId=${guest_id}`;
+                    url = `/api/cart/guest/delete/${ids[0]}?guestId=${guest_id}`;
                     method = 'delete';
                 }
             }
@@ -198,7 +140,6 @@ const UCart = () => {
     const deleteCart = (cartId) => {
         if (cartId !== undefined && cartId !== null) {
             deleteItems([cartId], 'single');
-            console.log("cartId " + cartId);
         } else {
             alert("삭제할 상품 정보가 없습니다.");
         }
@@ -211,6 +152,7 @@ const UCart = () => {
             navigate('/login');
         } else {
             alert("전체 상품을 주문합니다.");
+            // 주문 페이지로 이동하는 로직 추가
         }
     };
 
@@ -223,6 +165,7 @@ const UCart = () => {
         } else {
             alert("선택된 상품을 주문합니다.");
             const selectedItems = cartItems.filter(item => checkedItems.includes(item.cartId));
+            // 주문 페이지로 이동하는 로직 추가
         }
     };
 
@@ -246,23 +189,23 @@ const UCart = () => {
                 </button>
                 {startPage > 0 && (
                     <>
-                    <button onClick={() => setPage(0)}>1</button>
-                    <span>...</span>
+                        <button onClick={() => setPage(0)}>1</button>
+                        <span>...</span>
                     </>
                 )}
                 {pageNumbers.map(pageNum => (
                     <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={page === pageNum ? "active" : ""}
+                        key={pageNum}
+                        onClick={() => setPage(pageNum)}
+                        className={page === pageNum ? "active" : ""}
                     >
-                    {pageNum + 1}
+                        {pageNum + 1}
                     </button>
                 ))}
                 {endPage < totalPages && (
                     <>
-                    <span>...</span>
-                    <button onClick={() => setPage(totalPages - 1)}>{totalPages}</button>
+                        <span>...</span>
+                        <button onClick={() => setPage(totalPages - 1)}>{totalPages}</button>
                     </>
                 )}
                 <button
@@ -280,7 +223,6 @@ const UCart = () => {
             <div className="cart_contents">
                 <div className="title_area">
                     <h2>CART</h2>
-                    <button onClick={cartTest}>상품등록</button>
                 </div>
                 {isLoading && <p>장바구니 정보를 불러오는 중입니다...</p>}
                 {!isLoading && cartItems.length > 0 && (
@@ -309,7 +251,7 @@ const UCart = () => {
                                 {cartItems.map((item) => (
                                     <tr key={item.cartId}>
                                         <td><input type="checkbox" checked={checkedItems.includes(item.cartId)} onChange={(e) => handleCheckboxChange(item.cartId, e.target.checked)} /></td>
-                                        <td><img src={item.imageFilename} alt={item.productName} /></td>
+                                        <td><img src={`${API_BASE_URL}/api/images/${item.imageFilename}`} alt={item.productName} /></td>
                                         <td><Link to={`/상품상세페이지URL/${item.productId}`}>{item.productName}</Link></td>
                                         <td>{item.price.toLocaleString()}원</td>
                                         <td>

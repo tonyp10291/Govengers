@@ -310,7 +310,7 @@ const MQnA = () => {
                       </span>
                     </td>
                     <td className="title-cell">{inquiry.title}</td>
-                    <td>{inquiry.user?.unm || '탈퇴회원'}</td>
+                    <td>{inquiry.user?.uid || '탈퇴회원'}</td>
                     <td>{new Date(inquiry.createdAt).toLocaleDateString()}</td>
                     <td>
                       <span className={`status-badge ${getAnswerStatusClass(inquiry)}`}>

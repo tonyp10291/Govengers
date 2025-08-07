@@ -13,6 +13,7 @@ import UPdPage from './pages/user/UPdPage';
 import UQnA from './pages/user/UQnA';
 import UQAdd from "./pages/user/UQAdd";
 import Wishlist from './pages/user/UPic';
+import Cart from './pages/user/UCart';
 import MQnA from './pages/admin/MQnA';
 import Mypage from './pages/user/Mypage';
 import ShippingGuide from './pages/guides/ShippingGuide';
@@ -29,8 +30,6 @@ import PdOrder from './pages/admin/PdOrder';
 import PdList from './pages/admin/PdList';
 import PdEdit from './pages/admin/PdEdit';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import Wishlist from './pages/user/UPic';
-import Cart from './pages/user/UCart';
 
 function App() {
   useEffect(() => {

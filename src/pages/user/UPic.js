@@ -15,6 +15,7 @@ import axios from "axios";
      const guest_id = localStorage.getItem("guest_id");
      const [checkedItems, setCheckedItems] = useState([]);
      const [isAllChecked, setIsAllChecked] = useState(false);
+     const API_BASE_URL = "http://localhost:8090";
 
      const handleCheckboxChange = (id, isChecked) => {
          let newCheckedItems = [];
@@ -37,33 +38,6 @@ import axios from "axios";
          } else {
              setCheckedItems([]);
          }
-     }
-
-     const wishlistTest = () => {
-         const testFunction = async () => {
-             try{
-                 await axios.post(`/api/wishlist/guest/add?guestId=${guest_id}&pid=3`, {
-                     headers: {
-                         'Content-Type': 'application/json'
-                     }
-                 });
-                 window.location.reload();
-             }catch(err){
-                 if(err.response.data === "wishlist 추가 실패"){
-                     console.error(err.response.data);
-                     let result = window.confirm("이미 리스트에 있는 상품입니다.\n찜목록으로 이동하시겠습니까?");
-                     if(result){
-                         navigate("/");
-                     }
-                 }else{
-                     alert("알수없는 에러");
-                 }
-                 
-             }
-             
-         }
-         testFunction();
-         
      }
      
      const deleteWishlistChecked = () => {
@@ -244,8 +218,8 @@ import axios from "axios";
                          setTotalPages(response.data.totalPages);
                      } catch(err){
                          console.error(err.response.data);
-                         // alert('서버와 통신중 오류가 발생 했습니다.\n메인페이지로 돌아갑니다.');
-                         // navigate('/');
+                         alert('서버와 통신중 오류가 발생 했습니다.\n메인페이지로 돌아갑니다.');
+                         navigate('/');
                      }
                  }
                  fetchUserWishlist();
@@ -358,7 +332,6 @@ import axios from "axios";
              <div className="wishList_contents">
                  <div className="title_area">
                      <h2>WISH LIST</h2>
-                     <button onClick={wishlistTest}>상품등록</button>
                  </div>                 
                  {wishlist && wishlist.length > 0 && <Button text={"✖️선택 삭제"} style={{fontSize : "13px"}} onClick={(e) => deleteWishlistChecked()} />}
                  <div className="table_wrap">
@@ -393,7 +366,7 @@ import axios from "axios";
                                              {/* 체크박스 */}
                                              <td className="" style={{textAlign : "center"}}><input type="checkbox" className="itemCheckbox" checked={checkedItems.includes(list.id)} onChange={(e) => handleCheckboxChange(list.id, e.target.checked)}/></td>
                                              {/* 상품 이미지 */}
-                                             <td style={{textAlign : "center"}}><img src={list.image} alt={list.pnm} /></td>
+                                             <td style={{textAlign : "center"}}><img src={`${API_BASE_URL}/api/images/${list.image}`} alt={list.pnm} /></td>
                                              {/* 상품정보 */}
                                              <td style={{textAlign : "left"}}>
                                                  <Link to={`/상품상세페이지URL/${list.pid}`}>{list.pnm}</Link>
