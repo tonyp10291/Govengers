@@ -15,7 +15,7 @@ import axios from "axios";
      const guest_id = localStorage.getItem("guest_id");
      const [checkedItems, setCheckedItems] = useState([]);
      const [isAllChecked, setIsAllChecked] = useState(false);
-     const API_BASE_URL = "http://localhost:8090";
+     const API_BASE_URL = "http://localhost:8080";
 
      const handleCheckboxChange = (id, isChecked) => {
          let newCheckedItems = [];

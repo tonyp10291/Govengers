@@ -53,6 +53,11 @@ thead th {
     color: #666;
     padding: 10px 0;
 }
+
+/* 테이블 바디 (tbody) */
+tbody {
+    border-bottom: 1px solid #ddd;
+}
 tbody td {
     padding: 20px 0;
     text-align: center;

@@ -109,7 +109,6 @@ function TopHeader() {
                     <li><Link to="/ntlist">공지사항</Link></li>
                     <li><Link to="/cooking-guide">레시피</Link></li>
                     <li><Link to="/uqna">문의하기</Link></li>
-                    <li><Link to="/review">구매리뷰</Link></li>
                   </>
                 )}
               </ul>

@@ -152,7 +152,6 @@ const UCart = () => {
             navigate('/login');
         } else {
             alert("전체 상품을 주문합니다.");
-            // 주문 페이지로 이동하는 로직 추가
         }
     };
 
@@ -165,7 +164,6 @@ const UCart = () => {
         } else {
             alert("선택된 상품을 주문합니다.");
             const selectedItems = cartItems.filter(item => checkedItems.includes(item.cartId));
-            // 주문 페이지로 이동하는 로직 추가
         }
     };
 

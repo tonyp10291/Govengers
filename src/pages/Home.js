@@ -50,7 +50,6 @@ const Home = () => {
                     <Link to="/products?cate=닭고기">닭고기</Link>
                     <Link to="/products?cate=선물세트">선물세트</Link>
                     <Link to="/products?cate=소스류">소스류</Link>
-                    <Link to="/review">구매리뷰</Link>
                 </nav>
             </header>
 

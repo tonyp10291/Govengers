@@ -16,7 +16,6 @@ function Join() {
         showEmailCodeInput: false, showSmsCodeInput: false, emailTimer: 0, smsTimer: 0,
     });
 
-
     useEffect(() => {
         let timer;
         if (uiState.emailTimer > 0) {
@@ -294,7 +293,6 @@ function Join() {
                 return;
             }
 
-            // 아이디 관련 에러인 경우
             if (errorMessage.includes('아이디') || errorMessage.includes('username') || errorMessage.includes('id')) {
                 setErrors({ general: errorMessage + " 다른 아이디를 입력해주세요." });
                 return;

@@ -23,6 +23,8 @@ import NTWrt from './pages/admin/NTWrt';
 import NTList from "./pages/common/NTList";
 import NTView from './pages/common/NTView';
 import NTEdit from './pages/admin/NTEdit';
+import PaymentPage from './pages/user/PaymentPage';
+import PaymentSuccess from './pages/user/PaymentSuccess';
 import MUser from './pages/admin/MUser';
 import MRv from './pages/admin/MRv';
 import PdAdd from './pages/admin/PdAdd';
@@ -69,6 +71,10 @@ function App() {
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/mypage" element={<Mypage />} />
+
+          <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+
           <Route path="/ntlist" element={<NTList />} />
           <Route path="/notice/view/:id" element={<NTView />} />
           <Route path="/admin/mqna" element={<MQnA />} />
@@ -80,9 +86,11 @@ function App() {
           <Route path="/admin/pdorder" element={<PdOrder />} />
           <Route path="/admin/pdlist" element={<PdList />} />
           <Route path="/admin/PdEdit/:pid" element={<PdEdit />} />
+
           <Route path="/shipping-guide" element={<ShippingGuide />} />
           <Route path="/point-guide" element={<PointGuide />} />
           <Route path="/cooking-guide" element={<CookingGuide />} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

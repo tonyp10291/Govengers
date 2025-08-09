@@ -5,6 +5,7 @@ import TopHeader from "../../component/TopHeader";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { ArrowTurnDownRightIcon } from "@heroicons/react/24/solid";
 import "../../css/user/UQnA.css";
 
 const PAGE_SIZE = 5;
@@ -19,6 +20,7 @@ const UQnA = () => {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+
     const fetchInquiries = useCallback(async () => {
         try {
             setLoading(true);
@@ -35,40 +37,103 @@ const UQnA = () => {
             setLoading(false);
         }
     }, [activeCategory, searchKeyword]);
+
     useEffect(() => {
         fetchInquiries();
-        setCurrentPage(1); 
+        setCurrentPage(1);
     }, [fetchInquiries]);
+
     const filteredInquiries = inquiries;
     const totalPages = Math.ceil(filteredInquiries.length / PAGE_SIZE);
     const paginatedInquiries = filteredInquiries.slice(
         (currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE
     );
-    const renderPagination = () => (
-        <div className="pagination">
-            <button 
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} 
-                disabled={currentPage === 1}
-            >
-                &lt;
-            </button>
-            {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                    key={i+1}
-                    className={currentPage === i+1 ? "active" : ""}
-                    onClick={() => setCurrentPage(i + 1)}
-                >
-                    {i + 1}
-                </button>
-            ))}
-            <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-            >
-                &gt;
-            </button>
-        </div>
-    );
+
+    // 페이징
+    const renderPagination = () => {
+        const maxVisiblePages = 5;
+        const currentGroup = Math.floor((currentPage - 1) / maxVisiblePages);
+        const startPage = currentGroup * maxVisiblePages + 1;
+        const endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+
+        const pageNumbers = [];
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return (
+            <div className="pagination-container">
+                <div className="pagination-info">
+                    총 {totalPages}페이지 중 {currentPage}페이지
+                </div>
+                <div className="pagination">
+                    <button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        className="pagination-btn first-last"
+                        title="첫 페이지"
+                    >
+                        ⟪
+                    </button>
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="pagination-btn prev-next"
+                        title="이전 페이지"
+                    >
+                        ‹
+                    </button>
+                    {startPage > 1 && (
+                        <>
+                            <button
+                                onClick={() => setCurrentPage(1)}
+                                className="pagination-btn page-number"
+                            >
+                                1
+                            </button>
+                            <span className="pagination-dots">...</span>
+                        </>
+                    )}
+                    {pageNumbers.map(pageNum => (
+                        <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`pagination-btn page-number ${currentPage === pageNum ? "active" : ""}`}
+                        >
+                            {pageNum}
+                        </button>
+                    ))}
+                    {endPage < totalPages && (
+                        <>
+                            <span className="pagination-dots">...</span>
+                            <button
+                                onClick={() => setCurrentPage(totalPages)}
+                                className="pagination-btn page-number"
+                            >
+                                {totalPages}
+                            </button>
+                        </>
+                    )}
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="pagination-btn prev-next"
+                        title="다음 페이지"
+                    >
+                        ›
+                    </button>
+                    <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className="pagination-btn first-last"
+                        title="마지막 페이지"
+                    >
+                        ⟫
+                    </button>
+                </div>
+            </div>
+        );
+    };
 
     const handleToggle = (inq) => {
         if (inq.isPrivate && (!isLoggedIn || inq.user?.uid !== userId)) {
@@ -125,7 +190,7 @@ const UQnA = () => {
                             onKeyPress={handleKeyPress}
                         />
                         <button className="uqna-search-btn" onClick={handleSearch}>
-                          <FontAwesomeIcon icon={faSearch} />
+                            <FontAwesomeIcon icon={faSearch} />
                         </button>
                     </div>
                     <button className="write-btn" onClick={handleWriteClick}>
@@ -162,13 +227,22 @@ const UQnA = () => {
                                                 {inq.isPrivate && " 🔒"}
                                             </span>
                                             <span>{inq.user?.uid || inq.uid || "-"}</span>
-                                            <span>{inq.createdAt?.slice(0,10) || "-"}</span>
+                                            <span>{inq.createdAt?.slice(0, 10) || "-"}</span>
                                         </div>
                                         {openId === inq.inquiryId && (
-                                            <div className="inquiry-content">
-                                                {(inq.isPrivate && (!isLoggedIn || inq.user?.uid !== userId))
-                                                    ? <p>비밀글은 작성자만 볼 수 있습니다.</p>
-                                                    : <p>{inq.content}</p>}
+                                            <div className="inquiry-detail-toggle">
+                                                <div className="q-box">
+                                                    <span className="q-type">질문</span>
+                                                    <span className="q-content">{inq.content}</span>
+                                                </div>
+                                                <div className="a-box">
+                                                    {/* 아이콘을 답변 박스 왼쪽에 */}
+                                                    <ArrowTurnDownRightIcon width={18} height={18} className="answer-arrow-icon" />
+                                                    <span className="a-type">답변</span>
+                                                    <span className="a-content">
+                                                        {inq.answer ? inq.answer : <span className="notyet">아직 답변이 등록되지 않았습니다.</span>}
+                                                    </span>
+                                                </div>
                                             </div>
                                         )}
                                     </li>
