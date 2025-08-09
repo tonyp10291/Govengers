@@ -1,24 +1,30 @@
 .mypageWrapper {
   min-height: 100vh;
   background: #fff;
-  padding-top: 44px;
+  padding: 90px 24px 0 24px;
+  display: flex;
+  flex-direction: column;
 }
 .mypageContainer {
   width: 100%;
-  max-width: 1500px;
+  max-width: 1200px;
   margin: 0 auto;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 3px 10px rgba(0,0,0,0.05);
   border: 1px solid #ececec;
-  padding: 0 24px 24px 24px;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
 }
-
 .statusBox {
   width: 100%;
   background: #f7f7f7;
   border-radius: 10px 10px 0 0;
-  padding: 32px 24px 24px 24px;
+  padding: 32px 0 24px 0;
   border-bottom: 1px solid #eee;
   margin-bottom: 0;
 }
@@ -27,55 +33,48 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 24px;
+  padding-left: 28px;
 }
 .statusTitle {
-  font-size: 34px;
+  font-size: 20px;
   font-weight: bold;
   color: #111;
 }
 .statusPeriod {
-  font-size: 18px;
+  font-size: 15px;
   color: #aaa;
 }
 .statusContent {
   display: flex;
+  justify-content: center;
   align-items: flex-start;
-  justify-content: flex-start;
-  gap: 56px;
+  gap: 0;
   position: relative;
 }
+.statusContent > div {
+  flex: 1 1 0;
+  text-align: center;
+  border-right: 1px dashed #ddd;
+  padding: 0 0 0 0;
+}
+.statusContent > div:last-child {
+  border-right: none;
+}
 .statusLabel {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: bold;
   color: #222;
   margin-bottom: 8px;
   text-align: center;
 }
 .statusNum {
-  font-size: 34px;
+  font-size: 25px;
   font-weight: 700;
   color: #222;
   text-align: center;
 }
-.statusContent > div:not(:last-child) {
-  flex: 1 1 0;
-  border-right: 1px dashed #ddd;
-  padding-right: 32px;
-}
-.statusContent > div:last-child {
-  min-width: 150px;
-  padding-left: 32px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  color: #444;
-  gap: 6px;
-  border-right: none;
-}
-.statusExtra div {
-  font-size: 17px;
-}
 
+/* 메뉴 영역 */
 .menuGrid {
   display: flex;
   width: 100%;
@@ -97,15 +96,19 @@
   border-right: none;
 }
 .menuBox:hover {
-  background: #f5f5f5;
+  background: #fff;
 }
-.menuBox:hover .menuIcon {
-  stroke: #3b82f6;
+.menuBox:hover .menuLabel {
+  background: #b7dcff;
+  color: #111;
+  border-radius: 4px;
+  padding: 0 4px;
+  transition: background 0.12s;
+  display: inline-block;
 }
-
 .menuIcon {
   display: block;
-  margin: 0 auto 12px auto;
+  margin: 0 auto;
   width: 38px !important;
   height: 38px !important;
   stroke: #666;
@@ -113,17 +116,189 @@
   color: unset !important;
   background: none !important;
 }
-
 .menuLabel {
-  font-size: 26px;
+  font-size: 20px;
   font-weight: bold;
   letter-spacing: 0.5px;
-  margin-top: 8px;
+  margin-top: 0;
   color: #111;
+  transition: color 0.15s, background 0.12s;
+  display: inline-block;
 }
 .menuSub {
-  font-size: 18px;
+  font-size: 20px;
   color: #b0b0b0;
   margin-top: 4px;
   letter-spacing: 0.2px;
-} 
+}
+
+/* 펼치기(아코디언) */
+.menuWideAccordion {
+  width: 100%;
+  background: #fff;
+  border-radius: 0 0 10px 10px;
+  min-height: 320px;
+  max-height: 360px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin: 0;
+  margin-top: 0;
+  box-shadow: 0 7px 24px 0 rgba(0,0,0,0.05);
+  padding: 38px 24px 42px 24px;
+  animation: fadeDown 0.2s;
+  display: flex;
+  align-items: flex-start;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+/* Q&A 전체영역 */
+.boardWrapper {
+  width: 100%;
+  padding: 0 24px 32px 24px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: #fff;
+}
+.boardHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 22px;
+  padding: 0;
+  position: relative;
+}
+.boardTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 2px;
+  text-align: center;
+  flex: 1 1 0;
+}
+.boardTable {
+  width: 100%;
+  border-top: 1.5px solid #e2e2e2;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+/* 핵심! boardRow와 boardInner 분리 */
+.boardRow {
+  display: flex;
+  align-items: center;
+  padding: 22px 0 18px 0;   /* 좌우 패딩 0! */
+  background: #fff;
+  position: relative;
+  transition: background 0.13s;
+}
+.boardRow::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 0;
+  border-bottom: 1.5px solid #e2e2e2;
+  z-index: 1;
+}
+.boardRow:last-child::before {
+  border-bottom: none;
+}
+.boardRow:hover {
+  background: #f5f8fd;
+}
+/* 컨텐츠 패딩은 boardInner만 */
+.boardInner {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+.boardNum {
+  width: 60px;
+  text-align: center;
+  color: #444;
+  font-size: 17px;
+}
+.boardContent {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #232323;
+  font-size: 18px;
+  font-weight: 500;
+}
+.boardQTitle {
+  font-size: 18px;
+  font-weight: 500;
+}
+.boardSecret {
+  font-size: 13px;
+  color: #888;
+  background: #f2f2f2;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin-left: 6px;
+}
+.boardDate {
+  white-space: nowrap;
+  width: 180px;
+  min-width: 100px;
+  text-align: right;
+  color: #888;
+  font-size: 14px;
+  margin-left: 3px;
+  padding-right: 0;
+  word-break: keep-all;
+  line-height: 1.3;
+  box-sizing: border-box;
+}
+
+/* Q&A 펼침(토글) 본문 */
+.qaToggleContent {
+  background: #fafbfc;
+  border-radius: 8px;
+  margin: 0 0 12px 0;
+  padding: 28px 26px 22px 26px;
+  font-size: 17px;
+  color: #1a1a1a;
+  box-shadow: 0 1px 8px 0 rgba(20,20,20,0.05);
+  animation: fadeDown 0.18s;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.qaQuestion, .qaAnswer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.7;
+}
+.qaLabelQ, .qaLabelA {
+  font-size: 15px;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 5px;
+  background: #f5f5f7;
+  color: #666;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+.qaLabelQ { border: 1px solid #bbbbbb; }
+.qaLabelA { border: 1px solid #4278fa; color: #4278fa; background: #f0f6ff; }
+.qaText {
+  flex: 1 1 0;
+}
+.qaQInfo, .qaAInfo {
+  margin-left: 20px;
+  color: #888;
+  font-size: 13px;
+  font-weight: 400;
+  flex-shrink: 0;
+}

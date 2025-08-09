@@ -21,7 +21,7 @@ const PointGuide = () => {
         <div className="guide-text-section">
           <h3>포인트 적립</h3>
           <ul>
-            <li>구매 금액의 1% 포인트 적립</li>
+            <li>구매 금액의 5% 포인트 적립</li>
             <li>리뷰 작성 시 500포인트 추가 적립</li>
             <li>생일 쿠폰으로 2,000포인트 지급</li>
             <li>친구 추천 시 3,000포인트 적립</li>

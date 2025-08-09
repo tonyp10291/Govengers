@@ -9,7 +9,6 @@ const UPdList = () => {
     const [products, setProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isCartModalOpen, setIsCartModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const itemsPerPage = 12;
@@ -65,14 +64,6 @@ const UPdList = () => {
         setSelectedProduct(null);
     };
 
-    const openCartModal = () => {
-        setIsCartModalOpen(true);
-    };
-
-    const closeCartModal = () => {
-        setIsCartModalOpen(false);
-    };
-
     const formatPrice = (price) => {
         return price.toLocaleString('ko-KR');
     };
@@ -107,7 +98,6 @@ const UPdList = () => {
             if (fromModal) {
                 closeModal();
             }
-            openCartModal(); // 장바구니 모달 열기
         } catch (err) {
             if (err.response && err.response.data) {
                 if (err.response.data.includes("이미 리스트에 있는 상품입니다.")) {
@@ -195,6 +185,7 @@ const UPdList = () => {
                     <Link to="/products?cate=돼지고기">돼지고기</Link>
                     <Link to="/products?cate=닭고기">닭고기</Link>
                     <Link to="/products?cate=선물세트">선물세트</Link>
+                    <Link to="/products?cate=닭고기">소스류</Link>
                 </nav>
             </header>
 
@@ -305,10 +296,10 @@ const UPdList = () => {
                         <div className="modal-body">
                             <div className="modal-image">
                                 <img
-                                    src={selectedProduct.image ? `${API_BASE_URL}/api/images/${selectedProduct.image}` : '/img/default-product.jpg'}
+                                    src={selectedProduct.image ? `${API_BASE_URL}/api/images/${selectedProduct.image}` : '/api/images/default-product.jpg'}
                                     alt={selectedProduct.pnm}
                                     onError={(e) => {
-                                        e.target.src = '/img/default-product.jpg';
+                                        e.target.src = '/api/images/default-product.jpg';
                                     }}
                                 />
                             </div>
@@ -361,35 +352,6 @@ const UPdList = () => {
                 </div>
             )}
 
-            {isCartModalOpen && (
-                <div className="modal-overlay" onClick={closeCartModal}>
-                    <div className="cart-modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="cart-modal-header">
-                            <h3>장바구니 담기</h3>
-                            <button className="modal-close" onClick={closeCartModal}>×</button>
-                        </div>
-
-                        <div className="cart-summary">
-                            <p>총 {getTotalQuantity()} 개</p>
-                        </div>
-
-                        <div className="cart-items">
-                        </div>
-
-                        <div className="cart-pagination">
-                            <button>‹</button>
-                            <span>1</span>
-                            <button>›</button>
-                        </div>
-
-                        <div className="cart-modal-buttons">
-                            <button className="btn-direct-purchase">바로 구매하기</button>
-                            <button className="btn-continue-shopping" onClick={() => navigate("/cart")}>장바구니 이동</button>
-                            <button className="btn-shopping-continue" onClick={closeCartModal}>쇼핑계속하기</button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };

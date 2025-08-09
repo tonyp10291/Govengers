@@ -1,4 +1,3 @@
-/* 기본 컨테이너 스타일 */
 .review-admin-wrap {
     padding: 20px;
     background-color: #fff;
@@ -24,7 +23,6 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
   
-  /* 검색 박스 */
   .review-search-box-container {
     margin-bottom: 20px;
   }
@@ -58,7 +56,6 @@
     background-color: #0056b3;
   }
   
-  /* 리뷰 관리 테이블 스타일 */
   .review-admin-table {
     width: 100%;
     border-collapse: collapse;
@@ -100,7 +97,6 @@
     background-color: #e3f2fd;
   }
   
-  /* 리뷰 이미지 */
   .review-image {
     width: 60px;
     height: 60px;
@@ -110,7 +106,6 @@
     margin: 0 auto;
   }
   
-  /* NO와 유저ID 표시 */
   .review-no-only {
     display: flex;
     align-items: center;
@@ -130,7 +125,6 @@
     color: #666;
   }
   
-  /* 이미지 없음 플레이스홀더 */
   .review-no-image-placeholder {
     width: 60px;
     height: 60px;
@@ -154,7 +148,6 @@
     margin-top: 10px;
   }
   
-  /* 리뷰 상품명 */
   .review-product-name {
     max-width: 200px;
     white-space: nowrap;
@@ -163,7 +156,6 @@
     vertical-align: middle;
   }
   
-  /* 상태 배지 */
   .review-status-badge {
     padding: 4px 8px;
     border-radius: 12px;
@@ -183,7 +175,6 @@
     color: #721c24;
   }
   
-  /* 별점 */
   .review-stars {
     color: #ffc107;
     font-size: 16px;
@@ -195,7 +186,6 @@
     font-size: 12px;
   }
   
-  /* 상세 정보 박스 */
   .review-detail-row {
     background-color: #f8f9fa;
   }
@@ -212,7 +202,6 @@
     background-color: transparent;
   }
   
-  /* 좌우 레이아웃 - 전체 너비 스타일 */
   .review-detail-layout {
     display: flex;
     gap: 20px;
@@ -242,7 +231,6 @@
     gap: 30px;
   }
   
-  /* 왼쪽 영역 - 정보 항목들 */
   .review-detail-item {
     display: flex;
     margin-bottom: 20px;
@@ -281,7 +269,6 @@
     display: block;
   }
   
-  /* 리뷰사진 항목 전체 정렬 */
   .review-detail-item:has(.review-detail-image) {
     flex-direction: column;
     align-items: flex-start;
@@ -291,7 +278,6 @@
     margin-bottom: 10px;
   }
   
-  /* 오른쪽 영역 - 리뷰 내용 섹션 */
   .review-content-section,
   .review-response-section {
     background-color: white;
@@ -322,7 +308,6 @@
     font-size: 14px;
   }
   
-  /* 답변 편집 폼 */
   .review-response-edit-form {
     background-color: #f9f9f9;
     padding: 15px;
@@ -348,7 +333,6 @@
     box-shadow: 0 0 0 2px rgba(49, 130, 246, 0.1);
   }
   
-  /* 버튼 스타일 */
   .review-btn {
     padding: 8px 16px;
     border: none;
@@ -401,7 +385,6 @@
     border: 1px solid #e0e0e0;
   }
   
-  /* 페이지네이션 */
   .review-pagination-container {
     display: flex;
     flex-direction: column;
@@ -453,7 +436,6 @@
     color: #6c757d;
   }
   
-  /* 반응형 디자인 */
   @media (max-width: 768px) {
     .review-admin-wrap {
       padding: 10px;

@@ -13,6 +13,7 @@ import UPdPage from './pages/user/UPdPage';
 import UQnA from './pages/user/UQnA';
 import UQAdd from "./pages/user/UQAdd";
 import Wishlist from './pages/user/UPic';
+import Cart from './pages/user/UCart';
 import MQnA from './pages/admin/MQnA';
 import Mypage from './pages/user/Mypage';
 import ShippingGuide from './pages/guides/ShippingGuide';
@@ -22,6 +23,8 @@ import NTWrt from './pages/admin/NTWrt';
 import NTList from "./pages/common/NTList";
 import NTView from './pages/common/NTView';
 import NTEdit from './pages/admin/NTEdit';
+import PaymentPage from './pages/user/PaymentPage';
+import PaymentSuccess from './pages/user/PaymentSuccess';
 import MUser from './pages/admin/MUser';
 import MRv from './pages/admin/MRv';
 import PdAdd from './pages/admin/PdAdd';
@@ -63,7 +66,12 @@ function App() {
           <Route path="/product/:pid" element={<UPdPage />} />
 
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/cart" element={<Cart />} />
           <Route path="/mypage" element={<Mypage />} />
+
+          <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/payment/success" element={<PaymentSuccess />} />
+
           <Route path="/ntlist" element={<NTList />} />
           <Route path="/notice/view/:id" element={<NTView />} />
 
@@ -76,9 +84,11 @@ function App() {
           <Route path="/admin/pdorder" element={<PdOrder />} />
           <Route path="/admin/pdlist" element={<PdList />} />
           <Route path="/admin/PdEdit/:pid" element={<PdEdit />} />
+
           <Route path="/shipping-guide" element={<ShippingGuide />} />
           <Route path="/point-guide" element={<PointGuide />} />
           <Route path="/cooking-guide" element={<CookingGuide />} />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

@@ -5,10 +5,13 @@ import "../css/Home.css";
 import MainSlider from "../component/MainSlider";
 import { Button } from "../util/Buttons";
 
+
 const Home = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
-    
+    const PRODUCTS_PER_ROW = 4;
+    const PRODUCT_LIMIT = 12;
+
     const homeBtnClick = () => {
         navigate("/");
     };
@@ -16,12 +19,24 @@ const Home = () => {
     useEffect(() => {
         axios.get('/api/products')
             .then(response => {
-                setProducts(response.data); 
+                setProducts(response.data);
             })
             .catch(err => {
                 console.error('상품 불러오기 실패:', err);
             });
     }, []);
+
+    const visibleProducts = products.slice(0, PRODUCT_LIMIT);
+
+
+    // 4개씩 상품을 나누는 유틸 함수
+    const chunkProducts = (arr, size) => {
+        const chunks = [];
+        for (let i = 0; i < arr.length; i += size) {
+            chunks.push(arr.slice(i, i + size));
+        }
+        return chunks;
+    };
 
     return (
         <div className="home-container">
@@ -32,8 +47,9 @@ const Home = () => {
                 <nav className="nav-menu">
                     <Link to="/products?cate=소고기">소고기</Link>
                     <Link to="/products?cate=돼지고기">돼지고기</Link>
+                    <Link to="/products?cate=닭고기">닭고기</Link>
                     <Link to="/products?cate=선물세트">선물세트</Link>
-                    <Link to="/review">구매리뷰</Link> 
+                    <Link to="/products?cate=소스류">소스류</Link>
                 </nav>
             </header>
 
@@ -55,20 +71,55 @@ const Home = () => {
                     그리고 그것들 중 또 한번 전문가들의 선별 작업을 거쳐 통과된 고기만이 고객님의 집으로 배달됩니다
                 </p>
             </main>
-            
+
+
+            <section className="product-section">
+                <h2>PRODUCT</h2>
+                <p className="bar">고깃간 베스트 상품</p>
+                <div className="product-list-wrapper">
+                    {chunkProducts(visibleProducts, PRODUCTS_PER_ROW).map((row, rowIdx) => (
+                        <ul className="product-list-row" key={rowIdx}>
+                            {row.map((item) => (
+                                <li
+                                    key={item.pid}
+                                    className="product-item"
+                                    onClick={() => navigate(`/product/${item.pid}`)}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <img
+                                        src={item.image ? `/api/images/${item.image}` : '/api/images/default-product.jpg'}
+                                        alt={item.pnm}
+                                        onError={e => { e.target.src = '/api/images/default-product.jpg'; }}
+                                        className="product-img"
+                                    />
+                                    <h3>{item.pnm}</h3>
+                                    <p className="price">₩{Number(item.price).toLocaleString()}</p>
+                                    <div className="badges">
+                                        {item.soldout === 1 && <span className="badge soldout">SOLD OUT</span>}
+                                        {item.hit === 1 && <span className="badge hit">HIT</span>}
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    ))}
+                </div>
+            </section>
+
+
+
             <div className="info-banner-section">
                 <Link to="/shipping-guide" className="info-banner-card">
                     <img src="/postoffice.png" alt="우체국 배송 안내" />
                     <h3>우체국배송 안내</h3>
                     <p>우체국배송 토요일 휴무지역</p>
                 </Link>
-                
+
                 <Link to="/point-guide" className="info-banner-card">
                     <img src="/point.png" alt="포인트 적립" />
                     <h3>포인트 적립</h3>
                     <p>포인트 적립하세요~</p>
                 </Link>
-                
+
                 <Link to="/cooking-guide" className="info-banner-card">
                     <img src="/recipe.png" alt="고기 굽는 법" />
                     <h3>고기 맛있게 굽는 방법</h3>
@@ -76,24 +127,7 @@ const Home = () => {
                 </Link>
             </div>
 
-            <section className="product-section">
-                <h2>PRODUCT</h2>
-                <p className="bar">고깃간 베스트 상품</p>
-                <ul className="product-list">
-                    {Array.isArray(products) && products.map((item, index) => (
-                        <li key={index} className="product-item">
-                            <img src={item.imageUrl} alt={item.name} />
-                            <h3>{item.name}</h3>
-                            <p className="price">₩{item.price.toLocaleString()}</p>
-                            <div className="badges">
-                                {item.soldOut && <span className="badge soldout">SOLD OUT</span>}
-                                {item.hit && <span className="badge hit">HIT</span>}
-                                {item.new && <span className="badge new">NEW</span>}
-                            </div>
-                        </li>
-                    ))}
-                </ul>
-            </section>
+
         </div>
     );
 };

@@ -15,7 +15,7 @@ import axios from "axios";
      const guest_id = localStorage.getItem("guest_id");
      const [checkedItems, setCheckedItems] = useState([]);
      const [isAllChecked, setIsAllChecked] = useState(false);
-     const API_BASE_URL = "http://localhost:8090";
+     const API_BASE_URL = "http://localhost:8080";
 
      const handleCheckboxChange = (id, isChecked) => {
          let newCheckedItems = [];
@@ -365,7 +365,13 @@ import axios from "axios";
                                              {/* 체크박스 */}
                                              <td className="" style={{textAlign : "center"}}><input type="checkbox" className="itemCheckbox" checked={checkedItems.includes(list.id)} onChange={(e) => handleCheckboxChange(list.id, e.target.checked)}/></td>
                                              {/* 상품 이미지 */}
-                                             <td style={{textAlign : "center"}}><img src={`${API_BASE_URL}/api/images/${list.image}`} alt={list.pnm} /></td>
+                                             <td style={{textAlign : "center"}}><img
+                                            src={list.image ? `${API_BASE_URL}/api/images/${list.image}` : '/api/images/default-product.jpg'}
+                                            alt={list.productName}
+                                            onError={(e) => {
+                                                e.target.src = '/api/images/default-product.jpg'
+                                            }}
+                                            /></td>
                                              {/* 상품정보 */}
                                              <td style={{textAlign : "left"}}>
                                                  <Link to={`/상품상세페이지URL/${list.pid}`}>{list.pnm}</Link>

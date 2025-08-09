@@ -31,15 +31,14 @@ const MRv = () => {
       const response = await fetch(url);
       const data = await response.json();
       
-      console.log("API 응답 데이터:", data); // 디버그용
-      console.log("첫 번째 리뷰 데이터:", data.content?.[0] || data[0]); // 데이터 구조 확인
-      console.log("expandedId 상태:", expandedId); // 확장 상태 확인
+      console.log("API 응답 데이터:", data);
+      console.log("첫 번째 리뷰 데이터:", data.content?.[0] || data[0]);
+      console.log("expandedId 상태:", expandedId);
       
       if (Array.isArray(data.content)) {
         setReviews(data.content);
         setTotalPages(data.totalPages || Math.ceil(data.content.length / 5));
       } else if (Array.isArray(data)) {
-        // 백엔드에서 페이징 처리되지 않은 경우 프론트에서 처리
         const startIndex = page * 5;
         const endIndex = startIndex + 5;
         const paginatedData = data.slice(startIndex, endIndex);
@@ -57,7 +56,7 @@ const MRv = () => {
 
   const handleSearch = () => {
     setPage(0);
-    setExpandedId(null); // 검색 시 펼쳐진 항목 닫기
+    setExpandedId(null);
     fetchReviews();
     if (reviews.length === 0 && searchTerm.trim() !== "") {
       alert("검색 결과가 없습니다!");
@@ -115,7 +114,6 @@ const MRv = () => {
       });
 
       if (response.ok) {
-        // 해당 리뷰의 response 업데이트
         setReviews(prev => prev.map(review => 
           (review.reviewId || review.id) === reviewId 
             ? { ...review, response: responseText }
@@ -134,7 +132,7 @@ const MRv = () => {
   };
 
   const renderPagination = () => {
-    if (totalPages <= 1) return null; // 페이지가 1개 이하면 페이지네이션 숨김
+    if (totalPages <= 1) return null;
     
     const maxVisiblePages = 5;
     let startPage, endPage;
@@ -158,7 +156,7 @@ const MRv = () => {
           <button 
             onClick={() => {
               setPage((prev) => Math.max(prev - 5, 0));
-              setExpandedId(null); // 페이지 변경 시 펼쳐진 항목 닫기
+              setExpandedId(null);
             }}
             disabled={page < 5}
             className="review-pagination-btn review-first-last"
@@ -339,13 +337,11 @@ const MRv = () => {
                         <span className="review-rating-text">({review.rating}/5)</span>
                       </td>
                     </tr>
-                    {/* 상세정보를 좌우 레이아웃으로 변경 */}
                     {expandedId === (review.reviewId || review.id) && (
                       <tr className="review-detail-row">
                         <td colSpan="6">
                           <div className="review-detail-box">
                             <div className="review-detail-layout">
-                              {/* 왼쪽 영역 */}
                               <div className="review-detail-left">
                                 <div className="review-detail-item">
                                   <strong>상품명:</strong> {review.product?.pnm || review.productName}
@@ -389,7 +385,6 @@ const MRv = () => {
                                 </div>
                               </div>
 
-                              {/* 오른쪽 영역 */}
                               <div className="review-detail-right">
                                 <div className="review-content-section">
                                   <div className="review-section-title">리뷰 내용</div>

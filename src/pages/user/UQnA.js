@@ -1,101 +1,264 @@
-import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from 'axios';
-import "../../css/Home.css";
-import MainSlider from "../../component/MainSlider";
-import { Button } from "../../util/Buttons";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import AuthContext from "../../context/AuthContext";
+import TopHeader from "../../component/TopHeader";
+import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { ArrowTurnDownRightIcon } from "@heroicons/react/24/solid";
+import "../../css/user/UQnA.css";
 
-const Home = () => {
+const PAGE_SIZE = 5;
+
+const UQnA = () => {
     const navigate = useNavigate();
-    const [products, setProducts] = useState([]);
-    
-    const homeBtnClick = () => {
-        navigate("/");
-    };
+    const { isLoggedIn, userId } = useContext(AuthContext);
+
+    const [inquiries, setInquiries] = useState([]);
+    const [openId, setOpenId] = useState(null);
+    const [activeCategory, setActiveCategory] = useState("전체");
+    const [searchKeyword, setSearchKeyword] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const fetchInquiries = useCallback(async () => {
+        try {
+            setLoading(true);
+            const params = {};
+            if (activeCategory && activeCategory !== "전체") params.category = activeCategory;
+            if (searchKeyword) params.keyword = searchKeyword;
+
+            const response = await axios.get("/api/uqna", { params });
+            setInquiries(response.data || []);
+        } catch (error) {
+            console.error("목록 불러오기 실패:", error);
+            alert("문의 목록을 불러오는데 실패했습니다.");
+        } finally {
+            setLoading(false);
+        }
+    }, [activeCategory, searchKeyword]);
 
     useEffect(() => {
-        axios.get('/api/products')
-            .then(response => {
-                setProducts(response.data); 
-            })
-            .catch(err => {
-                console.error('상품 불러오기 실패:', err);
-            });
-    }, []);
+        fetchInquiries();
+        setCurrentPage(1);
+    }, [fetchInquiries]);
+
+    const filteredInquiries = inquiries;
+    const totalPages = Math.ceil(filteredInquiries.length / PAGE_SIZE);
+    const paginatedInquiries = filteredInquiries.slice(
+        (currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE
+    );
+
+    // 페이징
+    const renderPagination = () => {
+        const maxVisiblePages = 5;
+        const currentGroup = Math.floor((currentPage - 1) / maxVisiblePages);
+        const startPage = currentGroup * maxVisiblePages + 1;
+        const endPage = Math.min(startPage + maxVisiblePages - 1, totalPages);
+
+        const pageNumbers = [];
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return (
+            <div className="pagination-container">
+                <div className="pagination-info">
+                    총 {totalPages}페이지 중 {currentPage}페이지
+                </div>
+                <div className="pagination">
+                    <button
+                        onClick={() => setCurrentPage(1)}
+                        disabled={currentPage === 1}
+                        className="pagination-btn first-last"
+                        title="첫 페이지"
+                    >
+                        ⟪
+                    </button>
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="pagination-btn prev-next"
+                        title="이전 페이지"
+                    >
+                        ‹
+                    </button>
+                    {startPage > 1 && (
+                        <>
+                            <button
+                                onClick={() => setCurrentPage(1)}
+                                className="pagination-btn page-number"
+                            >
+                                1
+                            </button>
+                            <span className="pagination-dots">...</span>
+                        </>
+                    )}
+                    {pageNumbers.map(pageNum => (
+                        <button
+                            key={pageNum}
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`pagination-btn page-number ${currentPage === pageNum ? "active" : ""}`}
+                        >
+                            {pageNum}
+                        </button>
+                    ))}
+                    {endPage < totalPages && (
+                        <>
+                            <span className="pagination-dots">...</span>
+                            <button
+                                onClick={() => setCurrentPage(totalPages)}
+                                className="pagination-btn page-number"
+                            >
+                                {totalPages}
+                            </button>
+                        </>
+                    )}
+                    <button
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="pagination-btn prev-next"
+                        title="다음 페이지"
+                    >
+                        ›
+                    </button>
+                    <button
+                        onClick={() => setCurrentPage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className="pagination-btn first-last"
+                        title="마지막 페이지"
+                    >
+                        ⟫
+                    </button>
+                </div>
+            </div>
+        );
+    };
+
+    const handleToggle = (inq) => {
+        if (inq.isPrivate && (!isLoggedIn || inq.user?.uid !== userId)) {
+            alert("비밀글은 작성자만 볼 수 있습니다.");
+            return;
+        }
+        setOpenId(openId === inq.inquiryId ? null : inq.inquiryId);
+    };
+
+    const handleWriteClick = () => {
+        if (!isLoggedIn) {
+            alert("로그인이 필요한 기능입니다.");
+            navigate("/login");
+        } else {
+            navigate("/uqadd");
+        }
+    };
+
+    const handleSearch = () => {
+        fetchInquiries();
+    };
+
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
     return (
-        <div className="home-container">
-            <header className="home-header">
-                <div className="logo">
-                    <Button type={"logo"} onClick={homeBtnClick} />
-                </div>
-                <nav className="nav-menu">
-                    <Link to="/products?cate=소고기">소고기</Link>
-                    <Link to="/products?cate=돼지고기">돼지고기</Link>
-                    <Link to="/products?cate=선물세트">선물세트</Link>
-                    <Link to="/review">구매리뷰</Link> 
-                </nav>
-            </header>
+        <div>
+            <TopHeader />
+            <div className="uqna-container">
+                <h2 className="uqna-title">문의하기</h2>
 
-            <main className="home-main">
-                <MainSlider />
-                <p className="home-description">
-                    PREMIUM ONLINE BUTCHER SHOP GOVENGERS
-                </p>
-                <h1 className="home-title">
-                    신선한 고기를<br />
-                    현관 앞까지<br />
-                    온라인 정육점 GOVENGERS
-                </h1>
-                <p className="home-subtitle">
-                    스마트폰으로 바로 주문하고 다음날 받아보는 온라인 정육점 고벤저스
-                    <br />
-                    고벤져스의 제품은 등급과 육질 육량 등을 체크해 매일 경매를 받습니다
-                    <br />
-                    그리고 그것들 중 또 한번 전문가들의 선별 작업을 거쳐 통과된 고기만이 고객님의 집으로 배달됩니다
-                </p>
-            </main>
-            
-            <div className="info-banner-section">
-                <Link to="/shipping-guide" className="info-banner-card">
-                    <img src="/postoffice.png" alt="우체국 배송 안내" />
-                    <h3>우체국배송 안내</h3>
-                    <p>우체국배송 토요일 휴무지역</p>
-                </Link>
-                
-                <Link to="/point-guide" className="info-banner-card">
-                    <img src="/point.png" alt="포인트 적립" />
-                    <h3>포인트 적립</h3>
-                    <p>포인트 적립하세요~</p>
-                </Link>
-                
-                <Link to="/cooking-guide" className="info-banner-card">
-                    <img src="/recipe.png" alt="고기 굽는 법" />
-                    <h3>고기 맛있게 굽는 방법</h3>
-                    <p>고벤저스가 알려주는 고기 굽는법</p>
-                </Link>
-            </div>
-
-            <section className="product-section">
-                <h2>PRODUCT</h2>
-                <p className="bar">고깃간 베스트 상품</p>
-                <ul className="product-list">
-                    {Array.isArray(products) && products.map((item, index) => (
-                        <li key={index} className="product-item">
-                            <img src={item.imageUrl} alt={item.name} />
-                            <h3>{item.name}</h3>
-                            <p className="price">₩{item.price.toLocaleString()}</p>
-                            <div className="badges">
-                                {item.soldOut && <span className="badge soldout">SOLD OUT</span>}
-                                {item.hit && <span className="badge hit">HIT</span>}
-                                {item.new && <span className="badge new">NEW</span>}
-                            </div>
-                        </li>
+                <div className="uqna-tabs">
+                    {["전체", "상품문의", "배송문의", "결제문의", "회원문의", "기타문의"].map((cat) => (
+                        <div
+                            key={cat}
+                            className={`tab ${activeCategory === cat ? "active" : ""}`}
+                            onClick={() => setActiveCategory(cat)}
+                        >
+                            {cat}
+                        </div>
                     ))}
-                </ul>
-            </section>
+                </div>
+
+                <div className="uqna-top-actions">
+                    <div className="search-box">
+                        <input
+                            type="text"
+                            placeholder="검색어를 입력하세요"
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                            onKeyPress={handleKeyPress}
+                        />
+                        <button className="uqna-search-btn" onClick={handleSearch}>
+                            <FontAwesomeIcon icon={faSearch} />
+                        </button>
+                    </div>
+                    <button className="write-btn" onClick={handleWriteClick}>
+                        글쓰기
+                    </button>
+                </div>
+
+                <div className="uqna-header">
+                    <span>No</span>
+                    <span>카테고리</span>
+                    <span>제목</span>
+                    <span>작성자</span>
+                    <span>작성시간</span>
+                </div>
+
+                {loading ? (
+                    <div className="loading">로딩 중...</div>
+                ) : (
+                    <>
+                        <ul className="uqna-list">
+                            {paginatedInquiries.length > 0 ? (
+                                paginatedInquiries.map((inq, index) => (
+                                    <li key={inq.inquiryId || inq.id} className="uqna-item">
+                                        <div
+                                            className={`inquiry-title ${openId === inq.inquiryId ? "open" : ""}`}
+                                            onClick={() => handleToggle(inq)}
+                                        >
+                                            <span>{(currentPage - 1) * PAGE_SIZE + index + 1}</span>
+                                            <span>{inq.category}</span>
+                                            <span>
+                                                {inq.isPrivate && (!isLoggedIn || inq.user?.uid !== userId)
+                                                    ? "비밀글입니다"
+                                                    : inq.title}
+                                                {inq.isPrivate && " 🔒"}
+                                            </span>
+                                            <span>{inq.user?.uid || inq.uid || "-"}</span>
+                                            <span>{inq.createdAt?.slice(0, 10) || "-"}</span>
+                                        </div>
+                                        {openId === inq.inquiryId && (
+                                            <div className="inquiry-detail-toggle">
+                                                <div className="q-box">
+                                                    <span className="q-type">질문</span>
+                                                    <span className="q-content">{inq.content}</span>
+                                                </div>
+                                                <div className="a-box">
+                                                    {/* 아이콘을 답변 박스 왼쪽에 */}
+                                                    <ArrowTurnDownRightIcon width={18} height={18} className="answer-arrow-icon" />
+                                                    <span className="a-type">답변</span>
+                                                    <span className="a-content">
+                                                        {inq.answer ? inq.answer : <span className="notyet">아직 답변이 등록되지 않았습니다.</span>}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </li>
+                                ))
+                            ) : (
+                                <li className="no-results">
+                                    검색 결과가 없습니다.
+                                </li>
+                            )}
+                        </ul>
+                        {totalPages > 1 && renderPagination()}
+                    </>
+                )}
+            </div>
         </div>
     );
 };
 
-export default Home;
+export default UQnA;

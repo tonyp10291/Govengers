@@ -152,7 +152,6 @@ const UCart = () => {
             navigate('/login');
         } else {
             alert("전체 상품을 주문합니다.");
-            // 주문 페이지로 이동하는 로직 추가
         }
     };
 
@@ -165,7 +164,6 @@ const UCart = () => {
         } else {
             alert("선택된 상품을 주문합니다.");
             const selectedItems = cartItems.filter(item => checkedItems.includes(item.cartId));
-            // 주문 페이지로 이동하는 로직 추가
         }
     };
 
@@ -251,7 +249,13 @@ const UCart = () => {
                                 {cartItems.map((item) => (
                                     <tr key={item.cartId}>
                                         <td><input type="checkbox" checked={checkedItems.includes(item.cartId)} onChange={(e) => handleCheckboxChange(item.cartId, e.target.checked)} /></td>
-                                        <td><img src={`${API_BASE_URL}/api/images/${item.imageFilename}`} alt={item.productName} /></td>
+                                        <td><img
+                                            src={item.imageFilename ? `${API_BASE_URL}/api/images/${item.imageFilename}` : '/api/images/default-product.jpg'}
+                                            alt={item.productName}
+                                            onError={(e) => {
+                                                e.target.src = '/api/images/default-product.jpg'
+                                            }}
+                                            /></td>
                                         <td><Link to={`/상품상세페이지URL/${item.productId}`}>{item.productName}</Link></td>
                                         <td>{item.price.toLocaleString()}원</td>
                                         <td>

@@ -132,6 +132,7 @@ function PdList() {
   };
 
   const goEdit = (pid) => navigate(`/admin/PdEdit/${pid}`);
+
   const handleImageError = (e) => {
     console.error('이미지 로드 실패:', e.target.src);
     e.target.style.display = 'none';
@@ -188,10 +189,27 @@ function PdList() {
                       {p.image ? (
                         <div style={{ position: 'relative' }}>
                           <img
-                            src={`http://localhost/api/images/${p.image}`}
+                            src={`/api/images/${p.image}`}
                             alt={p.pnm}
                             className="pdlist-img"
-                            onError={handleImageError}
+                            onError={(e) => {
+                              // 첫 번째 시도 실패 시 다른 경로들 시도
+                              const fallbackUrls = [
+                                `/api/imgs/${p.image}`,
+                                `/gogiImage/${p.image}`,
+                                `/img/${p.image}`
+                              ];
+                              
+                              const currentIndex = parseInt(e.target.dataset.fallbackIndex || '0');
+                              if (currentIndex < fallbackUrls.length) {
+                                e.target.src = fallbackUrls[currentIndex];
+                                e.target.dataset.fallbackIndex = currentIndex + 1;
+                              } else {
+                                // 모든 경로 실패 시
+                                e.target.style.display = 'none';
+                                e.target.nextElementSibling.style.display = 'block';
+                              }
+                            }}
                             onLoad={() => console.log(`이미지 로드 성공: /api/images/${p.image}`)}
                           />
                           <span
