@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import AuthContext from "../../context/AuthContext";
 import axios from 'axios';
 import { Button } from '../../util/Buttons';
 import '../../css/Home.css';
@@ -8,9 +9,12 @@ import '../../css/user/UPdList.css';
 const UPdList = () => {
     const [products, setProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const { isLoggedIn, userRole } = useContext(AuthContext);
+    const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [loading, setLoading] = useState(false);
+    const guest_id = localStorage.getItem('guest_id');
+    const token = localStorage.getItem('token');
     const itemsPerPage = 12;
     const API_BASE_URL = "http://localhost:8090";
     const [searchParams] = useSearchParams();
@@ -23,7 +27,6 @@ const UPdList = () => {
 
     const fetchProducts = useCallback(async () => {
         try {
-            setLoading(true);
             let response;
 
             if (urlCategory && urlCategory !== '전체') {
@@ -38,12 +41,14 @@ const UPdList = () => {
             console.error('상품 조회 실패:', error);
             alert('상품을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
             setProducts([]);
-        } finally {
-            setLoading(false);
         }
     }, [urlCategory]);
 
     useEffect(() => {
+        if (!guest_id) {
+            window.location.reload();
+        }
+
         fetchProducts();
         setCurrentPage(1);
     }, [fetchProducts, urlCategory]);
@@ -74,12 +79,20 @@ const UPdList = () => {
     };
 
     const handleAddToCart = async (product, quantity = 1, fromModal = false) => {
-        const guest_id = localStorage.getItem('guest_id');
-        const token = localStorage.getItem('token');
-
-        if (!guest_id && !token) {
-            alert('로그인 또는 비회원 ID가 필요합니다.');
+        if (!guest_id) {
+            window.location.reload();
+        }
+        if (isAdmin){
+            alert("관리자는 사용 불가능한 기능입니다.");
             return;
+        }
+        if (product.soldout == 1) {
+            const result = window.confirm("품절된 상품은 장바구니 추가가 불가능 합니다.\n찜목록에 추가 하시겠습니까?");
+            if (result){
+                handleAddWishlist(product);
+            } else {
+                return;
+            }
         }
 
         let url = '';
@@ -98,37 +111,22 @@ const UPdList = () => {
             if (fromModal) {
                 closeModal();
             }
-        } catch (err) {
-            if (err.response && err.response.data) {
-                if (err.response.data.includes("이미 리스트에 있는 상품입니다.")) {
-                    console.error(err.response.data);
-                    let result = window.confirm("이미 리스트에 있는 상품입니다.\n장바구니로 이동하시겠습니까?");
-                    if (result) {
-                        navigate("/cart");
-                    }
-                } else if (err.response.data === "사용자 정보가 없습니다.") {
-                    alert("로그인 정보가 유효하지 않습니다. 다시 로그인해주세요.");
-                } else if (err.response.data === "장바구니 추가 실패") {
-                    alert("장바구니 추가에 실패했습니다. 잠시 후 다시 시도해주세요.");
-                } else {
-                    alert("알 수 없는 에러: " + err.response.data);
-                }
-            } else {
-                alert("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+        } catch (err) {         
+                alert("오류가 발생했습니다.");
                 console.error(err);
-            }
         }
     };
 
     const handleAddWishlist = async (product) => {
-        const guest_id = localStorage.getItem('guest_id');
-        const token = localStorage.getItem('token');
-        
-        if (!guest_id && !token) {
-            alert("로그인 또는 비회원 ID가 필요합니다.");
-            return;
+        if (!guest_id) {
+            window.location.reload();
         }
 
+        if (isAdmin){
+            alert("관리자는 사용 불가능한 기능입니다.");
+            return;
+        }
+        
         let url = '';
         let headers = { 'Content-Type': 'application/json' };
 
@@ -160,19 +158,6 @@ const UPdList = () => {
             }
         }
     };
-    
-    const cartItems = []; // 임시 상태
-    const getTotalQuantity = () => {
-        return cartItems.reduce((total, item) => total + item.quantity, 0);
-    };
-
-    if (loading) {
-        return (
-            <div className="updlist-container">
-                <div className="loading">상품을 불러오는 중...</div>
-            </div>
-        );
-    }
 
     return (
         <div className="updlist-container">
@@ -222,14 +207,14 @@ const UPdList = () => {
                                         🛒
                                     </button>
                                     <button
-                                        className="action-btn zoom-btn"
+                                        className="action-btn wish-btn"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            openModal(product);
+                                            handleAddWishlist(product);
                                         }}
-                                        title="확대보기"
+                                        title="찜하기"
                                     >
-                                        🔍
+                                        ❤️
                                     </button>
                                     <button
                                         className="action-btn detail-btn"
@@ -249,9 +234,14 @@ const UPdList = () => {
                                     <p className="product-desc">{product.pdesc}</p>
                                 )}
                                 <p className="product-price">₩{formatPrice(product.price)}</p>
+                                
                                 <div className="product-meta">
-                                    <span className="stock">재고: {product.stock}개</span>
-                                    <span className="hit">HIT</span>
+                                    {product.hit == 1 && 
+                                        <span className="hit">HIT</span>
+                                    }
+                                    {product.soldout == 1 &&
+                                        <span className="soldout">품절</span>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -314,10 +304,6 @@ const UPdList = () => {
                                     {selectedProduct.origin && (
                                         <p><strong>원산지:</strong> {selectedProduct.origin}</p>
                                     )}
-                                    <p><strong>재고:</strong> {selectedProduct.stock}개</p>
-                                    {selectedProduct.hit && (
-                                        <p><strong>조회수:</strong> {selectedProduct.hit}</p>
-                                    )}
                                 </div>
                                 <div className="quantity-selector">
                                     <label>수량:</label>
@@ -325,7 +311,7 @@ const UPdList = () => {
                                         id="modal-quantity"
                                         type="number"
                                         min="1"
-                                        max={selectedProduct.stock}
+                                        max="99"
                                         defaultValue="1"
                                     />
                                 </div>

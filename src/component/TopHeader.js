@@ -7,7 +7,6 @@ function TopHeader() {
   const { isLoggedIn, userRole, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
-
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);

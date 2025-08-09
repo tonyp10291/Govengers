@@ -1,4 +1,3 @@
-/* 장바구니 컨테이너 전체를 감싸는 스타일 */
 .cart_wrap {
     box-sizing: border-box;
     display: flex;
@@ -7,84 +6,76 @@
     min-height: 80vh;
 }
 
-/* 제목 영역 */
 .title_area {
     text-align: center;
     margin-bottom: 80px;
     padding-top: 100px;
 }
 .title_area h2 {
+    opacity: 0;
+    transform: translateX(-100px);
+    animation: titleFadeIn 2s ease forwards;
     font-size: 32px;
     font-weight: bold;
     color: #333;
 }
+@keyframes titleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
 
-/* 장바구니 내용 컨테이너 */
 .cart_contents {
     max-width: 1400px;
-    width: 100%;
 }
 
-/* 테이블 컨테이너 */
 .table_wrap {
     border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
 }
 
-/* 테이블 공통 스타일 */
 .contents_wrap {
     width: 100%;
     table-layout: fixed;
     border-collapse: collapse;
 }
 
-/* 테이블 헤더 (thead) */
 thead {
     height: 50px;
-    border-bottom: 1px solid #ddd;
 }
 thead th {
     font-weight: normal;
     color: #666;
     padding: 10px 0;
 }
-
-/* 테이블 바디 (tbody) */
-tbody {
-    border-bottom: 1px solid #ddd;
-}
 tbody td {
     padding: 20px 0;
-    text-align: center; /* 이미지와 상품 정보 등을 중앙 정렬 */
+    text-align: center;
     vertical-align: middle;
 }
 
-/* 상품 이미지 */
 tbody td img {
     max-width: 80px;
     height: auto;
 }
 
-/* 상품명 링크 */
 tbody td a {
     text-decoration: none;
     color: #333;
 }
 
-/* 수량 입력 필드 */
 tbody td .quantity_input {
-    width: 50px;
+    width: 20px;
     text-align: center;
+    font-size: 17px;
+    border: 0;
 }
 
-/* 삭제 버튼 */
-.delete_btn {
-    border: 1px solid #ddd;
-    background-color: #fff;
-    padding: 5px 10px;
-    cursor: pointer;
-}
-
-/* 전체 선택 및 전체 삭제 버튼 영역 */
 .top_buttons {
     display: flex;
     justify-content: flex-start;
@@ -98,7 +89,6 @@ tbody td .quantity_input {
     cursor: pointer;
 }
 
-/* 합계 정보 영역 */
 .total_price_area {
     margin-top: 20px;
     padding: 20px;
@@ -114,7 +104,6 @@ tbody td .quantity_input {
     color: #007bff;
 }
 
-/* 결제 예정 금액 영역 */
 .payment_summary {
     margin-top: 40px;
     border: 1px solid #ddd;
@@ -138,7 +127,6 @@ tbody td .quantity_input {
     margin-top: 20px;
 }
 
-/* 페이지네이션 */
 .pagination_wrap {
     text-align: center;
     margin-top: 40px;
@@ -156,24 +144,14 @@ tbody td .quantity_input {
     border-color: #007bff;
 }
 
-/* 버튼 스타일 */
 .action_buttons {
     text-align: center;
     margin-top: 40px;
 }
-.action_buttons button {
-    padding: 15px 30px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-}
-.action_buttons .checkout_btn {
-    background-color: #dc3545;
-    color: #fff;
-}
-.action_buttons .select_checkout_btn {
-    background-color: #f8f9fa;
-    border: 1px solid #dc3545;
-    color: #dc3545;
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }

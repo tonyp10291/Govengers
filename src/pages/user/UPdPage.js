@@ -1,10 +1,10 @@
-// src/pages/user/UPdPage.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import AuthContext from "../../context/AuthContext";
+import axios from 'axios';
 import '../../css/user/UPdPage.css';
 
 const API_BASE_URL = "http://localhost:8090";
-
 const categoryLinks = [
   { name: "소고기", to: "/products?cate=소고기" },
   { name: "돼지고기", to: "/products?cate=돼지고기" },
@@ -16,6 +16,10 @@ const categoryLinks = [
 
 const UPdPage = () => {
   const { pid } = useParams();
+  const { isLoggedIn, userRole } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+  const guest_id = localStorage.getItem('guest_id');
+  const token = localStorage.getItem('token');  
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
@@ -23,6 +27,10 @@ const UPdPage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!guest_id) {
+        window.location.reload();
+    }
+
     const fetchProduct = async () => {
       try {
         const res = await fetch(`/api/products/${pid}`);
@@ -40,17 +48,83 @@ const UPdPage = () => {
     setQuantity(q => Math.max(1, q + delta));
   };
 
-  const handleAddToCart = () => {
-    alert('장바구니에 담았습니다 (실제 기능 연동 필요)');
-  };
-
   const handleBuyNow = () => {
     alert('구매하기 기능은 개발중입니다!');
   };
 
-  // 카테고리 메뉴 클릭 → 상품목록 이동
   const handleCategoryClick = (to) => {
     navigate(to);
+  };
+
+  const handleAddToCart = async (product, quantity = 1) => {
+      
+      if (!guest_id) {
+          window.location.reload();
+      }
+      if (isAdmin){
+        alert("관리자는 사용 불가능한 기능입니다.");
+        return;
+      }
+      
+
+      let url = '';
+      let headers = {};
+
+      if (token) {
+          url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
+          headers = { 'Authorization': `Bearer ${token}` };
+      } else {
+          url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
+      }
+
+      try {
+          await axios.post(url, {}, { headers });
+          alert("상품이 장바구니에 담겼습니다.");
+      } catch (err) {         
+          alert("오류가 발생했습니다.");
+          console.error(err);
+      }
+  };
+
+  const handleAddWishlist = async (product) => {
+      
+      if (!guest_id) {
+          window.location.reload();
+      }
+      if (isAdmin){
+        alert("관리자는 사용 불가능한 기능입니다.");
+        return;
+      }
+
+      let url = '';
+      let headers = { 'Content-Type': 'application/json' };
+
+      if (token) {
+          url = `/api/wishlist/user/add?pid=${product.pid}`;
+          headers = { ...headers, 'Authorization': `Bearer ${token}` };
+      } else {
+          url = `/api/wishlist/guest/add?guestId=${guest_id}&pid=${product.pid}`;
+      }
+
+      try {
+          await axios.post(url, {}, { headers });
+          alert('찜하기가 완료되었습니다.');
+      } catch (err) {
+          if (err.response && err.response.data) {
+              if (err.response.data === "wishlist 추가 실패") {
+                  console.error(err.response.data);
+                  let result = window.confirm("이미 리스트에 있는 상품입니다.\n찜목록으로 이동하시겠습니까?");
+                  if (result) {
+                      navigate("/wishlist");
+                  }
+              } else {
+                  alert("알 수 없는 에러: " + err.response.data);
+              }
+          } else {
+              alert("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+              console.error(err);
+          }
+      }
   };
 
   if (error) {
@@ -72,7 +146,6 @@ const UPdPage = () => {
     );
   }
 
-  // 상품정보 세로정렬용
   const infoLabels = [
     { label: '적립금', value: `${Math.floor(product.price * 0.01)}원` },
     { label: '원산지', value: product.origin || '국내' },
@@ -84,7 +157,6 @@ const UPdPage = () => {
 
   return (
     <div className="upd-container">
-      {/* 상단 카테고리 네비 */}
       <div className="upd-categories">
         {categoryLinks.map((c) => (
           <span
@@ -98,27 +170,26 @@ const UPdPage = () => {
         ))}
       </div>
 
-      {/* 메인(이미지 + 정보) */}
       <div className="upd-main-flex">
-        {/* 메인 이미지 */}
         <div className="upd-img-box">
           <img
-            src={product.image ? `${API_BASE_URL}/api/images/${product.image}` : `${API_BASE_URL}/api/images/default-product.jpg`}
+            src={product.image ? `${API_BASE_URL}/api/images/${product.image}` : '/api/images/default-product.jpg'}
             alt={product.pnm}
             className="upd-main-img"
           />
         </div>
-        {/* 상품 정보 */}
         <div className="upd-info-box">
           <div className="upd-title-row">
             <span className="upd-title">{product.pnm}</span>
-            {product.hit > 0 && (
+            {product.hit == 1 && 
               <span className="upd-hit">HIT</span>
-            )}
+            }
+            {product.soldout == 1 &&
+                <span className="upd-soldout">품절</span>
+            }
           </div>
           <div className="upd-price">₩{Number(product.price).toLocaleString()}</div>
 
-          {/* 상품정보 수직 정렬 (map) */}
           <div className="upd-vertical-info-list">
             {infoLabels.map((item) => (
               <div className="upd-vertical-row" key={item.label}>
@@ -128,10 +199,8 @@ const UPdPage = () => {
             ))}
           </div>
 
-          {/* 상품설명 */}
           <div className="upd-desc-box">{product.pdesc}</div>
           
-          {/* 수량/금액 */}
           <div className="upd-order-row">
             <span>{product.pnm}</span>
             <button className="upd-quantity-btn" onClick={() => handleQuantityChange(-1)}>-</button>
@@ -144,18 +213,29 @@ const UPdPage = () => {
           <div className="upd-total-row">
             TOTAL <b style={{ marginLeft: 9 }}>₩{Number(totalPrice).toLocaleString()} <span className="upd-total-cnt">({quantity}개)</span></b>
           </div>
-          {/* 버튼 */}
           <div className="upd-btn-group">
-            <button className="upd-buy-btn" onClick={handleBuyNow}>구매하기</button>
+            {product.soldout == 0 &&
+              <button className="upd-buy-btn" onClick={handleBuyNow}>구매하기</button>
+            }
             <div className="upd-cart-wish-row">
-              <button className="upd-cart-btn" onClick={handleAddToCart}>장바구니</button>
-              <button className="upd-wish-btn">관심상품</button>
+                {product.soldout == 0 &&
+                  <button
+                      className="upd-cart-btn"
+                      onClick={() => {
+                          handleAddToCart(product, quantity);
+                      }}
+                  >
+                      장바구니 담기
+                  </button>
+                }
+                <button className="upd-wish-btn" onClick={() => handleAddWishlist(product)}>
+                  찜하기
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 탭 */}
       <div className="upd-tab-list">
         <div className={`upd-tab-item ${activeTab === 'description' ? 'active' : ''}`} onClick={() => setActiveTab('description')}>상품정보</div>
         <div className={`upd-tab-item ${activeTab === 'purchase' ? 'active' : ''}`} onClick={() => setActiveTab('purchase')}>구매정보</div>

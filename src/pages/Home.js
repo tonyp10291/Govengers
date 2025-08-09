@@ -8,7 +8,7 @@ import { Button } from "../util/Buttons";
 
 const Home = () => {
     const navigate = useNavigate();
-    const [products, setProducts] = useState([]);
+    const [hitProducts, setHitProducts] = useState([]);
     const PRODUCTS_PER_ROW = 4;
     const PRODUCT_LIMIT = 12;
 
@@ -19,17 +19,17 @@ const Home = () => {
     useEffect(() => {
         axios.get('/api/products')
             .then(response => {
-                setProducts(response.data);
+                const allProducts = response.data;
+                const isHitProducts = allProducts.filter(product => product.hit == 1);
+                setHitProducts(isHitProducts);
             })
             .catch(err => {
                 console.error('상품 불러오기 실패:', err);
             });
     }, []);
 
-    const visibleProducts = products.slice(0, PRODUCT_LIMIT);
+    const visibleProducts = hitProducts.slice(0, PRODUCT_LIMIT);
 
-
-    // 4개씩 상품을 나누는 유틸 함수
     const chunkProducts = (arr, size) => {
         const chunks = [];
         for (let i = 0; i < arr.length; i += size) {

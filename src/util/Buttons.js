@@ -22,7 +22,10 @@ export const Button = ({text, type, style, onClick}) => {
         "logo",
         "movePage",
         "submit",
-        "cancel"
+        "cancel",
+        "delete",
+        "checkout",
+        "checkout_selected"
     ].includes(type) ? type : "default";
 
     if (btnType === "submit"){
