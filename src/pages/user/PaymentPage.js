@@ -1,17 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../../css/user/PaymentPage.css';
+import AuthContext from "../../context/AuthContext";
 
 const PaymentPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    
+    const { isLoggedIn, userRole, userId } = useContext(AuthContext);
+    const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+    const guest_id = localStorage.getItem('guest_id');
+    const token = localStorage.getItem('token');
+    const [totalProductPrice, setTotalProductPrice] = useState(0);
+    const [totalShippingCost, setTotalShippingCost] = useState(0);
+    const [finalTotalPrice, setFinalTotalPrice] = useState(0);
+    const API_BASE_URL = "http://localhost:8090";
     const productInfo = location.state;
-
+    const mainProductName = productInfo.length > 0 ? productInfo[0].productName : '';
+    const otherItemsCount = productInfo.length - 1;
+    const productNameSummary = otherItemsCount > 0 
+        ? `${mainProductName} 외 ${otherItemsCount}건` 
+        : mainProductName;
+    
     // 회원/비회원 구분
-    const getUserId = () => localStorage.getItem('userId') || '';
-    const isGuest = !getUserId() || productInfo?.isGuest;
+    // const getUserId = () => localStorage.getItem('userId') || '';
+    // const isGuest = !getUserId() || productInfo?.isGuest;
 
     const [orderData, setOrderData] = useState({
         buyerName: '',
@@ -32,37 +45,36 @@ const PaymentPage = () => {
 
     // 회원인 경우 기존 정보 자동 입력
     useEffect(() => {
+        if (!guest_id) {
+            alert("잘못된 접근입니다.");
+            navigate("/");
+        }
         const loadMemberInfo = async () => {
-            if (!isGuest && getUserId()) {
+            if (token) {
                 try {
-                    const response = await fetch('/api/user/profile', {
+                    const response = await axios.get('/api/me', {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
                     });
-                    
-                    if (response.ok) {
-                        const userInfo = await response.json();
-                        setOrderData(prev => ({
-                            ...prev,
-                            buyerName: userInfo.name || '',
-                            buyerEmail: userInfo.email || '',
-                            buyerPhone: userInfo.phone || '',
-                            receiverName: userInfo.name || '',
-                            zipCode: userInfo.zipCode || '',
-                            address: userInfo.address || '',
-                            detailAddress: userInfo.detailAddress || ''
-                        }));
-                    }
+                    const userInfo = response.data.user;
+                    setOrderData(prev => ({
+                        ...prev,
+                        buyerName: userInfo.unm || '',
+                        buyerEmail: userInfo.umail || '',
+                        buyerPhone: userInfo.utel || '',
+                        receiverName: userInfo.unm || '',
+                        zipCode: userInfo.zipCode || '',
+                        address: userInfo.address || '',
+                        detailAddress: userInfo.detailAddress || ''
+                    }));
                 } catch (error) {
                     console.log('회원 정보 로드 실패:', error);
-                    // 실패해도 계속 진행 (수동 입력)
                 }
             }
         };
-
         loadMemberInfo();
-    }, [isGuest]);
+    }, [guest_id, token, navigate]);
 
     useEffect(() => {
         const script = document.createElement('script');
@@ -91,6 +103,18 @@ const PaymentPage = () => {
             navigate('/products');
         }
     }, [productInfo, navigate]);
+
+    useEffect(() => {
+        calculateTotals();
+    }, []);
+
+    const calculateTotals = () => {
+        const productPrice = productInfo.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const shippingCost = productInfo.length > 0 ? 3500 : 0;
+        setTotalProductPrice(productPrice);
+        setTotalShippingCost(shippingCost);
+        setFinalTotalPrice(productPrice + shippingCost);
+    };
 
     const validateField = (name, value) => {
         let error = '';
@@ -303,19 +327,20 @@ const PaymentPage = () => {
 
         try {
             console.log('=== 결제 요청 시작 ===');
-            console.log('회원 구분:', isGuest ? '비회원' : '회원');
-            
-            const totalPrice = productInfo.amount;
-            const deliveryFee = 3000;
-            const finalTotal = totalPrice + deliveryFee;
+            console.log('회원 구분:', guest_id ? '비회원' : '회원');
             
             const requestData = {
                 // 상품 정보
-                productId: productInfo.pid,
-                productName: productInfo.productName,
-                productPrice: productInfo.price,
-                quantity: productInfo.quantity,
-                amount: finalTotal,
+                productInfo: productInfo.map(item => ({
+                productId: item.pid,
+                productName: item.productName,
+                productPrice: item.price,
+                quantity: item.quantity,
+                amount: item.price * item.quantity
+            })),
+
+                productName: productNameSummary,
+                amount: finalTotalPrice,   
                 
                 // 주문자 정보
                 buyerName: orderData.buyerName,
@@ -335,15 +360,15 @@ const PaymentPage = () => {
                 payMethod: orderData.payMethod,
                 
                 // 회원 구분
-                isGuest: isGuest,
-                userId: isGuest ? null : getUserId()
+                isGuest: !!guest_id,
+                userId: userId
             };
             
             console.log('결제 준비 요청 데이터:', requestData);
-            const prepareResponse = await axios.post('http://localhost:8080/api/payment/prepare', requestData, {
+            const prepareResponse = await axios.post('/api/payment/prepare', requestData, {
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(isGuest ? {} : { 'Authorization': `Bearer ${localStorage.getItem('token')}` })
+                    ...(!!guest_id ? {} : { 'Authorization': `Bearer ${localStorage.getItem('token')}` })
                 },
                 timeout: 10000
             });
@@ -386,19 +411,16 @@ const PaymentPage = () => {
                         console.log('결제 검증 및 DB 저장 성공:', verifyResult);
 
                         if (verifyResult.success) {
-                            // 결제 성공 시 localStorage의 장바구니에서 해당 상품 제거 (선택사항)
-                            if (!isGuest) {
-                                removeFromLocalStorageCart(productInfo.pid);
-                            }
+                            removeFromCart(productInfo.map(item => item.cartId));
 
                             navigate('/payment/success', {
                                 state: {
                                     merchantUid: rsp.merchant_uid,
                                     impUid: rsp.imp_uid,
-                                    amount: finalTotal,
+                                    amount: finalTotalPrice,
                                     productName: productName,
                                     buyerName: buyerName,
-                                    isGuest: isGuest,
+                                    isGuest: !!guest_id,
                                     orderId: verifyResult.orderId, // 주문 ID 추가
                                     productInfo: {
                                         productName: productInfo.productName,
@@ -428,7 +450,7 @@ const PaymentPage = () => {
                         try {
                             console.log('=== 결제 상태 재확인 시작 ===');
                             const statusResponse = await axios.get(
-                                `http://localhost:8080/api/payment/status/${rsp.merchant_uid}`,
+                                `/api/payment/status/${rsp.merchant_uid}`,
                                 { timeout: 10000 }
                             );
                             
@@ -440,10 +462,10 @@ const PaymentPage = () => {
                                     state: {
                                         merchantUid: rsp.merchant_uid,
                                         impUid: rsp.imp_uid,
-                                        amount: finalTotal,
+                                        amount: finalTotalPrice,
                                         productName: productName,
                                         buyerName: buyerName,
-                                        isGuest: isGuest,
+                                        isGuest: !!guest_id,
                                         productInfo: {
                                             productName: productInfo.productName,
                                             productImage: productInfo.productImage,
@@ -497,15 +519,15 @@ const PaymentPage = () => {
             try {
                 console.log(`결제 검증 시도 ${attempt}/${maxRetries}`);
                 
-                const verifyResponse = await axios.post('http://localhost:8080/api/payment/verify', {
+                const verifyResponse = await axios.post('/api/payment/verify', {
                     impUid: impUid,
                     merchantUid: merchantUid,
-                    isGuest: isGuest,
-                    userId: isGuest ? null : getUserId()
+                    isGuest: !!guest_id,
+                    userId: !!guest_id ? null : userId
                 }, {
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(isGuest ? {} : { 'Authorization': `Bearer ${localStorage.getItem('token')}` })
+                        ...(!!guest_id ? {} : { 'Authorization': `Bearer ${localStorage.getItem('token')}` })
                     },
                     timeout: 15000
                 });
@@ -532,14 +554,25 @@ const PaymentPage = () => {
         }
     };
 
-    // localStorage 장바구니에서 해당 상품 제거
-    const removeFromLocalStorageCart = (productId) => {
+    // 장바구니에서 해당 상품 제거
+    const removeFromCart = async (productIds) => {
         try {
-            const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-            const updatedCartItems = cartItems.filter(item => item.pid !== productId);
-            localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-        } catch (error) {
-            console.error('장바구니 정리 실패:', error);
+            let url = '';
+            let headers = {};
+            let data = {};
+            let method = 'post';
+
+            if (token) {
+                headers = { 'Authorization': `Bearer ${token}` };
+                url = `/api/cart/user/delete-checked`;
+                data = productIds;
+            } else {
+                url = `/api/cart/guest/delete-checked?guestId=${guest_id}`;
+                data = productIds;
+            }
+            await axios({ method: method, url: url, data: data, headers: headers });
+        } catch (err) {
+            console.error(err.message || err.response?.data || err);
         }
     };
 
@@ -547,16 +580,12 @@ const PaymentPage = () => {
         return <div>로딩 중...</div>;
     }
 
-    const totalPrice = productInfo.amount;
-    const deliveryFee = 3000;
-    const finalTotal = totalPrice + deliveryFee;
-
     return (
         <div className="payment-page">
             <div className="payment-main-container">
                 <div className="payment-page-header">
                     <h1>주문서 작성/결제</h1>
-                    <p>안전하고 간편한 포트원 다날 결제 {isGuest && '(비회원 주문)'}</p>
+                    <p>안전하고 간편한 포트원 다날 결제 {!token && '(비회원 주문)'}</p>
                 </div>
 
                 <div className="payment-main-content">
@@ -564,26 +593,27 @@ const PaymentPage = () => {
                         <h2 className="payment-section-title">상품명/옵션 <span className="payment-highlight">수량/상품금액/할인금액</span></h2>
                         
                         <div className="payment-product-list">
-                            <div className="payment-product-item">
-                                <img 
-                                    src={productInfo.productImage}
-                                    alt={productInfo.productName}
-                                    className="payment-product-image"
-                                />
-                                <div className="payment-product-details">
-                                    <h4 className="payment-product-name">{productInfo.productName}</h4>
-                                    <p className="payment-product-description">{productInfo.description}</p>
+                            {productInfo.map((item) => (
+                                <div className="payment-product-item">
+                                    <img 
+                                        src={item.imageFilename ? `${API_BASE_URL}/api/images/${item.imageFilename}` : '/api/images/default-product.jpg'}
+                                        alt={item.productName}
+                                        className="payment-product-image"
+                                    />
+                                    <div className="payment-product-details">
+                                        <h4 className="payment-product-name">{item.productName}</h4>
+                                    </div>
+                                    <div className="payment-product-price-info">
+                                        <div className="payment-quantity">수량: {item.quantity || 1}개</div>
+                                        <div className="payment-price">{item.price.toLocaleString()}원</div>
+                                    </div>
                                 </div>
-                                <div className="payment-product-price-info">
-                                    <div className="payment-quantity">수량: {productInfo.quantity || 1}개</div>
-                                    <div className="payment-price">{productInfo.amount.toLocaleString()}원</div>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                     
                     <div className="payment-section buyer-info">
-                        <h2 className="payment-section-title">주문자 정보 {isGuest && '(비회원)'}</h2>
+                        <h2 className="payment-section-title">주문자 정보 {!token && '(비회원)'}</h2>
                         
                         <div className="payment-form-grid">
                             <div className="payment-form-group">
@@ -716,16 +746,16 @@ const PaymentPage = () => {
                         
                         <div className="payment-breakdown">
                             <div className="payment-breakdown-item">
-                                <span>총 [{productInfo.quantity || 1}]개의 상품 금액</span>
-                                <span>{totalPrice.toLocaleString()}원</span>
+                                <span>총 금액</span>
+                                <span>{totalProductPrice.toLocaleString()}원</span>
                             </div>
                             <div className="payment-breakdown-item">
                                 <span>배송비</span>
-                                <span>{deliveryFee.toLocaleString()}원</span>
+                                <span>{totalShippingCost.toLocaleString()}원</span>
                             </div>
                             <div className="payment-breakdown-item">
                                 <span>합계</span>
-                                <span className="payment-total-amount">{finalTotal.toLocaleString()}원</span>
+                                <span className="payment-total-amount">{finalTotalPrice.toLocaleString()}원</span>
                             </div>
                         </div>
                     </div>
@@ -756,7 +786,7 @@ const PaymentPage = () => {
                                 disabled={loading}
                                 className="payment-submit-button"
                             >
-                                {loading ? '결제 처리 중... ⏳' : `${finalTotal.toLocaleString()}원 결제하기 💳`}
+                                {loading ? '결제 처리 중... ⏳' : `${finalTotalPrice.toLocaleString()}원 결제하기 💳`}
                             </button>
                         </div>
                     </div>

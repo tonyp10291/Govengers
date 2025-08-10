@@ -75,7 +75,6 @@ import axios from "axios";
                  } else {
                      const deleteUserWishlistChecked = async () => {
                          try{
-                             //여러개의 요청을 한꺼번에 보냄
                              await Promise.all(checkedItems.map(id => 
                                  axios.post(`/api/wishlist/user/delete?id=${id}`,{}, {
                                      headers: {
@@ -372,12 +371,12 @@ import axios from "axios";
                                             }}
                                             /></td>
                                              <td style={{textAlign : "left"}}>
-                                                 <Link to={`/상품상세페이지URL/${list.pid}`}>{list.pnm}</Link>
+                                                 <Link to={`/product/${list.pid}`}>{list.pnm}</Link>
                                              </td>
-                                             <td>{list.price}원</td>
-                                             <td>{list.point}P</td>
-                                             <td>{list.shippingCost}원</td>
-                                             <td>{list.totalPrice}원</td>
+                                             <td>{list.price.toLocaleString()}원</td>
+                                             <td>{list.point.toLocaleString()}P</td>
+                                             <td>{list.shippingCost.toLocaleString()}원</td>
+                                             <td>{list.totalPrice.toLocaleString()}원</td>
                                              <td>
                                                  <div className="delete_wrap">
                                                      <Button text={"주문하기"} type={"delete"} style={{fontSize : "13px"}} />

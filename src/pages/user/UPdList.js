@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Button } from '../../util/Buttons';
 import '../../css/Home.css';
 import '../../css/user/UPdList.css';
+import { fetchAllCartItems, handleOrderItems } from "../../util/orderAllItems";
 
 const UPdList = () => {
     const [products, setProducts] = useState([]);
@@ -73,9 +74,43 @@ const UPdList = () => {
         return price.toLocaleString('ko-KR');
     };
 
-    const handlePurchase = () => {
-        alert('바로 구매하기 기능이 실행됩니다.');
-        closeModal();
+    const handlePurchase = async (product, quantity) => {
+        if (!guest_id) {
+            window.location.reload();
+        }
+        if (isAdmin){
+            alert("관리자는 사용 불가능한 기능입니다.");
+            return;
+        }
+        if (product.soldout == 1) {
+            const result = window.confirm("품절된 상품은 구매가 불가능 합니다.\n찜목록에 추가 하시겠습니까?");
+            if (result){
+                handleAddWishlist(product);
+                return;
+            } else {
+                return;
+            }
+        }
+
+        let url = '';
+        let headers = {};
+
+        if (token) {
+            url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
+            headers = { 'Authorization': `Bearer ${token}` };
+        } else {
+            url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
+        }
+
+        try {
+            await axios.post(url, {}, { headers });
+        } catch (err) {         
+                alert("오류가 발생했습니다.");
+                console.error(err);
+        }
+
+        const allItems = await fetchAllCartItems(token, guest_id, navigate);
+        handleOrderItems(navigate, allItems);
     };
 
     const handleAddToCart = async (product, quantity = 1, fromModal = false) => {
@@ -90,6 +125,7 @@ const UPdList = () => {
             const result = window.confirm("품절된 상품은 장바구니 추가가 불가능 합니다.\n찜목록에 추가 하시겠습니까?");
             if (result){
                 handleAddWishlist(product);
+                return;
             } else {
                 return;
             }
@@ -316,7 +352,10 @@ const UPdList = () => {
                                     />
                                 </div>
                                 <div className="modal-buttons">
-                                    <button className="btn-purchase" onClick={handlePurchase}>
+                                    <button className="btn-purchase" onClick={() => {
+                                        const quantity = parseInt(document.getElementById('modal-quantity').value);
+                                        handlePurchase(selectedProduct, quantity)
+                                        }}>
                                         바로 구매하기
                                     </button>
                                     <button

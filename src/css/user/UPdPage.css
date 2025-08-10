@@ -600,7 +600,9 @@
     color: #666;
     padding-left: 0;
     margin: 0;
-  .upd-soldout {
+}
+
+.upd-soldout {
     font-size: 1.08rem;
     color: black;
     background: red;
@@ -609,7 +611,6 @@
     letter-spacing: 1px;
     font-weight: 500;
   }
-}
 
 .upd-price {
   font-size: 2rem;
@@ -742,6 +743,22 @@
   font-size: .78rem;
   padding: 2px 8px;
   border-radius: 999px;
+}
+
+.upd-related-soldout {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: red;
+  color: black;
+  font-weight: 700;
+  font-size: .78rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.move-right {
+  left: 50px;
 }
 
 .upd-rel-arrow {

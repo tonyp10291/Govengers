@@ -3,6 +3,7 @@ import { Button } from "../../util/Buttons";
 import { Link, useNavigate } from "react-router-dom";
 import '../../css/user/UCart.css';
 import axios from "axios";
+import { fetchAllCartItems, handleOrderItems } from "../../util/orderAllItems";
 
 const UCart = () => {
     const navigate = useNavigate();
@@ -34,7 +35,7 @@ const UCart = () => {
     const calculateTotals = () => {
         const checkedItemsData = cartItems.filter(item => checkedItems.includes(item.cartId));
         const productPrice = checkedItemsData.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const shippingCost = checkedItemsData.reduce((sum, item) => sum + item.shippingCost, 0);
+        const shippingCost = checkedItemsData.length > 0 ? 3500 : 0;
         setTotalProductPrice(productPrice);
         setTotalShippingCost(shippingCost);
         setFinalTotalPrice(productPrice + shippingCost);
@@ -57,8 +58,8 @@ const UCart = () => {
             setCheckedItems([]);
             setIsAllChecked(false);
         } catch (err) {
-            console.error("로그인 위시리스트를 가져오는 중 오류 발생:", err.response.data);
-            alert('위시리스트를 가져오는 중 오류가 발생했습니다. 메인 페이지로 돌아갑니다.');
+            console.error("유저 장바구니를 가져오는 중 오류 발생:", err.response.data);
+            alert('장바구니를 가져오는 중 오류가 발생했습니다. 메인 페이지로 돌아갑니다.');
             navigate('/');
         } finally {
             setIsLoading(false);
@@ -146,24 +147,23 @@ const UCart = () => {
     };
     const deleteCartAll = () => deleteItems(cartItems.map(item => item.cartId), 'all');
 
-    const orderAllItems = () => {
-        if (!token) {
-            alert("로그인이 필요한 서비스입니다.");
-            navigate('/login');
-        } else {
-            alert("전체 상품을 주문합니다.");
-        }
-    };
+    const orderAllItems = async () => {
+        const allItems = await fetchAllCartItems(token, guest_id, navigate);
+        handleOrderItems(navigate, allItems);
+    }
 
     const orderCheckedItems = () => {
-        if (!token) {
-            alert("로그인이 필요한 서비스입니다.");
-            navigate('/login');
-        } else if (checkedItems.length === 0) {
+        if (checkedItems.length === 0) {
             alert("선택된 상품이 없습니다.");
         } else {
-            alert("선택된 상품을 주문합니다.");
-            const selectedItems = cartItems.filter(item => checkedItems.includes(item.cartId));
+            const result = window.confirm("선택된 상품을 주문합니까?");
+            if(result){
+                const selectedItems = cartItems.filter(item => checkedItems.includes(item.cartId));
+                handleOrderItems(navigate, selectedItems);
+            } else {
+                return;
+            }
+            
         }
     };
 
@@ -282,7 +282,7 @@ const UCart = () => {
                                                 e.target.src = '/api/images/default-product.jpg'
                                             }}
                                             /></td>
-                                        <td><Link to={`/상품상세페이지URL/${item.productId}`}>{item.productName}</Link></td>
+                                        <td><Link to={`/product/${item.productId}`}>{item.productName}</Link></td>
                                         <td>{item.price.toLocaleString()}원</td>
                                         <td>
                                             <div className="quantity_control">

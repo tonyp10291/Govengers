@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import AuthContext from "../../context/AuthContext";
 import axios from 'axios';
 import '../../css/user/UPdPage.css';
+import { fetchAllCartItems, handleOrderItems } from "../../util/orderAllItems";
 
-const API_BASE_URL = "http://localhost:8090";
 const categoryLinks = [
   { name: "소고기", to: "/products?cate=소고기" },
   { name: "돼지고기", to: "/products?cate=돼지고기" },
@@ -15,8 +15,6 @@ const categoryLinks = [
 ];
 
 const API_PREFIX = '/api';
-const getRole = () => localStorage.getItem('role') || 'USER'; // 'ADMIN' | 'USER'
-const getUserId = () => localStorage.getItem('userId') || ''; // 로그인한 아이디
 
 const maskId = (id) => {
   if (!id) return '';
@@ -32,21 +30,12 @@ const MENU_ITEMS = [
   { key: 'qna', label: '상품문의' },
 ];
 
-const categoryLinks = [
-  { name: '소고기', to: '/products?cate=소고기' },
-  { name: '돼지고기', to: '/products?cate=돼지고기' },
-  { name: '닭고기', to: '/products?cate=닭고기' },
-  { name: '선물세트', to: '/products?cate=선물세트' },
-  { name: '소스류', to: '/products?cate=소스류' },
-  { name: '구매리뷰', to: '/products?cate=구매리뷰' },
-];
-
 const VISIBLE_CNT = 5;
 
 function UPdPage() {
   const { pid } = useParams();
   const navigate = useNavigate();
-  const { isLoggedIn, userRole } = useContext(AuthContext);
+  const { isLoggedIn, userRole, userId } = useContext(AuthContext);
   const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
   const guest_id = localStorage.getItem('guest_id');
   const token = localStorage.getItem('token');  
@@ -61,14 +50,13 @@ function UPdPage() {
   const [reviews, setReviews] = useState([]);
   const [qnas, setQnas] = useState([]);
 
-  const [eligible, setEligible] = useState(false); // 구매자 여부
+  const [eligible, setEligible] = useState(false);
   const [revForm, setRevForm] = useState({ content: '', file: null, rating: 5 });
   const [qnaForm, setQnaForm] = useState({ title: '', content: '', secret: false, password: '' });
 
-  // 클릭해서 펼치는 상세(Q&A, 리뷰 코멘트)
   const [openQnaId, setOpenQnaId] = useState(null);
   const [qnaDetail, setQnaDetail] = useState(null);
-  const [adminReply, setAdminReply] = useState({ targetType: '', targetId: null, text: '' }); // targetType: 'review'|'qna'
+  const [adminReply, setAdminReply] = useState({ targetType: '', targetId: null, text: '' });
 
   const sectionRefs = {
     description: useRef(null),
@@ -78,7 +66,6 @@ function UPdPage() {
     qna: useRef(null),
   };
 
-  // 상품 상세 조회 (fetch + 상대경로)
   useEffect(() => {
     if (!guest_id) {
         window.location.reload();
@@ -97,7 +84,6 @@ function UPdPage() {
     fetchProduct();
   }, [pid]);
 
-  // 관련상품 조회 (mainCategory 기준, 현재 상품 제외)
   useEffect(() => {
     const getMainCategory = (p) =>
       p?.mainCategory ?? p?.main_category ?? p?.category ?? null;
@@ -232,9 +218,8 @@ function UPdPage() {
 
   // 리뷰 삭제 (작성자 or 관리자)
   const deleteReview = async (rid, writerId) => {
-    const me = getUserId();
-    const isAdmin = getRole() === 'ADMIN';
-    if (!isAdmin && me !== writerId) return alert('삭제 권한이 없습니다.');
+
+    if (!isAdmin && userId !== writerId) return alert('삭제 권한이 없습니다.');
     if (!window.confirm('이 후기를 삭제하시겠습니까?')) return;
 
     try {
@@ -246,9 +231,8 @@ function UPdPage() {
     }
   };
 
-  // 관리자 리뷰 답글
   const submitAdminReplyToReview = async (rid) => {
-    if (getRole() !== 'ADMIN') return;
+    if (!isAdmin) return;
     const text = adminReply.text?.trim();
     if (!text) return;
     try {
@@ -275,7 +259,7 @@ function UPdPage() {
     if (!title.trim()) return alert('제목을 입력해 주세요.');
     if (!content.trim()) return alert('내용을 입력해 주세요.');
     if (secret && !password.trim()) return alert('비밀글 비밀번호를 입력해 주세요.');
-    if (getRole() === 'ADMIN') return alert('관리자는 상품문의를 작성할 수 없습니다.');
+    if (isAdmin) return alert('관리자는 상품문의를 작성할 수 없습니다.');
 
     try {
       const res = await fetch('/api/qna', {
@@ -296,9 +280,8 @@ function UPdPage() {
 
   // Q&A 삭제 (작성자 or 관리자)
   const deleteQna = async (qid, writerId) => {
-    const me = getUserId();
-    const isAdmin = getRole() === 'ADMIN';
-    if (!isAdmin && me !== writerId) return alert('삭제 권한이 없습니다.');
+
+    if (!isAdmin && userId !== writerId) return alert('삭제 권한이 없습니다.');
     if (!window.confirm('이 문의를 삭제하시겠습니까?')) return;
 
     try {
@@ -312,10 +295,8 @@ function UPdPage() {
 
   // Q&A 클릭 -> 상세 열람 (비밀글 비번검증 포함)
   const openQna = async (q) => {
-    // 본인 또는 관리자면 바로 열람
-    const me = getUserId();
-    const isAdmin = getRole() === 'ADMIN';
-    if (!q.secret || q.writerId === me || isAdmin) {
+
+    if (!q.secret || q.writerId === userId || isAdmin) {
       const r = await fetch(`/api/qna/${q.qid}`);
       const d = await r.json();
       setQnaDetail(d); setOpenQnaId(q.qid);
@@ -337,7 +318,7 @@ function UPdPage() {
 
   // 관리자 Q&A 답글
   const submitAdminReplyToQna = async (qid) => {
-    if (getRole() !== 'ADMIN') return;
+    if (isAdmin) return;
     const text = adminReply.text?.trim();
     if (!text) return;
     try {
@@ -363,109 +344,118 @@ function UPdPage() {
   const handleCategoryClick = (to) => navigate(to);
   const handleQuantityChange = (delta) => setQuantity(q => Math.max(1, q + delta));
 
-  // ✅ 장바구니 담기 함수 수정 (회원/비회원 모두 지원)
-  const handleAddToCart = async () => {
-    if (!product) {
-      alert('상품 정보를 불러오는 중입니다.');
-      return;
-    }
-
-    const userId = getUserId();
-    
-    try {
-      // 회원인 경우: DB에 저장
-      if (userId) {
-        const cartData = {
-          pid: product.pid,
-          quantity: quantity,
-          price: product.price,
-          pnm: product.pnm,
-          imgFilename: product.image
-        };
-
-        const response = await fetch('/api/cart/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // 토큰이 있다면
-          },
-          body: JSON.stringify(cartData)
-        });
-
-        if (!response.ok) {
-          throw new Error('장바구니 추가에 실패했습니다.');
+  const handleAddToCart = async (product, quantity) => {
+    if (!guest_id) {
+            window.location.reload();
         }
-      }
-      
-      // 회원/비회원 모두: localStorage에 저장 (비회원은 localStorage만 사용)
-      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-      const existingItemIndex = cartItems.findIndex(item => item.pid === product.pid);
-      
-      if (existingItemIndex >= 0) {
-        cartItems[existingItemIndex].quantity += quantity;
-        cartItems[existingItemIndex].amount = cartItems[existingItemIndex].price * cartItems[existingItemIndex].quantity;
-      } else {
-        cartItems.push({
-          pid: product.pid,
-          productName: product.pnm,
-          productImage: product.image 
-            ? `${API_PREFIX}/images/${product.image}` 
-            : `${API_PREFIX}/images/default-product.jpg`,
-          description: product.pdesc,
-          quantity: quantity,
-          price: product.price,
-          amount: product.price * quantity
-        });
-      }
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
-      
-      // 장바구니 추가 후 선택지 제공
-      const goToCart = window.confirm('장바구니에 담았습니다. 장바구니로 이동하시겠습니까?');
-      if (goToCart) {
-        navigate('/cart');
-      }
-      
-    } catch (error) {
-      console.error('장바구니 추가 실패:', error);
-      // 회원인데 DB 저장에 실패한 경우에도 localStorage는 저장되도록 처리
-      if (userId) {
-        console.log('DB 저장 실패, localStorage로 대체');
-        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-        const existingItemIndex = cartItems.findIndex(item => item.pid === product.pid);
+        if (isAdmin){
+            alert("관리자는 사용 불가능한 기능입니다.");
+            return;
+        }
+        if (product.soldout == 1) {
+            const result = window.confirm("품절된 상품은 장바구니 추가가 불가능 합니다.\n찜목록에 추가 하시겠습니까?");
+            if (result){
+                handleAddWishlist(product);
+                return;
+            } else {
+                return;
+            }
+        }
         
-        if (existingItemIndex >= 0) {
-          cartItems[existingItemIndex].quantity += quantity;
-          cartItems[existingItemIndex].amount = cartItems[existingItemIndex].price * cartItems[existingItemIndex].quantity;
+        let url = '';
+        let headers = {};
+
+        if (token) {
+            url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
+            headers = { 'Authorization': `Bearer ${token}` };
         } else {
-          cartItems.push({
-            pid: product.pid,
-            productName: product.pnm,
-            productImage: product.image 
-              ? `${API_PREFIX}/images/${product.image}` 
-              : `${API_PREFIX}/images/default-product.jpg`,
-            description: product.pdesc,
-            quantity: quantity,
-            price: product.price,
-            amount: product.price * quantity
-          });
+            url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
         }
-        localStorage.setItem('cartItems', JSON.stringify(cartItems));
-        
-        alert('장바구니에 담았습니다. (임시 저장)');
-      } else {
-        alert('장바구니 추가에 실패했습니다.');
-      }
-    }
-  };
 
-  // ✅ 구매하기 함수 수정 (회원/비회원 모두 지원)
-  const handleBuyNow = () => {
+        try {
+            await axios.post(url, {}, { headers });
+            alert("상품이 장바구니에 담겼습니다.");
+        } catch (err) {         
+            alert("오류가 발생했습니다.");
+            console.error(err);
+        }
+    };
+
+    const handleAddWishlist = async (product) => {
+        if (!guest_id) {
+            window.location.reload();
+        }
+
+        if (isAdmin){
+            alert("관리자는 사용 불가능한 기능입니다.");
+            return;
+        }
+        
+        let url = '';
+        let headers = { 'Content-Type': 'application/json' };
+
+        if (token) {
+            url = `/api/wishlist/user/add?pid=${product.pid}`;
+            headers = { ...headers, 'Authorization': `Bearer ${token}` };
+        } else {
+            url = `/api/wishlist/guest/add?guestId=${guest_id}&pid=${product.pid}`;
+        }
+
+        try {
+            await axios.post(url, {}, { headers });
+            alert('찜하기가 완료되었습니다.');
+        } catch (err) {
+            if (err.response && err.response.data) {
+                if (err.response.data === "wishlist 추가 실패") {
+                    console.error(err.response.data);
+                    let result = window.confirm("이미 리스트에 있는 상품입니다.\n찜목록으로 이동하시겠습니까?");
+                    if (result) {
+                        navigate("/wishlist");
+                    }
+                } else {
+                    alert("알 수 없는 에러: " + err.response.data);
+                }
+            } else {
+                alert("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
+                console.error(err);
+            }
+        }
+    };
+
+  const handleBuyNow = async () => {
+
+    if (!guest_id) {
+            window.location.reload();
+        }
+    if (isAdmin){
+        alert("관리자는 사용 불가능한 기능입니다.");
+        return;
+    }
     if (!product) {
       alert('상품 정보를 불러오는 중입니다.');
       return;
     }
+    
+    let url = '';
+    let headers = {};
 
-    // PaymentPage로 전달할 상품 정보 구성
+    if (token) {
+        url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
+        headers = { 'Authorization': `Bearer ${token}` };
+    } else {
+        url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
+    }
+
+    try {
+        await axios.post(url, {}, { headers });
+    } catch (err) {         
+            alert("오류가 발생했습니다.");
+            console.error(err);
+    }
+
+    const allItems = await fetchAllCartItems(token, guest_id, navigate);
+    handleOrderItems(navigate, allItems);
+
     const productInfo = {
       productName: product.pnm,
       productImage: product.image 
@@ -475,16 +465,11 @@ function UPdPage() {
       quantity: quantity,
       amount: product.price * quantity,
       pid: product.pid,
-      price: product.price, // 단가 추가
-      isGuest: !getUserId() // 비회원 여부 표시
+      shippingCost: product.shippingCost,
+      price: product.price,
     };
 
     console.log('구매하기 - 상품 정보:', productInfo);
-
-    // PaymentPage로 navigate (state로 상품 정보 전달)
-    navigate('/payment', { 
-      state: productInfo 
-    });
   };
 
   const handleRelPrev = () => relIndex > 0 && setRelIndex(i => i - 1);
@@ -493,7 +478,7 @@ function UPdPage() {
   };
 
   const infoLabels = [
-    { label: '적립금', value: product ? `${Math.floor(product.price * 0.01)}원` : '-' },
+    { label: '적립금', value: product ? `${Math.floor(product.price * 0.05)}원` : '-' },
     { label: '원산지', value: product?.origin || '국내' },
     { label: '카테고리', value: product?.mainCategory },
     { label: '유통기한', value: product?.expDate || '-' },
@@ -606,7 +591,14 @@ function UPdPage() {
                       장바구니 담기
                   </button>
                 }
-              <button className="upd-wish-btn">관심상품</button>
+              <button
+                    className="upd-wish-btn"
+                    onClick={() => {
+                        handleAddWishlist(product);
+                    }}    
+              >
+                  관심상품
+              </button>
             </div>
           </div>
         </div>
@@ -677,7 +669,6 @@ function UPdPage() {
         </div>
       </section>
 
-      {/* 관련상품 섹션 */}
       <section ref={sectionRefs.related} className="upd-section">
         <h3>관련상품</h3>
         {relatedProducts.length === 0 ? (
@@ -704,7 +695,13 @@ function UPdPage() {
                   <div
                     key={rp.pid}
                     className="upd-related-card"
-                    onClick={() => navigate(`/product/${rp.pid}`)}
+                    onClick={() => {
+                      navigate(`/product/${rp.pid}`);
+                      window.scroll({ 
+                        top: 0, 
+                        behavior: 'smooth' 
+                      });
+                    }}
                   >
                     <div className="upd-related-thumb">
                       <img
@@ -721,6 +718,7 @@ function UPdPage() {
                       <div className="upd-related-price">₩{Number(rp.price).toLocaleString()}</div>
                     </div>
                     {rp.hit > 0 && <span className="upd-related-hit">HIT</span>}
+                    {rp.soldout > 0 && <span className={`upd-related-soldout ${rp.hit > 0 ? 'move-right' : ''}`}>품절</span>}
                   </div>
                 ))}
               </div>
@@ -785,7 +783,7 @@ function UPdPage() {
                 <b>{maskId(r.writerId)}</b>
                 <span className="rev-rating">★ {r.rating}</span>
                 <span className="rev-date">{new Date(r.createdAt).toLocaleDateString()}</span>
-                {(getRole() === 'ADMIN' || getUserId() === r.writerId) && (
+                {(isAdmin || userId === r.writerId) && (
                   <button className="tiny danger" onClick={() => deleteReview(r.rid, r.writerId)}>삭제</button>
                 )}
               </div>
@@ -796,7 +794,7 @@ function UPdPage() {
                 </div>
               )}
               {/* 관리자 답글 쓰기 */}
-              {getRole() === 'ADMIN' && (
+              {isAdmin && (
                 <div className="admin-reply">
                   <input
                     value={adminReply.targetType === 'review' && adminReply.targetId === r.rid ? adminReply.text : ''}
@@ -827,7 +825,7 @@ function UPdPage() {
         <h3>상품문의</h3>
 
         {/* ⬇️ 관리자면 폼 숨김 */}
-        {getRole() !== 'ADMIN' && (
+        {isAdmin && (
           <form className="qna-form" onSubmit={submitQna}>
             {/* 제목 */}
             <div className="q-row">
@@ -892,7 +890,7 @@ function UPdPage() {
                 </b>
                 <span className="qna-writer">{maskId(q.writerId)}</span>
                 <span className="qna-date">{new Date(q.createdAt).toLocaleDateString()}</span>
-                {(getRole() === 'ADMIN' || getUserId() === q.writerId) && (
+                {(isAdmin || userId === q.writerId) && (
                   <button className="tiny danger" onClick={() => deleteQna(q.qid, q.writerId)}>삭제</button>
                 )}
               </div>
@@ -903,7 +901,7 @@ function UPdPage() {
                   <div className="qna-content">{qnaDetail.content}</div>
 
                   {/* 관리자 답글 입력 */}
-                  {getRole() === 'ADMIN' && (
+                  {isAdmin && (
                     <div className="admin-reply">
                       <input
                         value={adminReply.targetType === 'qna' && adminReply.targetId === q.qid ? adminReply.text : ''}
