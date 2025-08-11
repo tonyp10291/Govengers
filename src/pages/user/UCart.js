@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Button } from "../../util/Buttons";
 import { Link, useNavigate } from "react-router-dom";
 import '../../css/user/UCart.css';
 import axios from "axios";
 import { fetchAllCartItems, handleOrderItems } from "../../util/orderAllItems";
+import AuthContext from "../../context/AuthContext";
 
 const UCart = () => {
     const navigate = useNavigate();
@@ -15,10 +16,18 @@ const UCart = () => {
     const [checkedItems, setCheckedItems] = useState([]);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const API_BASE_URL = "http://localhost:8090";
+    const API_BASE_URL = "http://localhost:8080";
     const [totalProductPrice, setTotalProductPrice] = useState(0);
     const [totalShippingCost, setTotalShippingCost] = useState(0);
     const [finalTotalPrice, setFinalTotalPrice] = useState(0);
+    const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+    const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+
+    useEffect(() => {
+    if(!isAuthLoading && isAdmin){
+        navigate("/alert");
+    }
+}, [isAdmin, navigate, isAuthLoading]);
 
     useEffect(() => {
         if (!guest_id){
@@ -59,8 +68,6 @@ const UCart = () => {
             setIsAllChecked(false);
         } catch (err) {
             console.error("유저 장바구니를 가져오는 중 오류 발생:", err.response.data);
-            alert('장바구니를 가져오는 중 오류가 발생했습니다. 메인 페이지로 돌아갑니다.');
-            navigate('/');
         } finally {
             setIsLoading(false);
         }
@@ -133,7 +140,6 @@ const UCart = () => {
             fetchCartItems();
         } catch (err) {
             console.error(err.message || err.response?.data || err);
-            alert("삭제 중 오류가 발생했습니다: " + (err.message || "알 수 없는 오류"));
         }
     };
 
@@ -258,7 +264,7 @@ const UCart = () => {
                 <div className="table_wrap">
                     {!isLoading && cartItems.length > 0 ? (
                         <table className="contents_wrap">
-                            <thead>
+                            <thead className="tableHead">
                                 <tr>
                                     <th><input type="checkbox" checked={isAllChecked} onChange={(e) => handleAllCheckboxChange(e.target.checked)} /></th>
                                     <th>이미지</th>
@@ -271,7 +277,7 @@ const UCart = () => {
                                     <th>선택</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="tableBody">
                                 {cartItems.map((item) => (
                                     <tr key={item.cartId}>
                                         <td><input type="checkbox" checked={checkedItems.includes(item.cartId)} onChange={(e) => handleCheckboxChange(item.cartId, e.target.checked)} /></td>

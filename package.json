@@ -2,7 +2,7 @@
   "name": "govengers_backup",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://localhost:8090",
+  "proxy": "http://localhost:8080",
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.0.0",
     "@fortawesome/fontawesome-svg-core": "^7.0.0",

@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
+import AuthContext from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../css/admin/PdOrder.css";
 
@@ -13,8 +15,17 @@ const PdOrder = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [statistics, setStatistics] = useState({});
-
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
   const token = localStorage.getItem("token");
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!isAuthLoading && !isAdmin){
+        navigate("/alert");
+    }
+  }, [isAdmin, navigate, isAuthLoading]);
 
   const getStatusText = (status) => {
     const statusMap = {
@@ -88,7 +99,6 @@ const PdOrder = () => {
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("주문 목록 조회 실패:", error);
-      alert("주문 목록을 불러오는데 실패했습니다.");
     }
   }, [page, searchTerm, statusFilter, paymentFilter, startDate, endDate, token]);
 

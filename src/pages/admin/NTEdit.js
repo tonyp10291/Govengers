@@ -9,7 +9,8 @@ import { Button } from "../../util/Buttons";
 export default function NoticeEdit() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { isLoggedIn, token, userRole } = useContext(AuthContext);
+    const { isLoggedIn, userRole, isAuthLoading, token } = useContext(AuthContext);
+    const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
     
     const [notice, setNotice] = useState({
         title: '',
@@ -21,14 +22,10 @@ export default function NoticeEdit() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        console.log('🔍 권한 확인:', { isLoggedIn, userRole, hasToken: !!token });
-        
-        if (!isLoggedIn || userRole !== 'ROLE_ADMIN') {
-            alert('관리자 권한이 필요합니다.');
-            navigate('/login');
-            return;
+        if(!isAuthLoading && !isAdmin){
+            navigate("/alert");
         }
-    }, [isLoggedIn, userRole, token, navigate]);
+      }, [isAdmin, navigate, isAuthLoading]);
 
     useEffect(() => {
         if (!id || !token) return;

@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import AuthContext from "../../context/AuthContext";
 import TopHeader from "../../component/TopHeader";
 import "../../css/admin/NTWrt.css";
 import "../../css/util/Buttons.css";
@@ -7,6 +8,14 @@ import { Button } from "../../util/Buttons";
 
 export default function NTWrt() {
   const navigate = useNavigate();
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+
+  useEffect(() => {
+    if(!isAuthLoading && !isAdmin){
+        navigate("/alert");
+    }
+  }, [isAdmin, navigate, isAuthLoading]);
 
   const [noticeId, setNoticeId] = useState(null);
 

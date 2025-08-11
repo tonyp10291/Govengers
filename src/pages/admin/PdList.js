@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import AuthContext from "../../context/AuthContext";
 import axios from "axios";
 import "../../css/admin/PdList.css";
 import { Button } from "../../util/Buttons";
@@ -22,8 +23,17 @@ function PdList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!isAuthLoading && !isAdmin){
+        navigate("/alert");
+    }
+  }, [isAdmin, navigate, isAuthLoading]);
+
   const btnStyle = {
     fontSize: "0.96rem",
     padding: "5px 14px",

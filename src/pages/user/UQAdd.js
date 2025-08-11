@@ -1,13 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../css/user/UQAdd.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
+import AuthContext from "../../context/AuthContext";
 
 const UQAdd = () => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState("상품문의");
   const [isPrivate, setIsPrivate] = useState(false);
+  const navigate = useNavigate();
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+
+  useEffect(() => {
+          if(!isAuthLoading && isAdmin){
+              navigate("/alert");
+          }
+       }, [isAdmin, navigate, isAuthLoading]);
 
   const handleSubmit = async () => {
     try {

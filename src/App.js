@@ -7,7 +7,6 @@ import Home from './pages/Home';
 import Login from './pages/common/Login';
 import Join from './pages/common/Join';
 import Find from './pages/common/Find';
-import ResetPassword from './pages/common/ResetPassword';
 import UPdList from './pages/user/UPdList';
 import UPdPage from './pages/user/UPdPage';
 import UQnA from './pages/user/UQnA';
@@ -32,6 +31,7 @@ import PdOrder from './pages/admin/PdOrder';
 import PdList from './pages/admin/PdList';
 import PdEdit from './pages/admin/PdEdit';
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { Alert } from './pages/Alert';
 
 function App() {
   useEffect(() => {
@@ -45,12 +45,10 @@ function App() {
       <TopHeader />
       <main>
         <Routes>
-
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/join" element={<Join />} />
             <Route path="/find" element={<Find />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/uqna" element={<UQnA />} />
             <Route path="/uqadd" element={<UQAdd />} /> 
             <Route path="/products" element={
@@ -90,6 +88,7 @@ function App() {
           <Route path="/shipping-guide" element={<ShippingGuide />} />
           <Route path="/point-guide" element={<PointGuide />} />
           <Route path="/cooking-guide" element={<CookingGuide />} />
+          <Route path="/alert" element={<Alert />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

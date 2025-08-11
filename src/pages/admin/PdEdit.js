@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import AuthContext from "../../context/AuthContext";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "../../util/Buttons";
@@ -10,7 +11,6 @@ const USER_STATUS = ["배송완료", "배송중", "배송준비중", "주문완�
 
 function PdEdit() {
   const { pid } = useParams();
-  const navigate = useNavigate();
   const today = new Date().toISOString().split("T")[0];
 
   const [form, setForm] = useState({
@@ -29,6 +29,15 @@ function PdEdit() {
   });
   const [preview, setPreview] = useState(null);
   const fileInputRef = useRef();
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!isAuthLoading && !isAdmin){
+        navigate("/alert");
+    }
+  }, [isAdmin, navigate, isAuthLoading]);
 
   useEffect(() => {
     async function fetchProduct() {
@@ -57,12 +66,10 @@ function PdEdit() {
           setPreview(`/api/images/${data.image}`);
         }
       } catch (err) {
-        alert("상품 정보를 불러오지 못했습니다.\n" + (err.response?.data?.message || ""));
-        navigate(-1);
+        console.log(err.response.data);
       }
     }
     if (pid) fetchProduct();
-    // eslint-disable-next-line
   }, [pid]);
 
 

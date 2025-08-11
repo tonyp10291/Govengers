@@ -5,7 +5,6 @@ import "../css/Home.css";
 import MainSlider from "../component/MainSlider";
 import { Button } from "../util/Buttons";
 
-
 const Home = () => {
     const navigate = useNavigate();
     const [hitProducts, setHitProducts] = useState([]);
@@ -20,7 +19,17 @@ const Home = () => {
         axios.get('/api/products')
             .then(response => {
                 const allProducts = response.data;
-                const isHitProducts = allProducts.filter(product => product.hit == 1);
+                
+                // hit 필드의 다양한 형태에 대응하여 필터링
+                const isHitProducts = allProducts.filter(product => {
+                    // hit 값이 1, '1', true, 'true', 'Y' 중 하나인 경우
+                    return product.hit === 1 || 
+                           product.hit === '1' || 
+                           product.hit === true || 
+                           product.hit === 'true' ||
+                           product.hit === 'Y';
+                });
+                
                 setHitProducts(isHitProducts);
             })
             .catch(err => {
@@ -72,6 +81,25 @@ const Home = () => {
                 </p>
             </main>
 
+            <div className="info-banner-section">
+                <Link to="/shipping-guide" className="info-banner-card">
+                    <img src="/postoffice.png" alt="우체국 배송 안내" />
+                    <h3>우체국배송 안내</h3>
+                    <p>우체국배송 토요일 휴무지역</p>
+                </Link>
+
+                <Link to="/point-guide" className="info-banner-card">
+                    <img src="/point.png" alt="포인트 적립" />
+                    <h3>포인트 적립</h3>
+                    <p>포인트 적립하세요~</p>
+                </Link>
+
+                <Link to="/cooking-guide" className="info-banner-card">
+                    <img src="/recipe.png" alt="고기 굽는 법" />
+                    <h3>고기 맛있게 굽는 방법</h3>
+                    <p>고벤저스가 알려주는 고기 굽는법</p>
+                </Link>
+            </div>
 
             <section className="product-section">
                 <h2>PRODUCT</h2>
@@ -104,30 +132,6 @@ const Home = () => {
                     ))}
                 </div>
             </section>
-
-
-
-            <div className="info-banner-section">
-                <Link to="/shipping-guide" className="info-banner-card">
-                    <img src="/postoffice.png" alt="우체국 배송 안내" />
-                    <h3>우체국배송 안내</h3>
-                    <p>우체국배송 토요일 휴무지역</p>
-                </Link>
-
-                <Link to="/point-guide" className="info-banner-card">
-                    <img src="/point.png" alt="포인트 적립" />
-                    <h3>포인트 적립</h3>
-                    <p>포인트 적립하세요~</p>
-                </Link>
-
-                <Link to="/cooking-guide" className="info-banner-card">
-                    <img src="/recipe.png" alt="고기 굽는 법" />
-                    <h3>고기 맛있게 굽는 방법</h3>
-                    <p>고벤저스가 알려주는 고기 굽는법</p>
-                </Link>
-            </div>
-
-
         </div>
     );
 };

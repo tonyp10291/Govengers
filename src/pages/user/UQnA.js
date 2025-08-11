@@ -12,14 +12,20 @@ const PAGE_SIZE = 5;
 
 const UQnA = () => {
     const navigate = useNavigate();
-    const { isLoggedIn, userId } = useContext(AuthContext);
-
+    const { isLoggedIn, userId, userRole, isAuthLoading } = useContext(AuthContext);
+    const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
     const [inquiries, setInquiries] = useState([]);
     const [openId, setOpenId] = useState(null);
     const [activeCategory, setActiveCategory] = useState("전체");
     const [searchKeyword, setSearchKeyword] = useState("");
     const [loading, setLoading] = useState(false);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1); 
+     
+     useEffect(() => {
+        if(!isAuthLoading && isAdmin){
+            navigate("/alert");
+        }
+     }, [isAdmin, navigate, isAuthLoading]);
 
     const fetchInquiries = useCallback(async () => {
         try {

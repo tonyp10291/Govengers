@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import AuthContext from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../css/admin/MQnA.css";
 
@@ -12,7 +14,16 @@ const MQnA = () => {
   const [answerStatusFilter, setAnswerStatusFilter] = useState("");
   const [privacyFilter, setPrivacyFilter] = useState("");
   const [replyText, setReplyText] = useState("");
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+        if(!isAuthLoading && !isAdmin){
+            navigate("/alert");
+        }
+      }, [isAdmin, navigate, isAuthLoading]);
 
   const getCategoryText = (category) => {
     const categoryMap = {

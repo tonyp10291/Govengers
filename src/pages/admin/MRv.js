@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import AuthContext from "../../context/AuthContext";
 import "../../css/admin/MRv.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
@@ -12,6 +14,16 @@ const MRv = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [editingResponse, setEditingResponse] = useState(null);
   const [responseText, setResponseText] = useState("");
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+        if(!isAuthLoading && !isAdmin){
+            navigate("/alert");
+        }
+      }, [isAdmin, navigate, isAuthLoading]);
 
   useEffect(() => {
     const handleResize = () => {

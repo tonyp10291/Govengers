@@ -14,17 +14,13 @@ const PaymentPage = () => {
     const [totalProductPrice, setTotalProductPrice] = useState(0);
     const [totalShippingCost, setTotalShippingCost] = useState(0);
     const [finalTotalPrice, setFinalTotalPrice] = useState(0);
-    const API_BASE_URL = "http://localhost:8090";
+    const API_BASE_URL = "http://localhost:8080";
     const productInfo = location.state;
     const mainProductName = productInfo.length > 0 ? productInfo[0].productName : '';
     const otherItemsCount = productInfo.length - 1;
     const productNameSummary = otherItemsCount > 0 
         ? `${mainProductName} 외 ${otherItemsCount}건` 
         : mainProductName;
-    
-    // 회원/비회원 구분
-    // const getUserId = () => localStorage.getItem('userId') || '';
-    // const isGuest = !getUserId() || productInfo?.isGuest;
 
     const [orderData, setOrderData] = useState({
         buyerName: '',
@@ -330,7 +326,7 @@ const PaymentPage = () => {
             console.log('회원 구분:', guest_id ? '비회원' : '회원');
             
             const requestData = {
-                // 상품 정보
+                // 상품 개별 정보
                 productInfo: productInfo.map(item => ({
                 productId: item.pid,
                 productName: item.productName,
@@ -338,7 +334,6 @@ const PaymentPage = () => {
                 quantity: item.quantity,
                 amount: item.price * item.quantity
             })),
-
                 productName: productNameSummary,
                 amount: finalTotalPrice,   
                 
@@ -355,12 +350,13 @@ const PaymentPage = () => {
                 addressExtra: orderData.addressExtra,
                 deliveryMethod: orderData.deliveryMethod,
                 deliveryMemo: orderData.deliveryMemo,
+                shippingCost: totalShippingCost,
                 
                 // 결제 정보
                 payMethod: orderData.payMethod,
                 
                 // 회원 구분
-                isGuest: !!guest_id,
+                guest_id: guest_id,
                 userId: userId
             };
             
@@ -420,7 +416,7 @@ const PaymentPage = () => {
                                     amount: finalTotalPrice,
                                     productName: productName,
                                     buyerName: buyerName,
-                                    isGuest: !!guest_id,
+                                    guest_id: guest_id,
                                     orderId: verifyResult.orderId, // 주문 ID 추가
                                     productInfo: {
                                         productName: productInfo.productName,
@@ -465,7 +461,7 @@ const PaymentPage = () => {
                                         amount: finalTotalPrice,
                                         productName: productName,
                                         buyerName: buyerName,
-                                        isGuest: !!guest_id,
+                                        guest_id: guest_id,
                                         productInfo: {
                                             productName: productInfo.productName,
                                             productImage: productInfo.productImage,
@@ -522,7 +518,7 @@ const PaymentPage = () => {
                 const verifyResponse = await axios.post('/api/payment/verify', {
                     impUid: impUid,
                     merchantUid: merchantUid,
-                    isGuest: !!guest_id,
+                    guest_id: guest_id,
                     userId: !!guest_id ? null : userId
                 }, {
                     headers: {
@@ -593,22 +589,21 @@ const PaymentPage = () => {
                         <h2 className="payment-section-title">상품명/옵션 <span className="payment-highlight">수량/상품금액/할인금액</span></h2>
                         
                         <div className="payment-product-list">
-                            {productInfo.map((item) => (
-                                <div className="payment-product-item">
-                                    <img 
-                                        src={item.imageFilename ? `${API_BASE_URL}/api/images/${item.imageFilename}` : '/api/images/default-product.jpg'}
-                                        alt={item.productName}
-                                        className="payment-product-image"
-                                    />
-                                    <div className="payment-product-details">
-                                        <h4 className="payment-product-name">{item.productName}</h4>
-                                    </div>
-                                    <div className="payment-product-price-info">
-                                        <div className="payment-quantity">수량: {item.quantity || 1}개</div>
-                                        <div className="payment-price">{item.price.toLocaleString()}원</div>
-                                    </div>
-                                </div>
-                            ))}
+                          {productInfo.map((item, index) => (
+                          <div key={item.pid || item.cartId || index} className="payment-product-item">
+                        <img src={item.imageFilename ? `${API_BASE_URL}/api/images/${item.imageFilename}` : '/api/images/default-product.jpg'}
+            alt={item.productName}
+            className="payment-product-image"
+        />
+        <div className="payment-product-details">
+            <h4 className="payment-product-name">{item.productName}</h4>
+        </div>
+        <div className="payment-product-price-info">
+            <div className="payment-quantity">수량: {item.quantity || 1}개</div>
+            <div className="payment-price">{item.price.toLocaleString()}원</div>
+        </div>
+    </div>
+))}
                         </div>
                     </div>
                     

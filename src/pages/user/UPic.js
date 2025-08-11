@@ -1,9 +1,11 @@
 import React from "react";
 import { Button } from "../../util/Buttons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import '../../css/user/UPic.css';
 import axios from "axios";
+import AuthContext from "../../context/AuthContext";
+import { fetchAllCartItems, handleOrderItems } from "../../util/orderAllItems";
 
  const Wishlist = () => {
 
@@ -16,6 +18,14 @@ import axios from "axios";
      const [checkedItems, setCheckedItems] = useState([]);
      const [isAllChecked, setIsAllChecked] = useState(false);
      const API_BASE_URL = "http://localhost:8080";
+     const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+     const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+     
+     useEffect(() => {
+        if(!isAuthLoading && isAdmin){
+            navigate("/alert");
+        }
+    }, [isAdmin, navigate, isAuthLoading]);
 
      const handleCheckboxChange = (id, isChecked) => {
          let newCheckedItems = [];
@@ -90,7 +100,6 @@ import axios from "axios";
                                  console.error(err.response.data);
                              }else{
                                  console.error(err.response.data);
-                                 alert("알수없는 에러");
                              }
                          }
                      }
@@ -119,7 +128,6 @@ import axios from "axios";
                                  console.error(err.response.data);
                              }else{
                                  console.error(err.response.data);
-                                 alert("알수없는 에러");
                              }
                          }
                      }
@@ -140,7 +148,6 @@ import axios from "axios";
                                  console.error(err.response.data);
                              }else{
                                  console.error(err.response.data);
-                                 alert("알수없는 에러");
                              }
                          }
                      }
@@ -169,7 +176,6 @@ import axios from "axios";
                                  console.error(err.response.data);
                              }else{
                                  console.error(err.response.data);
-                                 alert("알수없는 에러");
                              }
                          }
                      }
@@ -190,7 +196,6 @@ import axios from "axios";
                                  console.error(err.response.data);
                              }else{
                                  console.error(err.response.data);
-                                 alert("알수없는 에러");
                              }
                          }
                      }
@@ -242,14 +247,77 @@ import axios from "axios";
                          setTotalPages(response.data.totalPages);
                      } catch (err) {
                          console.error("로그인 위시리스트를 가져오는 중 오류 발생:", err.response.data);
-                         alert('위시리스트를 가져오는 중 오류가 발생했습니다. 메인 페이지로 돌아갑니다.');
-                         navigate('/');
                      }
                  };
                  fetchUserWishlist();
              }
          }
      }, [page, token, guest_id]);
+
+     const handleAddToCart = async (product, quantity = 1, fromModal = false) => {
+        if (!guest_id) {
+            window.location.reload();
+        }
+        if (isAdmin){
+            return;
+        }
+        if (product.soldout == 1) {
+            alert("품절된 상품은 장바구니 추가가 불가능 합니다.");
+            return;
+        }
+
+        let url = '';
+        let headers = {};
+
+        if (token) {
+            url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
+            headers = { 'Authorization': `Bearer ${token}` };
+        } else {
+            url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
+        }
+
+        try {
+            await axios.post(url, {}, { headers });
+            alert("상품이 장바구니에 담겼습니다.");
+        } catch (err) {         
+                alert("오류가 발생했습니다.");
+                console.error(err);
+        }
+    };
+
+    const handlePurchase = async (product, quantity) => {
+        if (!guest_id) {
+            window.location.reload();
+        }
+        if (isAdmin){
+            alert("관리자는 사용 불가능한 기능입니다.");
+            return;
+        }
+        if (product.soldout == 1) {
+            alert("품절된 상품은 구매가 불가능 합니다.");
+            return;
+        }
+
+        let url = '';
+        let headers = {};
+
+        if (token) {
+            url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
+            headers = { 'Authorization': `Bearer ${token}` };
+        } else {
+            url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
+        }
+
+        try {
+            await axios.post(url, {}, { headers });
+        } catch (err) {         
+                alert("오류가 발생했습니다.");
+                console.error(err);
+        }
+
+        const allItems = await fetchAllCartItems(token, guest_id, navigate);
+        handleOrderItems(navigate, allItems);
+    };
 
      const renderPagination = () => {
          const maxVisiblePages = 5;
@@ -330,7 +398,7 @@ import axios from "axios";
          <div className="wishList_wrap"> 
              <div className="wishList_contents">
                  <div className="title_area">
-                     <h2>WISH LIST</h2>
+                     <h2>WISHLIST</h2>
                  </div>                 
                  {wishlist && wishlist.length > 0 && <Button text={"✖️선택 삭제"} type={"delete"} style={{fontSize : "13px"}} onClick={(e) => deleteWishlistChecked()} />}
                  {wishlist && wishlist.length > 0 && <Button text={"✖️전체 삭제"} type={"delete"} style={{fontSize : "13px"}} onClick={() => deleteWishlistAll()} />}
@@ -347,7 +415,7 @@ import axios from "axios";
                                      <col style={{width : "40px"}} />
                                      <col style={{width : "40px"}} />
                                  </colgroup>
-                                 <thead>
+                                 <thead className="tableHead">
                                      <tr>
                                          <th scope="col"><input type="checkbox" className="allCheckbox" checked={isAllChecked} onChange={(e) => handleAllCheckboxChange(e.target.checked)}/></th>
                                          <th scope="col">이미지</th>
@@ -359,7 +427,7 @@ import axios from "axios";
                                          <th scope="col">선택</th>
                                      </tr>
                                  </thead>
-                                 <tbody>
+                                 <tbody className="tableBody">
                                      {wishlist.map((list) => (
                                          <tr key={list.id}>
                                              <td className="" style={{textAlign : "center"}}><input type="checkbox" className="itemCheckbox" checked={checkedItems.includes(list.id)} onChange={(e) => handleCheckboxChange(list.id, e.target.checked)}/></td>
@@ -370,7 +438,7 @@ import axios from "axios";
                                                 e.target.src = '/api/images/default-product.jpg'
                                             }}
                                             /></td>
-                                             <td style={{textAlign : "left"}}>
+                                             <td>
                                                  <Link to={`/product/${list.pid}`}>{list.pnm}</Link>
                                              </td>
                                              <td>{list.price.toLocaleString()}원</td>
@@ -379,10 +447,13 @@ import axios from "axios";
                                              <td>{list.totalPrice.toLocaleString()}원</td>
                                              <td>
                                                  <div className="delete_wrap">
-                                                     <Button text={"주문하기"} type={"delete"} style={{fontSize : "13px"}} />
+                                                     <Button text={"주문하기"} type={"delete"} style={{fontSize : "13px"}} onClick={() => {
+                                                        const quantity = 1;
+                                                        handlePurchase(list, quantity)
+                                                        }}/>
                                                  </div>
                                                  <div className="delete_wrap">
-                                                     <Button text={"장바구니 담기"} type={"delete"} style={{fontSize : "13px"}} />
+                                                     <Button text={"장바구니 담기"} type={"delete"} style={{fontSize : "13px"}} onClick={() => handleAddToCart(list)} />
                                                  </div>
                                                  <div className="delete_wrap">
                                                      <Button text={"✖️삭제"} type={"delete"} style={{fontSize : "13px"}} onClick={() => deleteWishlist(list.id)} />

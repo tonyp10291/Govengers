@@ -17,7 +17,7 @@ const UPdList = () => {
     const guest_id = localStorage.getItem('guest_id');
     const token = localStorage.getItem('token');
     const itemsPerPage = 12;
-    const API_BASE_URL = "http://localhost:8090";
+    const API_BASE_URL = "http://localhost:8080";
     const [searchParams] = useSearchParams();
     const urlCategory = searchParams.get('cate') || '전체';
     const navigate = useNavigate();
@@ -206,7 +206,7 @@ const UPdList = () => {
                     <Link to="/products?cate=돼지고기">돼지고기</Link>
                     <Link to="/products?cate=닭고기">닭고기</Link>
                     <Link to="/products?cate=선물세트">선물세트</Link>
-                    <Link to="/products?cate=닭고기">소스류</Link>
+                    <Link to="/products?cate=소스류">소스류</Link>
                 </nav>
             </header>
 

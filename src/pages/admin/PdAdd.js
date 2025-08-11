@@ -1,11 +1,23 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useContext, useEffect } from "react";
+import AuthContext from "../../context/AuthContext";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { Button } from "../../util/Buttons";
 import "../../css/admin/PdAdd.css";
 
 const MAIN_CATEGORY = ["소고기", "돼지고기", "닭고기", "선물세트", "소스류" ];
 
 function PdAdd() {
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!isAuthLoading && !isAdmin){
+        navigate("/alert");
+    }
+  }, [isAdmin, navigate, isAuthLoading]);
+
   const today = new Date().toISOString().split("T")[0];
   const [form, setForm] = useState({
     pnm: "",

@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import AuthContext from "../../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../css/admin/MUser.css";
 
@@ -8,8 +10,16 @@ const MUser = () => {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const navigate = useNavigate();
+  const { isLoggedIn, userRole, isAuthLoading } = useContext(AuthContext);
+  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
   const token = localStorage.getItem("token");
+
+  useEffect(() => {
+      if(!isAuthLoading && !isAdmin){
+          navigate("/alert");
+      }
+    }, [isAdmin, navigate, isAuthLoading]);
 
   const handleSearch = () => {
     axios.get(`/api/admin/users?page=0&keyword=${searchTerm}`, {
