@@ -4,10 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import '../../css/user/UCart.css';
 import axios from "axios";
 import { fetchAllCartItems, handleOrderItems } from "../../util/orderAllItems";
-<<<<<<< HEAD
 import AuthContext from "../../context/AuthContext";
-=======
->>>>>>> origin/JongYun_merge
 
 const UCart = () => {
     const navigate = useNavigate();
@@ -27,15 +24,12 @@ const UCart = () => {
     const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
 
     useEffect(() => {
-<<<<<<< HEAD
     if(!isAuthLoading && isAdmin){
         navigate("/alert");
     }
 }, [isAdmin, navigate, isAuthLoading]);
 
     useEffect(() => {
-=======
->>>>>>> origin/JongYun_merge
         if (!guest_id){
             window.location.reload();
         } else {
@@ -74,11 +68,6 @@ const UCart = () => {
             setIsAllChecked(false);
         } catch (err) {
             console.error("유저 장바구니를 가져오는 중 오류 발생:", err.response.data);
-<<<<<<< HEAD
-=======
-            alert('장바구니를 가져오는 중 오류가 발생했습니다. 메인 페이지로 돌아갑니다.');
-            navigate('/');
->>>>>>> origin/JongYun_merge
         } finally {
             setIsLoading(false);
         }
