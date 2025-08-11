@@ -130,6 +130,13 @@
     color: #e53e3e;
 }
 
+/* 단가 표시 스타일 추가 */
+.payment-unit-price {
+    font-size: 0.85rem;
+    color: #718096;
+    margin-top: 2px;
+}
+
 .payment-form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -231,21 +238,54 @@
 
 .payment-delivery-notice {
     margin-top: 20px;
-    padding: 15px;
+    padding: 20px;
     background: #f0f4ff;
-    border-radius: 8px;
+    border-radius: 12px;
     border-left: 4px solid #667eea;
+    border: 1px solid #e2e8f0;
 }
 
+/* 배송 요청사항 입력 영역 개선 */
 .payment-notice-item {
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 15px;
 }
 
 .payment-notice-label {
     font-weight: 600;
-    color: #4a5568;
+    color: #2d3748;
+    font-size: 1rem;
+    margin-bottom: 5px;
+    display: block;
+}
+
+/* 배송 요청사항 입력박스를 넓고 높게 설정 */
+.payment-notice-item .payment-form-input {
+    width: 100% !important;
+    min-width: 100%;
+    max-width: 100%;
+    padding: 15px 18px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    min-height: 50px; /* 높이 증가 */
+    line-height: 1.5;
+    resize: vertical; /* 세로 크기 조절 가능 */
+    transition: all 0.2s ease;
+}
+
+.payment-notice-item .payment-form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.payment-notice-item .payment-form-input::placeholder {
+    color: #a0aec0;
+    opacity: 1;
 }
 
 .payment-notice-text {
@@ -256,6 +296,12 @@
     font-size: 0.9rem;
     color: #e53e3e;
     font-weight: 500;
+    background-color: #fef5e7;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border-left: 3px solid #f6ad55;
+    margin-top: 10px;
+    line-height: 1.5;
 }
 
 .payment-breakdown {
@@ -401,5 +447,16 @@
     .payment-submit-button {
         width: 100%;
         padding: 14px 24px;
+    }
+
+    /* 모바일에서 배송 요청사항 입력박스 조정 */
+    .payment-notice-item .payment-form-input {
+        padding: 12px 15px;
+        font-size: 14px;
+        min-height: 45px;
+    }
+
+    .payment-delivery-notice {
+        padding: 15px;
     }
 }

@@ -196,6 +196,24 @@
   transform: scale(0.9);
 }
 
+.recommend-tag {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 4px 8px;
+    margin: 0 4px;
+    border-radius: 12px;
+    color: #666;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.recommend-tag:hover {
+    background-color: #f0f0f0;
+    border-color: #999;
+    color: #333;
+}
+
 @media screen and (max-width: 768px) {
   .header-top {
     padding: 10px 15px;

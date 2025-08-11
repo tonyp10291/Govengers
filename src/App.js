@@ -27,7 +27,7 @@ import PaymentSuccess from './pages/user/PaymentSuccess';
 import MUser from './pages/admin/MUser';
 import MRv from './pages/admin/MRv';
 import PdAdd from './pages/admin/PdAdd';
-import PdOrder from './pages/admin/PdOrder';
+import PdOrd from './pages/admin/PdOrd';
 import PdList from './pages/admin/PdList';
 import PdEdit from './pages/admin/PdEdit';
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -81,7 +81,7 @@ function App() {
           <Route path="/admin/muser" element={<MUser />} />
           <Route path="/admin/mrv" element={<MRv />} />
           <Route path="/admin/pdAdd" element={<PdAdd />} />
-          <Route path="/admin/pdorder" element={<PdOrder />} />
+          <Route path="/admin/pdord" element={<PdOrd />} />
           <Route path="/admin/pdlist" element={<PdList />} />
           <Route path="/admin/PdEdit/:pid" element={<PdEdit />} />
 
