@@ -3,14 +3,14 @@
     margin-bottom: 80px;
     padding-top: 100px;
 }
-td{
+.tableBody td{
     padding : 20px 0 20px 0
 }
-thead{
+.tableHead{
     height: 50px;
     border-bottom: 1px solid #ddd;
 }
-tbody{
+.tableBody{
     text-align: right;
 }
 
@@ -34,4 +34,3 @@ tbody{
 .wishList_contents{
     max-width: 1400px;
 }
-

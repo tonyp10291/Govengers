@@ -28,7 +28,7 @@ import PaymentSuccess from './pages/user/PaymentSuccess';
 import MUser from './pages/admin/MUser';
 import MRv from './pages/admin/MRv';
 import PdAdd from './pages/admin/PdAdd';
-import PdOrder from './pages/admin/PdOrder';
+import PdOrd from './pages/admin/PdOrd';
 import PdList from './pages/admin/PdList';
 import PdEdit from './pages/admin/PdEdit';
 import '@fortawesome/fontawesome-free/css/all.min.css';
@@ -40,20 +40,24 @@ function App() {
       localStorage.setItem("guest_id", crypto.randomUUID());
     }
   }, []);
-
   return (
     <BrowserRouter>
       <TopHeader />
       <main>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/join" element={<Join />} />
-          <Route path="/find" element={<Find />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
 
-          <Route path="/uqna" element={<UQnA />} />
-          <Route path="/uqadd" element={<UQAdd />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/join" element={<Join />} />
+            <Route path="/find" element={<Find />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/uqna" element={<UQnA />} />
+            <Route path="/uqadd" element={<UQAdd />} /> 
+            <Route path="/products" element={
+              <ProductProvider>
+                <UPdList />
+              </ProductProvider>
+            } />
 
           <Route
             path="/products"
@@ -64,7 +68,6 @@ function App() {
             }
           />
           <Route path="/product/:pid" element={<UPdPage />} />
-
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/mypage" element={<Mypage />} />
@@ -74,14 +77,13 @@ function App() {
 
           <Route path="/ntlist" element={<NTList />} />
           <Route path="/notice/view/:id" element={<NTView />} />
-
           <Route path="/admin/mqna" element={<MQnA />} />
           <Route path="/admin/ntwrt" element={<NTWrt />} />
           <Route path="/admin/notice/edit/:id" element={<NTEdit />} />
           <Route path="/admin/muser" element={<MUser />} />
           <Route path="/admin/mrv" element={<MRv />} />
           <Route path="/admin/pdAdd" element={<PdAdd />} />
-          <Route path="/admin/pdorder" element={<PdOrder />} />
+          <Route path="/admin/pdord" element={<PdOrd />} />
           <Route path="/admin/pdlist" element={<PdList />} />
           <Route path="/admin/PdEdit/:pid" element={<PdEdit />} />
 

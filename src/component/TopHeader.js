@@ -7,7 +7,6 @@ function TopHeader() {
   const { isLoggedIn, userRole, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
-
   const [isOpen, setIsOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -39,28 +38,31 @@ function TopHeader() {
     navigate("/");
   };
 
-
   const handleSearch = () => {
     if (!searchTerm.trim()) {
       alert("검색어를 입력해주세요.");
       return;
     }
 
-
-    navigate(`/search?keyword=${encodeURIComponent(searchTerm.trim())}`);
+    // /products 페이지로 keyword 파라미터와 함께 이동
+    navigate(`/products?keyword=${encodeURIComponent(searchTerm.trim())}`);
     
-
     setShowSearch(false);
     setSearchTerm("");
   };
 
+  // 추천 검색어 클릭 핸들러
+  const handleRecommendClick = (keyword) => {
+    navigate(`/products?keyword=${encodeURIComponent(keyword)}`);
+    setShowSearch(false);
+    setSearchTerm("");
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
   };
-
 
   const handleSearchInputChange = (e) => {
     setSearchTerm(e.target.value);
@@ -124,7 +126,7 @@ function TopHeader() {
                 <button onClick={handleLogout} className="util-link logout-btn">LOGOUT</button>
                 <Link to="/admin/pdadd" className="util-link">상품등록</Link>
                 <Link to="/admin/pdlist" className="util-link">상품목록</Link>
-                <Link to="/admin/pdorder" className="util-link">주문목록</Link>
+                <Link to="/admin/pdord" className="util-link">주문목록</Link>
                 <Link to="/admin/muser" className="util-link">회원목록</Link>
                 
               </>
@@ -169,7 +171,31 @@ function TopHeader() {
               <button className="close-btn" onClick={toggleSearch}>X</button>
             </div>
             <div className="recommend">
-              추천 검색어: 소고기, 돼지고기, 삼겹살, 등심
+              <span>추천 검색어: </span>
+              <button 
+                className="recommend-tag" 
+                onClick={() => handleRecommendClick('소고기')}
+              >
+                소고기
+              </button>
+              <button 
+                className="recommend-tag" 
+                onClick={() => handleRecommendClick('돼지고기')}
+              >
+                돼지고기
+              </button>
+              <button 
+                className="recommend-tag" 
+                onClick={() => handleRecommendClick('삼겹살')}
+              >
+                삼겹살
+              </button>
+              <button 
+                className="recommend-tag" 
+                onClick={() => handleRecommendClick('등심')}
+              >
+                등심
+              </button>
             </div>
           </div>
         </div>

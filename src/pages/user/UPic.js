@@ -41,7 +41,7 @@ import axios from "axios";
      }
      
      const deleteWishlistChecked = () => {
-
+        
          if (!guest_id){
              alert('잘못된 접근입니다.\n메인페이지로 돌아갑니다.');
              navigate('/');
@@ -75,7 +75,6 @@ import axios from "axios";
                  } else {
                      const deleteUserWishlistChecked = async () => {
                          try{
-                             //여러개의 요청을 한꺼번에 보냄
                              await Promise.all(checkedItems.map(id => 
                                  axios.post(`/api/wishlist/user/delete?id=${id}`,{}, {
                                      headers: {
@@ -202,9 +201,9 @@ import axios from "axios";
      }
 
      useEffect(() => {
+
          if (!guest_id){
-             alert('잘못된 접근입니다.\n메인페이지로 돌아갑니다.');
-             navigate('/');
+             window.location.reload();
          } else {
              if (!token){
                  const fetchUserWishlist = async () => {
@@ -331,9 +330,10 @@ import axios from "axios";
          <div className="wishList_wrap"> 
              <div className="wishList_contents">
                  <div className="title_area">
-                     <h2>WISH LIST</h2>
+                     <h2>WISHLIST</h2>
                  </div>                 
-                 {wishlist && wishlist.length > 0 && <Button text={"✖️선택 삭제"} style={{fontSize : "13px"}} onClick={(e) => deleteWishlistChecked()} />}
+                 {wishlist && wishlist.length > 0 && <Button text={"✖️선택 삭제"} type={"delete"} style={{fontSize : "13px"}} onClick={(e) => deleteWishlistChecked()} />}
+                 {wishlist && wishlist.length > 0 && <Button text={"✖️전체 삭제"} type={"delete"} style={{fontSize : "13px"}} onClick={() => deleteWishlistAll()} />}
                  <div className="table_wrap">
                  {wishlist && wishlist.length > 0 ? (
                              <table className="contents_wrap">
@@ -347,7 +347,7 @@ import axios from "axios";
                                      <col style={{width : "40px"}} />
                                      <col style={{width : "40px"}} />
                                  </colgroup>
-                                 <thead>
+                                 <thead className="tableHead">
                                      <tr>
                                          <th scope="col"><input type="checkbox" className="allCheckbox" checked={isAllChecked} onChange={(e) => handleAllCheckboxChange(e.target.checked)}/></th>
                                          <th scope="col">이미지</th>
@@ -359,12 +359,10 @@ import axios from "axios";
                                          <th scope="col">선택</th>
                                      </tr>
                                  </thead>
-                                 <tbody>
+                                 <tbody className="tableBody">
                                      {wishlist.map((list) => (
                                          <tr key={list.id}>
-                                             {/* 체크박스 */}
                                              <td className="" style={{textAlign : "center"}}><input type="checkbox" className="itemCheckbox" checked={checkedItems.includes(list.id)} onChange={(e) => handleCheckboxChange(list.id, e.target.checked)}/></td>
-                                             {/* 상품 이미지 */}
                                              <td style={{textAlign : "center"}}><img
                                             src={list.image ? `${API_BASE_URL}/api/images/${list.image}` : '/api/images/default-product.jpg'}
                                             alt={list.productName}
@@ -372,27 +370,22 @@ import axios from "axios";
                                                 e.target.src = '/api/images/default-product.jpg'
                                             }}
                                             /></td>
-                                             {/* 상품정보 */}
-                                             <td style={{textAlign : "left"}}>
-                                                 <Link to={`/상품상세페이지URL/${list.pid}`}>{list.pnm}</Link>
+                                             <td>
+                                                 <Link to={`/product/${list.pid}`}>{list.pnm}</Link>
                                              </td>
-                                             {/* 판매가격 */}
-                                             <td>{list.price}원</td>
-                                             {/* 포인트 - 판매가격의 5% */}
-                                             <td>{list.point}P</td>
-                                             {/* 배송구분 */}
-                                             <td>{list.shippingCost}원</td>
-                                             <td>{list.totalPrice}원</td>
-                                             {/* 주문하기, 장바구니 담기, 삭제 -> 버튼으로 */}
+                                             <td>{list.price.toLocaleString()}원</td>
+                                             <td>{list.point.toLocaleString()}P</td>
+                                             <td>{list.shippingCost.toLocaleString()}원</td>
+                                             <td>{list.totalPrice.toLocaleString()}원</td>
                                              <td>
                                                  <div className="delete_wrap">
-                                                     <Button text={"주문하기"} style={{fontSize : "13px"}} />
+                                                     <Button text={"주문하기"} type={"delete"} style={{fontSize : "13px"}} />
                                                  </div>
                                                  <div className="delete_wrap">
-                                                     <Button text={"장바구니 담기"} style={{fontSize : "13px"}} />
+                                                     <Button text={"장바구니 담기"} type={"delete"} style={{fontSize : "13px"}} />
                                                  </div>
                                                  <div className="delete_wrap">
-                                                     <Button text={"✖️삭제"} style={{fontSize : "13px"}} onClick={() => deleteWishlist(list.id)} />
+                                                     <Button text={"✖️삭제"} type={"delete"} style={{fontSize : "13px"}} onClick={() => deleteWishlist(list.id)} />
                                                  </div>
                                              </td>
                                          </tr>
@@ -403,7 +396,6 @@ import axios from "axios";
                              <p>관심상품 내역이 존재하지 않습니다.</p>
                          )}
                  </div>
-                 {wishlist && wishlist.length > 0 && <Button text={"✖️전체 삭제"} style={{fontSize : "13px"}} onClick={() => deleteWishlistAll()} />}
                  {wishlist && wishlist.length > 0 && renderPagination()}
              </div>             
          </div>

@@ -5,10 +5,9 @@ import "../css/Home.css";
 import MainSlider from "../component/MainSlider";
 import { Button } from "../util/Buttons";
 
-
 const Home = () => {
     const navigate = useNavigate();
-    const [products, setProducts] = useState([]);
+    const [hitProducts, setHitProducts] = useState([]);
     const PRODUCTS_PER_ROW = 4;
     const PRODUCT_LIMIT = 12;
 
@@ -19,17 +18,27 @@ const Home = () => {
     useEffect(() => {
         axios.get('/api/products')
             .then(response => {
-                setProducts(response.data);
+                const allProducts = response.data;
+                
+                // hit 필드의 다양한 형태에 대응하여 필터링
+                const isHitProducts = allProducts.filter(product => {
+                    // hit 값이 1, '1', true, 'true', 'Y' 중 하나인 경우
+                    return product.hit === 1 || 
+                           product.hit === '1' || 
+                           product.hit === true || 
+                           product.hit === 'true' ||
+                           product.hit === 'Y';
+                });
+                
+                setHitProducts(isHitProducts);
             })
             .catch(err => {
                 console.error('상품 불러오기 실패:', err);
             });
     }, []);
 
-    const visibleProducts = products.slice(0, PRODUCT_LIMIT);
+    const visibleProducts = hitProducts.slice(0, PRODUCT_LIMIT);
 
-
-    // 4개씩 상품을 나누는 유틸 함수
     const chunkProducts = (arr, size) => {
         const chunks = [];
         for (let i = 0; i < arr.length; i += size) {
@@ -72,6 +81,25 @@ const Home = () => {
                 </p>
             </main>
 
+            <div className="info-banner-section">
+                <Link to="/shipping-guide" className="info-banner-card">
+                    <img src="/postoffice.png" alt="우체국 배송 안내" />
+                    <h3>우체국배송 안내</h3>
+                    <p>우체국배송 토요일 휴무지역</p>
+                </Link>
+
+                <Link to="/point-guide" className="info-banner-card">
+                    <img src="/point.png" alt="포인트 적립" />
+                    <h3>포인트 적립</h3>
+                    <p>포인트 적립하세요~</p>
+                </Link>
+
+                <Link to="/cooking-guide" className="info-banner-card">
+                    <img src="/recipe.png" alt="고기 굽는 법" />
+                    <h3>고기 맛있게 굽는 방법</h3>
+                    <p>고벤저스가 알려주는 고기 굽는법</p>
+                </Link>
+            </div>
 
             <section className="product-section">
                 <h2>PRODUCT</h2>
@@ -104,30 +132,6 @@ const Home = () => {
                     ))}
                 </div>
             </section>
-
-
-
-            <div className="info-banner-section">
-                <Link to="/shipping-guide" className="info-banner-card">
-                    <img src="/postoffice.png" alt="우체국 배송 안내" />
-                    <h3>우체국배송 안내</h3>
-                    <p>우체국배송 토요일 휴무지역</p>
-                </Link>
-
-                <Link to="/point-guide" className="info-banner-card">
-                    <img src="/point.png" alt="포인트 적립" />
-                    <h3>포인트 적립</h3>
-                    <p>포인트 적립하세요~</p>
-                </Link>
-
-                <Link to="/cooking-guide" className="info-banner-card">
-                    <img src="/recipe.png" alt="고기 굽는 법" />
-                    <h3>고기 맛있게 굽는 방법</h3>
-                    <p>고벤저스가 알려주는 고기 굽는법</p>
-                </Link>
-            </div>
-
-
         </div>
     );
 };

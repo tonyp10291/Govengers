@@ -12,18 +12,31 @@
     padding-top: 100px;
 }
 .title_area h2 {
+    opacity: 0;
+    transform: translateX(-100px);
+    animation: titleFadeIn 2s ease forwards;
     font-size: 32px;
     font-weight: bold;
     color: #333;
 }
+@keyframes titleFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0px);
+  }
+}
 
 .cart_contents {
     max-width: 1400px;
-    width: 100%;
 }
 
 .table_wrap {
     border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
 }
 
 .contents_wrap {
@@ -34,7 +47,6 @@
 
 thead {
     height: 50px;
-    border-bottom: 1px solid #ddd;
 }
 thead th {
     font-weight: normal;
@@ -42,12 +54,13 @@ thead th {
     padding: 10px 0;
 }
 
+/* 테이블 바디 (tbody) */
 tbody {
     border-bottom: 1px solid #ddd;
 }
 tbody td {
     padding: 20px 0;
-    text-align: center; 
+    text-align: center;
     vertical-align: middle;
 }
 
@@ -62,15 +75,10 @@ tbody td a {
 }
 
 tbody td .quantity_input {
-    width: 50px;
+    width: 20px;
     text-align: center;
-}
-
-.delete_btn {
-    border: 1px solid #ddd;
-    background-color: #fff;
-    padding: 5px 10px;
-    cursor: pointer;
+    font-size: 17px;
+    border: 0;
 }
 
 .top_buttons {
@@ -145,19 +153,10 @@ tbody td .quantity_input {
     text-align: center;
     margin-top: 40px;
 }
-.action_buttons button {
-    padding: 15px 30px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-}
-.action_buttons .checkout_btn {
-    background-color: #dc3545;
-    color: #fff;
-}
-.action_buttons .select_checkout_btn {
-    background-color: #f8f9fa;
-    border: 1px solid #dc3545;
-    color: #dc3545;
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }

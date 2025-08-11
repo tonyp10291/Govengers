@@ -307,15 +307,13 @@
 .info-title { font-weight: 700; font-size: 1rem; margin-bottom: 6px; }
 .info-text { font-size: 0.98rem; color: #4c4c4c; }
 
-/* --- �곹뭹 �곸꽭 �섏씠吏� 硫붿씤 而⑦뀒�대꼫 --- */
 .upd-container {
   width: 100%;
   min-height: 100vh;
   background: #fafbfc;
-  padding: 65px 0 40px 0;   /* �꾩뿉 怨듦컙 異⑸텇�� 以� */
+  padding: 65px 0 40px 0;
 }
 
-/* --- 移댄뀒怨좊━ �ㅻ퉬 --- */
 .upd-categories {
   display: flex;
   justify-content: center;
@@ -342,23 +340,20 @@
   color: #0b318e;
 }
 
-/* --- 硫붿씤 �뱀뀡 --- */
 .upd-main-flex {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   gap: 70px;
   margin-bottom: 50px;
-  margin-top: 32px;    /* �꾩껜 �꾨옒濡�! */
+  margin-top: 32px;
 }
 
-/* --- �대�吏� 諛뺤뒪(媛곸쭊) --- */
 .upd-img-box {
   flex: none;
   width: 600px;
   height: 600px;
   background: #fff;
-  /* border-radius: 18px;  <-- �쇱슫�� �쒓굅 */
   box-shadow: 0 4px 24px 0 rgba(50, 60, 70, 0.09);
   display: flex;
   align-items: center;
@@ -369,10 +364,8 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* border-radius: 0;  <-- �쇱슫�� �쒓굅 */
 }
 
-/* --- �곹뭹�뺣낫(�몃줈 �섏쭅 �뺣젹, 媛곸쭊) --- */
 .upd-info-box {
   display: flex;
   flex-direction: column;
@@ -395,14 +388,12 @@
   font-size: 1.08rem;
   color: #fff;
   background: #222;
-  /* border-radius: 7px; */
   padding: 2px 10px;
   margin-left: 7px;
   letter-spacing: 1px;
   font-weight: 500;
 }
 
-/* 媛�寃� �ш쾶 */
 .upd-price {
   font-size: 2rem;
   font-weight: 700;
@@ -410,7 +401,6 @@
   margin: 6px 0 10px 0;
 }
 
-/* �곹뭹�뺣낫 �쇰꺼+媛� �몃줈�뺣젹 */
 .upd-vertical-info-list {
   display: flex;
   flex-direction: column;
@@ -451,7 +441,6 @@
   width: 100%;
 }
 
-/* --- �섎웾/湲덉븸 --- */
 .upd-order-row {
   display: flex;
   align-items: center;
@@ -463,7 +452,6 @@
   height: 30px;
   font-size: 1.2rem;
   border: 1px solid #d2d2d2;
-  /* border-radius: 8px; */
   background: #fff;
   cursor: pointer;
   margin: 0 6px;
@@ -475,7 +463,6 @@
   color: #222;
 }
 
-/* --- 踰꾪듉 �뱀뀡 (媛곸�怨� �볤퀬 �뉕쾶) --- */
 .upd-btn-group {
   width: 100%;
   display: flex;
@@ -491,7 +478,6 @@
   font-weight: 700;
   padding: 18px 0 16px 0;
   border: none;
-  /* border-radius: 0; */
   box-shadow: 0 4px 17px 0 rgba(30,30,30,0.11);
   cursor: pointer;
   margin-bottom: 0;
@@ -512,17 +498,14 @@
   padding: 16px 0 15px 0;
   background: #fff;
   border: 1.5px solid #d7d7d7;
-  /* border-radius: 0; */
   outline: none;
   cursor: pointer;
   transition: background 0.16s, color 0.16s;
 }
 .upd-cart-btn { border-right: none; }
-.upd-wish-btn { }
 .upd-cart-btn:hover { background: #ffeaea; color: #e21b1b; }
 .upd-wish-btn:hover { background: #f3f7ff; color: #1256d2; }
 
-/* --- ��, ��궡�� (�댁쟾怨� �숈씪) --- */
 .upd-tab-list {
   display: flex;
   justify-content: center;
@@ -554,7 +537,6 @@
 }
 .upd-tab-content {
   background: #fff;
-  /* border-radius: 0 0 20px 20px; */
   min-height: 220px;
   box-shadow: 0 4px 18px 0 rgba(30, 30, 30, 0.06);
   padding: 38px 46px 40px 46px;
@@ -614,10 +596,27 @@
   margin-bottom: 10px;
 }
 .upd-exchange-info ul {
-  font-size: 1.03rem;
-  color: #666;
-  padding-left: 0;
-  margin: 0;
+    font-size: 1.03rem;
+    color: #666;
+    padding-left: 0;
+    margin: 0;
+}
+
+.upd-soldout {
+    font-size: 1.08rem;
+    color: black;
+    background: red;
+    padding: 2px 10px;
+    margin-left: 7px;
+    letter-spacing: 1px;
+    font-weight: 500;
+  }
+
+.upd-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #e21b1b;
+  margin: 6px 0 10px 0;
 }
 .upd-exchange-info ul li {
   margin-bottom: 2px;
@@ -626,7 +625,7 @@
 
 .upd-sticky-menu {
   position: sticky;
-  top: 64px; /* �꾩슂�� 議곗젙 (�곷떒�ㅻ뜑 �덉쓣 寃쎌슦 �щ갚) */
+  top: 64px;
   z-index: 11;
   background: #fff;
   display: flex;
@@ -654,7 +653,6 @@
   font-weight: 700;
 }
 
-/* 媛� �뱀뀡 湲곕낯 */
 .upd-section {
   padding: 38px 6vw 16px 6vw;
   background: #fff;
@@ -667,7 +665,6 @@
   letter-spacing: -0.3px;
 }
 
-/* --- 愿��⑥긽�� 罹먮윭�� --- */
 .upd-related-wrap {
   position: relative;
   display: flex;
@@ -684,7 +681,7 @@
 .upd-related-track {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: calc(100% / 5); /* 5媛� 蹂댁씠湲� */
+  grid-auto-columns: calc(100% / 5);
   transition: transform .25s ease-in-out;
 }
 
@@ -748,6 +745,22 @@
   border-radius: 999px;
 }
 
+.upd-related-soldout {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: red;
+  color: black;
+  font-weight: 700;
+  font-size: .78rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.move-right {
+  left: 50px;
+}
+
 .upd-rel-arrow {
   min-width: 36px;
   height: 36px;
@@ -796,7 +809,6 @@
 .admin-reply { display:flex; gap:8px; margin-top:8px; }
 .admin-reply input { flex:1; }
 
-/* 怨듯넻 �� �덉씠�꾩썐 */
 .qna-form { margin-bottom: 18px; }
 .q-row {
   display: flex;
@@ -823,41 +835,32 @@
   background: #fff;
 }
 
-.q-textarea {
-  min-height: 140px;
-  max-height: 140px;     
-  resize: none;          
-  overflow-y: auto;      
-  line-height: 1.6;
-}
-.q-counter {
-  text-align: right;
-  color: #9aa0a6;
-  font-size: .9rem;
-  margin-top: 6px;
+.review-author {
+    font-weight: 500;
 }
 
-.q-secret-row { align-items: center; }
-.q-secret-label { font-weight: 600; color: #333; }
-.q-pass {
-  margin-left: 10px;
-  border: 1px solid #ddd;
-  padding: 8px 12px;
+.review-date {
+    color: #6b7280;
+    font-size: 0.875rem;
 }
 
-.qna-submit-btn {
-  display: block;
-  margin: 18px auto 0;                
-  width: clamp(260px, 40%, 520px);    
-  height: 64px;
-  border: none;
-  background: #1e1e1e;
-  color: #fff;
-  font-weight: 800;
-  font-size: 1.35rem;
-  letter-spacing: 2px;
-  cursor: pointer;
-  transition: transform .08s ease, background .2s ease;
+.review-text {
+    color: #374151;
 }
-.qna-submit-btn:hover { background: #000; }
-.qna-submit-btn:active { transform: translateY(1px); }
+
+.qna-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.empty-state {
+    background-color: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+}
+
+.empty-text {
+    color: #6b7280;
+    text-align: center;
+}

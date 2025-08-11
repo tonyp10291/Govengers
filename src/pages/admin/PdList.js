@@ -205,7 +205,6 @@ function PdList() {
                                 e.target.src = fallbackUrls[currentIndex];
                                 e.target.dataset.fallbackIndex = currentIndex + 1;
                               } else {
-                                // 모든 경로 실패 시
                                 e.target.style.display = 'none';
                                 e.target.nextElementSibling.style.display = 'block';
                               }

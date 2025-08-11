@@ -202,3 +202,58 @@ html {
 .badge.soldout { background: #d00; }
 .badge.hit     { background: #f80; }
 .badge.new     { background: #2a7; }
+
+.product-list-wrapper {
+  width: 100%;
+  margin: 0 auto;
+}
+
+.product-list-row {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  margin-bottom: 32px;
+  list-style: none;
+  padding: 0;
+}
+
+.product-item {
+  flex: 1 1 0;
+  max-width: 260px;
+  min-width: 200px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  padding: 24px 12px 18px 12px;
+  text-align: center;
+  transition: box-shadow .18s;
+}
+.product-item:hover {
+  box-shadow: 0 6px 22px rgba(0,0,0,0.12);
+}
+.product-img {
+  width: 100%;
+  max-width: 200px;
+  height: 170px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+.badges {
+  margin-top: 6px;
+}
+.badge.hit {
+  background: #fa0;
+  color: #fff;
+  padding: 2px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-right: 6px;
+}
+.badge.soldout {
+  background: #888;
+  color: #fff;
+  padding: 2px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+}

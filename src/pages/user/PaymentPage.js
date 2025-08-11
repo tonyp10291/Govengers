@@ -1,68 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../../css/user/PaymentPage.css';
+import AuthContext from "../../context/AuthContext";
 
 const PaymentPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    
+    const { isLoggedIn, userRole, userId } = useContext(AuthContext);
+    const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
+    const guest_id = localStorage.getItem('guest_id');
+    const token = localStorage.getItem('token');
+    const [totalProductPrice, setTotalProductPrice] = useState(0);
+    const [totalShippingCost, setTotalShippingCost] = useState(0);
+    const [finalTotalPrice, setFinalTotalPrice] = useState(0);
+    const API_BASE_URL = "http://localhost:8080";
     const productInfo = location.state;
-
-    // 회원/비회원 구분
-    const getUserId = () => localStorage.getItem('userId') || '';
-    const isGuest = !getUserId() || productInfo?.isGuest;
-
+    const mainProductName = productInfo.length > 0 ? productInfo[0].productName : '';
+    const otherItemsCount = productInfo.length - 1;
+    const productNameSummary = otherItemsCount > 0 
+        ? `${mainProductName} 외 ${otherItemsCount}건` 
+        : mainProductName;
+    
     const [orderData, setOrderData] = useState({
         buyerName: '',
         buyerEmail: '',
         buyerPhone: '',
-        receiverName: '', // 받으실 분 이름 추가
+        receiverName: '',
         deliveryMethod: '택배',
         zipCode: '',
         address: '',
         detailAddress: '',
         addressExtra: '',
-        deliveryMemo: '', // 배송 요청사항 추가
+        deliveryMemo: '',
         payMethod: 'card'
     });
 
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
+    // 이미지 에러 핸들링 함수
+    const handleImageError = (e, item) => {
+        console.warn(`이미지 로드 실패: ${item.imageFilename || 'undefined'} (상품: ${item.productName})`);
+        e.target.src = `${API_BASE_URL}/api/images/default-product.jpg`;
+        e.target.onerror = () => {
+            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuydtOuvuOyngCDsl5bsnYw8L3RleHQ+PC9zdmc+';
+        };
+    };
+
     // 회원인 경우 기존 정보 자동 입력
     useEffect(() => {
+        if (!guest_id) {
+            alert("잘못된 접근입니다.");
+            navigate("/");
+        }
         const loadMemberInfo = async () => {
-            if (!isGuest && getUserId()) {
+            if (token) {
                 try {
-                    const response = await fetch('/api/user/profile', {
+                    const response = await axios.get('/api/me', {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
                     });
-                    
-                    if (response.ok) {
-                        const userInfo = await response.json();
-                        setOrderData(prev => ({
-                            ...prev,
-                            buyerName: userInfo.name || '',
-                            buyerEmail: userInfo.email || '',
-                            buyerPhone: userInfo.phone || '',
-                            receiverName: userInfo.name || '',
-                            zipCode: userInfo.zipCode || '',
-                            address: userInfo.address || '',
-                            detailAddress: userInfo.detailAddress || ''
-                        }));
-                    }
+                    const userInfo = response.data.user;
+                    setOrderData(prev => ({
+                        ...prev,
+                        buyerName: userInfo.unm || '',
+                        buyerEmail: userInfo.umail || '',
+                        buyerPhone: userInfo.utel || '',
+                        receiverName: userInfo.unm || '',
+                        zipCode: userInfo.zipCode || '',
+                        address: userInfo.address || '',
+                        detailAddress: userInfo.detailAddress || ''
+                    }));
                 } catch (error) {
                     console.log('회원 정보 로드 실패:', error);
-                    // 실패해도 계속 진행 (수동 입력)
                 }
             }
         };
-
         loadMemberInfo();
-    }, [isGuest]);
+    }, [guest_id, token, navigate]);
 
     useEffect(() => {
         const script = document.createElement('script');
@@ -91,6 +108,39 @@ const PaymentPage = () => {
             navigate('/products');
         }
     }, [productInfo, navigate]);
+
+    useEffect(() => {
+        calculateTotals();
+    }, [productInfo]); // productInfo 의존성 추가
+
+    const calculateTotals = () => {
+        if (!productInfo || productInfo.length === 0) {
+            setTotalProductPrice(0);
+            setTotalShippingCost(0);
+            setFinalTotalPrice(0);
+            return;
+        }
+
+        const productPrice = productInfo.reduce((sum, item) => {
+            const itemPrice = item.price || 0;
+            const itemQuantity = item.quantity || 1;
+            const itemTotal = itemPrice * itemQuantity;
+            
+            console.log(`상품: ${item.productName}, 가격: ${itemPrice}, 수량: ${itemQuantity}, 합계: ${itemTotal}`);
+            
+            return sum + itemTotal;
+        }, 0);
+        
+        const shippingCost = productInfo.length > 0 ? 3500 : 0;
+        
+        console.log('총 상품 가격:', productPrice);
+        console.log('배송비:', shippingCost);
+        console.log('최종 가격:', productPrice + shippingCost);
+        
+        setTotalProductPrice(productPrice);
+        setTotalShippingCost(shippingCost);
+        setFinalTotalPrice(productPrice + shippingCost);
+    };
 
     const validateField = (name, value) => {
         let error = '';
@@ -303,26 +353,21 @@ const PaymentPage = () => {
 
         try {
             console.log('=== 결제 요청 시작 ===');
-            console.log('회원 구분:', isGuest ? '비회원' : '회원');
-            
-            const totalPrice = productInfo.amount;
-            const deliveryFee = 3000;
-            const finalTotal = totalPrice + deliveryFee;
+            console.log('회원 구분:', guest_id ? '비회원' : '회원');
             
             const requestData = {
-                // 상품 정보
-                productId: productInfo.pid,
-                productName: productInfo.productName,
-                productPrice: productInfo.price,
-                quantity: productInfo.quantity,
-                amount: finalTotal,
-                
-                // 주문자 정보
+                productInfo: productInfo.map(item => ({
+                    productId: item.pid,
+                    productName: item.productName,
+                    productPrice: item.price,
+                    quantity: item.quantity,
+                    amount: item.price * item.quantity
+                })),
+                productName: productNameSummary,
+                amount: finalTotalPrice,   
                 buyerName: orderData.buyerName,
                 buyerEmail: orderData.buyerEmail,
                 buyerPhone: orderData.buyerPhone,
-                
-                // 배송 정보
                 receiverName: orderData.receiverName,
                 zipCode: orderData.zipCode,
                 address: orderData.address,
@@ -330,20 +375,16 @@ const PaymentPage = () => {
                 addressExtra: orderData.addressExtra,
                 deliveryMethod: orderData.deliveryMethod,
                 deliveryMemo: orderData.deliveryMemo,
-                
-                // 결제 정보
                 payMethod: orderData.payMethod,
-                
-                // 회원 구분
-                isGuest: isGuest,
-                userId: isGuest ? null : getUserId()
+                isGuest: !!guest_id,
+                userId: userId
             };
             
             console.log('결제 준비 요청 데이터:', requestData);
-            const prepareResponse = await axios.post('http://localhost:8080/api/payment/prepare', requestData, {
+            const prepareResponse = await axios.post('/api/payment/prepare', requestData, {
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(isGuest ? {} : { 'Authorization': `Bearer ${localStorage.getItem('token')}` })
+                    ...(!!guest_id ? {} : { 'Authorization': `Bearer ${localStorage.getItem('token')}` })
                 },
                 timeout: 10000
             });
@@ -386,27 +427,18 @@ const PaymentPage = () => {
                         console.log('결제 검증 및 DB 저장 성공:', verifyResult);
 
                         if (verifyResult.success) {
-                            // 결제 성공 시 localStorage의 장바구니에서 해당 상품 제거 (선택사항)
-                            if (!isGuest) {
-                                removeFromLocalStorageCart(productInfo.pid);
-                            }
+                            removeFromCart(productInfo.map(item => item.cartId));
 
                             navigate('/payment/success', {
                                 state: {
                                     merchantUid: rsp.merchant_uid,
                                     impUid: rsp.imp_uid,
-                                    amount: finalTotal,
+                                    amount: finalTotalPrice,
                                     productName: productName,
                                     buyerName: buyerName,
-                                    isGuest: isGuest,
-                                    orderId: verifyResult.orderId, // 주문 ID 추가
-                                    productInfo: {
-                                        productName: productInfo.productName,
-                                        productImage: productInfo.productImage,
-                                        description: productInfo.description,
-                                        quantity: productInfo.quantity,
-                                        amount: productInfo.amount
-                                    },
+                                    isGuest: !!guest_id,
+                                    orderId: verifyResult.orderId,
+                                    productInfo: productInfo,
                                     orderInfo: {
                                         buyerEmail: orderData.buyerEmail,
                                         buyerPhone: orderData.buyerPhone,
@@ -425,52 +457,7 @@ const PaymentPage = () => {
                         }
                     } catch (verifyError) {
                         console.error('결제 검증 오류:', verifyError);
-                        try {
-                            console.log('=== 결제 상태 재확인 시작 ===');
-                            const statusResponse = await axios.get(
-                                `http://localhost:8080/api/payment/status/${rsp.merchant_uid}`,
-                                { timeout: 10000 }
-                            );
-                            
-                            console.log('결제 상태 재확인 응답:', statusResponse.data);
-                            
-                            if (statusResponse.data.success && statusResponse.data.status === 'COMPLETED') {
-                                console.log('재확인 결과: 결제 완료 상태 확인됨');
-                                navigate('/payment/success', {
-                                    state: {
-                                        merchantUid: rsp.merchant_uid,
-                                        impUid: rsp.imp_uid,
-                                        amount: finalTotal,
-                                        productName: productName,
-                                        buyerName: buyerName,
-                                        isGuest: isGuest,
-                                        productInfo: {
-                                            productName: productInfo.productName,
-                                            productImage: productInfo.productImage,
-                                            description: productInfo.description,
-                                            quantity: productInfo.quantity,
-                                            amount: productInfo.amount
-                                        },
-                                        orderInfo: {
-                                            buyerEmail: orderData.buyerEmail,
-                                            buyerPhone: orderData.buyerPhone,
-                                            receiverName: orderData.receiverName,
-                                            zipCode: orderData.zipCode,
-                                            address: orderData.address,
-                                            detailAddress: orderData.detailAddress,
-                                            deliveryMethod: orderData.deliveryMethod,
-                                            deliveryMemo: orderData.deliveryMemo,
-                                            payMethod: orderData.payMethod
-                                        }
-                                    }
-                                });
-                            } else {
-                                alert('결제 검증에 실패했습니다. 고객센터로 문의해주세요.\n주문번호: ' + rsp.merchant_uid);
-                            }
-                        } catch (statusError) {
-                            console.error('결제 상태 재확인 실패:', statusError);
-                            alert('결제 상태 확인 중 오류가 발생했습니다. 고객센터로 문의해주세요.\n주문번호: ' + rsp.merchant_uid);
-                        }
+                        alert('결제 검증에 실패했습니다. 고객센터로 문의해주세요.\n주문번호: ' + rsp.merchant_uid);
                     }
                 } else {
                     console.log('결제 실패:', rsp.error_msg);
@@ -497,15 +484,15 @@ const PaymentPage = () => {
             try {
                 console.log(`결제 검증 시도 ${attempt}/${maxRetries}`);
                 
-                const verifyResponse = await axios.post('http://localhost:8080/api/payment/verify', {
+                const verifyResponse = await axios.post('/api/payment/verify', {
                     impUid: impUid,
                     merchantUid: merchantUid,
-                    isGuest: isGuest,
-                    userId: isGuest ? null : getUserId()
+                    isGuest: !!guest_id,
+                    userId: !!guest_id ? null : userId
                 }, {
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(isGuest ? {} : { 'Authorization': `Bearer ${localStorage.getItem('token')}` })
+                        ...(!!guest_id ? {} : { 'Authorization': `Bearer ${localStorage.getItem('token')}` })
                     },
                     timeout: 15000
                 });
@@ -532,14 +519,24 @@ const PaymentPage = () => {
         }
     };
 
-    // localStorage 장바구니에서 해당 상품 제거
-    const removeFromLocalStorageCart = (productId) => {
+    const removeFromCart = async (productIds) => {
         try {
-            const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-            const updatedCartItems = cartItems.filter(item => item.pid !== productId);
-            localStorage.setItem('cartItems', JSON.stringify(updatedCartItems));
-        } catch (error) {
-            console.error('장바구니 정리 실패:', error);
+            let url = '';
+            let headers = {};
+            let data = {};
+            let method = 'post';
+
+            if (token) {
+                headers = { 'Authorization': `Bearer ${token}` };
+                url = `/api/cart/user/delete-checked`;
+                data = productIds;
+            } else {
+                url = `/api/cart/guest/delete-checked?guestId=${guest_id}`;
+                data = productIds;
+            }
+            await axios({ method: method, url: url, data: data, headers: headers });
+        } catch (err) {
+            console.error(err.message || err.response?.data || err);
         }
     };
 
@@ -547,43 +544,48 @@ const PaymentPage = () => {
         return <div>로딩 중...</div>;
     }
 
-    const totalPrice = productInfo.amount;
-    const deliveryFee = 3000;
-    const finalTotal = totalPrice + deliveryFee;
-
     return (
         <div className="payment-page">
             <div className="payment-main-container">
                 <div className="payment-page-header">
                     <h1>주문서 작성/결제</h1>
-                    <p>안전하고 간편한 포트원 다날 결제 {isGuest && '(비회원 주문)'}</p>
+                    <p>안전하고 간편한 포트원 다날 결제 {!token && '(비회원 주문)'}</p>
                 </div>
 
                 <div className="payment-main-content">
                     <div className="payment-section order-products">
-                        <h2 className="payment-section-title">상품명/옵션 <span className="payment-highlight">수량/상품금액/할인금액</span></h2>
+                        <h2 className="payment-section-title">상품명/옵션 <span className="payment-highlight">수량/상품금액</span></h2>
                         
                         <div className="payment-product-list">
-                            <div className="payment-product-item">
-                                <img 
-                                    src={productInfo.productImage}
-                                    alt={productInfo.productName}
-                                    className="payment-product-image"
-                                />
-                                <div className="payment-product-details">
-                                    <h4 className="payment-product-name">{productInfo.productName}</h4>
-                                    <p className="payment-product-description">{productInfo.description}</p>
+                            {productInfo.map((item, index) => (
+                                <div key={item.pid || item.cartId || index} className="payment-product-item">
+                                    <img 
+                                        src={item.imageFilename ? 
+                                            (item.imageFilename.startsWith('http') ? 
+                                                item.imageFilename : 
+                                                `${API_BASE_URL}/api/images/${item.imageFilename}`
+                                            ) : 
+                                            `${API_BASE_URL}/api/images/default-product.jpg`
+                                        }
+                                        alt={item.productName || '상품 이미지'}
+                                        onError={(e) => handleImageError(e, item)}
+                                        className="payment-product-image"
+                                    />
+                                    <div className="payment-product-details">
+                                        <h4 className="payment-product-name">{item.productName}</h4>
+                                    </div>
+                                    <div className="payment-product-price-info">
+                                        <div className="payment-quantity">수량: {item.quantity || 1}개</div>
+                                        <div className="payment-price">{((item.price || 0) * (item.quantity || 1)).toLocaleString()}원</div>
+                                        <div className="payment-unit-price">단가: {(item.price || 0).toLocaleString()}원</div>
+                                    </div>
                                 </div>
-                                <div className="payment-product-price-info">
-                                    <div className="payment-quantity">수량: {productInfo.quantity || 1}개</div>
-                                    <div className="payment-price">{productInfo.amount.toLocaleString()}원</div>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                     
                     <div className="payment-section buyer-info">
-                        <h2 className="payment-section-title">주문자 정보 {isGuest && '(비회원)'}</h2>
+                        <h2 className="payment-section-title">주문자 정보 {!token && '(비회원)'}</h2>
                         
                         <div className="payment-form-grid">
                             <div className="payment-form-group">
@@ -716,16 +718,16 @@ const PaymentPage = () => {
                         
                         <div className="payment-breakdown">
                             <div className="payment-breakdown-item">
-                                <span>총 [{productInfo.quantity || 1}]개의 상품 금액</span>
-                                <span>{totalPrice.toLocaleString()}원</span>
+                                <span>총 상품 금액</span>
+                                <span>{totalProductPrice.toLocaleString()}원</span>
                             </div>
                             <div className="payment-breakdown-item">
                                 <span>배송비</span>
-                                <span>{deliveryFee.toLocaleString()}원</span>
+                                <span>{totalShippingCost.toLocaleString()}원</span>
                             </div>
-                            <div className="payment-breakdown-item">
-                                <span>합계</span>
-                                <span className="payment-total-amount">{finalTotal.toLocaleString()}원</span>
+                            <div className="payment-breakdown-item payment-total">
+                                <span><strong>최종 결제 금액</strong></span>
+                                <span className="payment-total-amount"><strong>{finalTotalPrice.toLocaleString()}원</strong></span>
                             </div>
                         </div>
                     </div>
@@ -756,7 +758,7 @@ const PaymentPage = () => {
                                 disabled={loading}
                                 className="payment-submit-button"
                             >
-                                {loading ? '결제 처리 중... ⏳' : `${finalTotal.toLocaleString()}원 결제하기 💳`}
+                                {loading ? '결제 처리 중... ⏳' : `${finalTotalPrice.toLocaleString()}원 결제하기 💳`}
                             </button>
                         </div>
                     </div>

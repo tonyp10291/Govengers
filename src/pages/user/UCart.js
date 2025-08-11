@@ -3,6 +3,7 @@ import { Button } from "../../util/Buttons";
 import { Link, useNavigate } from "react-router-dom";
 import '../../css/user/UCart.css';
 import axios from "axios";
+import { fetchAllCartItems, handleOrderItems } from "../../util/orderAllItems";
 
 const UCart = () => {
     const navigate = useNavigate();
@@ -14,15 +15,14 @@ const UCart = () => {
     const [checkedItems, setCheckedItems] = useState([]);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const API_BASE_URL = "http://localhost:8090";
+    const API_BASE_URL = "http://localhost:8080";
     const [totalProductPrice, setTotalProductPrice] = useState(0);
     const [totalShippingCost, setTotalShippingCost] = useState(0);
     const [finalTotalPrice, setFinalTotalPrice] = useState(0);
 
     useEffect(() => {
-        if (!guest_id && !token) {
-            alert('잘못된 접근입니다.\n메인페이지로 돌아갑니다.');
-            navigate('/');
+        if (!guest_id){
+            window.location.reload();
         } else {
             fetchCartItems();
         }
@@ -35,7 +35,7 @@ const UCart = () => {
     const calculateTotals = () => {
         const checkedItemsData = cartItems.filter(item => checkedItems.includes(item.cartId));
         const productPrice = checkedItemsData.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const shippingCost = checkedItemsData.reduce((sum, item) => sum + item.shippingCost, 0);
+        const shippingCost = checkedItemsData.length > 0 ? 3500 : 0;
         setTotalProductPrice(productPrice);
         setTotalShippingCost(shippingCost);
         setFinalTotalPrice(productPrice + shippingCost);
@@ -48,7 +48,6 @@ const UCart = () => {
             if (token) {
                 if (guest_id) {
                     await axios.post(`/api/cart/migrate?guestId=${guest_id}`, {}, { headers: { 'Authorization': `Bearer ${token}` } });
-                    localStorage.removeItem("guest_id");
                 }
                 response = await axios.get(`/api/cart/user?page=${page}`, { headers: { 'Authorization': `Bearer ${token}` } });
             } else {
@@ -59,7 +58,9 @@ const UCart = () => {
             setCheckedItems([]);
             setIsAllChecked(false);
         } catch (err) {
-            console.error("장바구니 목록을 가져오는 중 오류 발생:", err);
+            console.error("유저 장바구니를 가져오는 중 오류 발생:", err.response.data);
+            alert('장바구니를 가져오는 중 오류가 발생했습니다. 메인 페이지로 돌아갑니다.');
+            navigate('/');
         } finally {
             setIsLoading(false);
         }
@@ -146,75 +147,100 @@ const UCart = () => {
     };
     const deleteCartAll = () => deleteItems(cartItems.map(item => item.cartId), 'all');
 
-    const orderAllItems = () => {
-        if (!token) {
-            alert("로그인이 필요한 서비스입니다.");
-            navigate('/login');
-        } else {
-            alert("전체 상품을 주문합니다.");
-        }
-    };
+    const orderAllItems = async () => {
+        const allItems = await fetchAllCartItems(token, guest_id, navigate);
+        handleOrderItems(navigate, allItems);
+    }
 
     const orderCheckedItems = () => {
-        if (!token) {
-            alert("로그인이 필요한 서비스입니다.");
-            navigate('/login');
-        } else if (checkedItems.length === 0) {
+        if (checkedItems.length === 0) {
             alert("선택된 상품이 없습니다.");
         } else {
-            alert("선택된 상품을 주문합니다.");
-            const selectedItems = cartItems.filter(item => checkedItems.includes(item.cartId));
+            const result = window.confirm("선택된 상품을 주문합니까?");
+            if(result){
+                const selectedItems = cartItems.filter(item => checkedItems.includes(item.cartId));
+                handleOrderItems(navigate, selectedItems);
+            } else {
+                return;
+            }
+            
         }
     };
 
     const renderPagination = () => {
-        const maxVisiblePages = 5;
-        const currentGroup = Math.floor(page / maxVisiblePages);
-        const startPage = currentGroup * maxVisiblePages;
-        const endPage = Math.min(startPage + maxVisiblePages, totalPages);
-        const pageNumbers = [];
-        for (let i = startPage; i < endPage; i++) {
-            pageNumbers.push(i);
-        }
-        return (
-            <div className="pagination_wrap">
-                <span>총 {totalPages}페이지 중 {page + 1}페이지</span>
-                <button
-                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                    disabled={page === 0}
-                >
-                    ‹
-                </button>
-                {startPage > 0 && (
-                    <>
-                        <button onClick={() => setPage(0)}>1</button>
-                        <span>...</span>
-                    </>
-                )}
-                {pageNumbers.map(pageNum => (
-                    <button
-                        key={pageNum}
-                        onClick={() => setPage(pageNum)}
-                        className={page === pageNum ? "active" : ""}
-                    >
-                        {pageNum + 1}
-                    </button>
-                ))}
-                {endPage < totalPages && (
-                    <>
-                        <span>...</span>
-                        <button onClick={() => setPage(totalPages - 1)}>{totalPages}</button>
-                    </>
-                )}
-                <button
-                    onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-                    disabled={page === totalPages - 1}
-                >
-                    ›
-                </button>
-            </div>
-        );
-    };
+         const maxVisiblePages = 5;
+         const currentGroup = Math.floor(page / maxVisiblePages);
+         const startPage = currentGroup * maxVisiblePages;
+         const endPage = Math.min(startPage + maxVisiblePages, totalPages);
+
+         const pageNumbers = [];
+         for (let i = startPage; i < endPage; i++) {
+             pageNumbers.push(i);
+         }
+
+         return (
+             <div className="pagination-container">
+                 <div className="pagination-info">
+                     <span>총 {totalPages}페이지 중 {page + 1}페이지</span>
+                 </div>
+                 
+                 <div className="pagination">
+
+                     <button 
+                         onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                         disabled={page === 0}
+                         className="pagination-btn prev-next"
+                         title="이전 페이지"
+                     >
+                         ‹
+                     </button>
+
+                     {startPage > 0 && (
+                         <>
+                         <button
+                             onClick={() => setPage(0)}
+                             className="pagination-btn page-number"
+                         >
+                             1
+                         </button>
+                         <span className="pagination-dots">...</span>
+                         </>
+                     )}
+
+                     {pageNumbers.map(pageNum => (
+                         <button
+                         key={pageNum}
+                         onClick={() => setPage(pageNum)}
+                         className={`pagination-btn page-number ${page === pageNum ? "active" : ""}`}
+                         >
+                         {pageNum + 1}
+                         </button>
+                     ))}
+
+                     {endPage < totalPages && (
+                         <>
+                         <span className="pagination-dots">...</span>
+                         <button
+                             onClick={() => setPage(totalPages - 1)}
+                             className="pagination-btn page-number"
+                         >
+                             {totalPages}
+                         </button>
+                         </>
+                     )}
+
+                     <button 
+                         onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                         disabled={page === totalPages - 1}
+                         className="pagination-btn prev-next"
+                         title="다음 페이지"
+                     >
+                         ›
+                     </button>
+                 </div>
+             </div>
+         );
+     };
 
     return (
         <div className="cart_wrap">
@@ -225,14 +251,14 @@ const UCart = () => {
                 {isLoading && <p>장바구니 정보를 불러오는 중입니다...</p>}
                 {!isLoading && cartItems.length > 0 && (
                     <div className="top_buttons">
-                        <Button text={"✖️선택 상품 삭제"} className="delete_btn" onClick={deleteCartChecked} />
-                        <Button text={"장바구니 비우기"} className="delete_btn" onClick={deleteCartAll} />
+                        <Button text={"✖️선택 상품 삭제"} type="delete" onClick={deleteCartChecked} />
+                        <Button text={"장바구니 비우기"} type="delete" onClick={deleteCartAll} />
                     </div>
                 )}
                 <div className="table_wrap">
                     {!isLoading && cartItems.length > 0 ? (
                         <table className="contents_wrap">
-                            <thead>
+                            <thead className="tableHead">
                                 <tr>
                                     <th><input type="checkbox" checked={isAllChecked} onChange={(e) => handleAllCheckboxChange(e.target.checked)} /></th>
                                     <th>이미지</th>
@@ -245,7 +271,7 @@ const UCart = () => {
                                     <th>선택</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="tableBody">
                                 {cartItems.map((item) => (
                                     <tr key={item.cartId}>
                                         <td><input type="checkbox" checked={checkedItems.includes(item.cartId)} onChange={(e) => handleCheckboxChange(item.cartId, e.target.checked)} /></td>
@@ -256,20 +282,20 @@ const UCart = () => {
                                                 e.target.src = '/api/images/default-product.jpg'
                                             }}
                                             /></td>
-                                        <td><Link to={`/상품상세페이지URL/${item.productId}`}>{item.productName}</Link></td>
+                                        <td><Link to={`/product/${item.productId}`}>{item.productName}</Link></td>
                                         <td>{item.price.toLocaleString()}원</td>
                                         <td>
                                             <div className="quantity_control">
-                                                <button onClick={() => handleQuantityChange(item.cartId, item.quantity - 1)}>-</button>
+                                                <Button text={"-"} onClick={() => handleQuantityChange(item.cartId, item.quantity - 1)} />
                                                 <input type="text" value={item.quantity} onChange={(e) => handleQuantityChange(item.cartId, parseInt(e.target.value) || 0)} className="quantity_input" />
-                                                <button onClick={() => handleQuantityChange(item.cartId, item.quantity + 1)}>+</button>
+                                                <Button text={"+"} onClick={() => handleQuantityChange(item.cartId, item.quantity + 1)} />
                                             </div>
                                         </td>
-                                        <td>{item.point}P</td>
+                                        <td>{item.point * item.quantity}P</td>
                                         <td>{item.shippingCost.toLocaleString()}원</td>
                                         <td>{(item.price * item.quantity).toLocaleString()}원</td>
                                         <td>
-                                            <button className="delete_btn" onClick={() => deleteCart(item.cartId)}>✖️삭제</button>
+                                            <Button text={"✖️삭제"} type={"delete"} onClick={() => deleteCart(item.cartId)} />
                                         </td>
                                     </tr>
                                 ))}
@@ -277,6 +303,7 @@ const UCart = () => {
                         </table>
                     ) : !isLoading && <p>장바구니에 담긴 상품이 없습니다.</p>}
                 </div>
+                {!isLoading && cartItems.length > 0 && renderPagination()}
                 {!isLoading && cartItems.length > 0 && (
                     <div className="payment_summary">
                         <h3>결제 예정 금액</h3>
@@ -296,11 +323,10 @@ const UCart = () => {
                 )}
                 {!isLoading && cartItems.length > 0 && (
                     <div className="action_buttons">
-                        <button className="checkout_btn" onClick={orderAllItems}>전체 상품 주문</button>
-                        <button className="select_checkout_btn" onClick={orderCheckedItems}>선택 상품 주문</button>
+                        <Button text={"전체 상품 주문"} type={"checkout"} style={{fontSize : "25px"}} onClick={orderAllItems} />
+                        <Button text={"선택 상품 주문"} type={"checkout_selected"} style={{fontSize : "25px"}} onClick={orderCheckedItems} />
                     </div>
                 )}
-                {!isLoading && cartItems.length > 0 && renderPagination()}
             </div>
         </div>
     );

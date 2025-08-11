@@ -6,6 +6,14 @@
     transition: all 0.3s ease;
 }
 
+.btn_default{
+    padding: 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+
 .btn_logo{
     width: 100px;
     height: 100px;
@@ -52,6 +60,22 @@
     color: #fff;
 }
 
+.btn_delete{
+    border: 1px solid #ddd;
+    background-color: #fff;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 3px;
+    margin-left: 3px;
+}
+
+.btn_delete:hover {
+    background: #d6d6d6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 .btn_submit:hover {
     background: #333;
     transform: translateY(-2px);
@@ -61,6 +85,43 @@
 .btn_cancel{
     background: #888;
     color: #fff;
+}
+
+.btn_action {
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+}
+.btn_checkout {
+    background-color: #f8f9fa;
+    border: 1px solid rgb(161, 157, 157);
+    border-radius: 2px;
+    padding: 5px;
+}
+.btn_checkout_selected {
+    background-color: #f8f9fa;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    margin-left: 10px;
+    border-radius: 2px;
+    padding: 5px;
+}
+
+.btn_checkout_selected:hover {
+    background: #dc3545;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    color:#000;
+}
+
+.btn_checkout:hover {
+    background: #666;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
 }
 
 .btn_cancel:hover {
