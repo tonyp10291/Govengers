@@ -15,7 +15,7 @@ const UCart = () => {
     const [checkedItems, setCheckedItems] = useState([]);
     const [isAllChecked, setIsAllChecked] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const API_BASE_URL = "http://localhost:8080";
+    const API_BASE_URL = "http://localhost:8090";
     const [totalProductPrice, setTotalProductPrice] = useState(0);
     const [totalShippingCost, setTotalShippingCost] = useState(0);
     const [finalTotalPrice, setFinalTotalPrice] = useState(0);

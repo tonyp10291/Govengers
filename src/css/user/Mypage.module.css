@@ -7,201 +7,298 @@
 }
 .mypageContainer {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
   background: #fff;
   border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
   border: 1px solid #ececec;
-  padding: 0 0 24px 0;
+  padding: 0;
   box-sizing: border-box;
+  overflow: hidden;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
 }
-.statusItems {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-}
-.statusItem {
-  text-align: center;
-}
 .statusBox {
   width: 100%;
-  box-sizing: border-box;
   background: #f7f7f7;
   border-radius: 10px 10px 0 0;
-  padding: 32px 24px 24px 24px;
-  border-bottom: 1px solid #e9e9e9;
+  padding: 32px 0 24px 0;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 0;
 }
 .statusHeader {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 18px;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding-left: 28px;
 }
-.statusTitle { font-size: 18px; font-weight: 700; }
-.statusPeriod { font-size: 13px; color: #888; }
+.statusTitle {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111;
+}
+.statusPeriod {
+  font-size: 15px;
+  color: #aaa;
+}
 .statusContent {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0;
+  position: relative;
 }
 .statusContent > div {
+  flex: 1 1 0;
   text-align: center;
-  border-right: 1px solid #e9e9e9;
-  padding-right: 8px;
+  border-right: 1px dashed #ddd;
+  padding: 0 0 0 0;
 }
 .statusContent > div:last-child {
   border-right: none;
-  padding-right: 0;
 }
-.statusLabel { font-size: 14px; color: #666; margin-bottom: 6px; }
-.statusNum { font-size: 20px; font-weight: 700; }
+.statusLabel {
+  font-size: 20px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.statusNum {
+  font-size: 25px;
+  font-weight: 700;
+  color: #222;
+  text-align: center;
+}
+
+/* 메뉴 영역 */
 .menuGrid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 18px;
-  padding: 20px 24px;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 0 0 10px 10px;
+  border-top: none;
 }
 .menuBox {
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  padding: 18px 12px;
+  flex: 1 1 0;
+  padding: 38px 0 28px 0;
   text-align: center;
+  background: #fff;
+  border-right: 1px solid #eee;
   cursor: pointer;
-  transition: box-shadow .12s ease, transform .08s ease;
+  transition: background 0.16s;
 }
-.menuBox:hover { box-shadow: 0 6px 16px rgba(0,0,0,0.06); transform: translateY(-1px); }
-.menuIcon { width: 28px; height: 28px; margin: 0 auto 8px; color: #444; }
-.menuLabel { font-weight: 700; letter-spacing: .6px; }
-.menuSub { font-size: 12px; color: #888; margin-top: 6px; }
-.menuWideAccordion {
-  margin: 12px 24px 0 24px;
-  border: 1px solid #eee;
-  border-radius: 10px;
-  padding: 20px;
+.menuBox:last-child {
+  border-right: none;
+}
+.menuBox:hover {
   background: #fff;
 }
-.qna { max-height: 520px; overflow: auto; }
-.profileWrapper { 
-  padding: 6px; 
-  max-height: 520px;
-  overflow-y: auto;
-  overflow-x: hidden;
+.menuBox:hover .menuLabel {
+  background: #b7dcff;
+  color: #111;
+  border-radius: 4px;
+  padding: 0 4px;
+  transition: background 0.12s;
+  display: inline-block;
 }
-.profileTitle { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
-.profileFormSection { border-top: 1px solid #f0f0f0; padding-top: 12px; }
-.sectionTitle { font-size: 16px; font-weight: 600; margin: 10px 0 16px; }
-.formStar { color: #e02525; font-weight: 700; margin-left: 4px; }
-.profileForm { display: flex; flex-direction: column; gap: 14px; }
-.formRow {
+.menuIcon {
+  display: block;
+  margin: 0 auto;
+  width: 38px !important;
+  height: 38px !important;
+  stroke: #666;
+  stroke-width: 1.7;
+  color: unset !important;
+  background: none !important;
+}
+.menuLabel {
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  margin-top: 0;
+  color: #111;
+  transition: color 0.15s, background 0.12s;
+  display: inline-block;
+}
+.menuSub {
+  font-size: 20px;
+  color: #b0b0b0;
+  margin-top: 4px;
+  letter-spacing: 0.2px;
+}
+
+/* 펼치기(아코디언) */
+.menuWideAccordion {
+  width: 100%;
+  background: #fff;
+  border-radius: 0 0 10px 10px;
+  min-height: 320px;
+  max-height: 360px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  margin: 0;
+  margin-top: 0;
+  box-shadow: 0 7px 24px 0 rgba(0,0,0,0.05);
+  padding: 38px 24px 42px 24px;
+  animation: fadeDown 0.2s;
+  display: flex;
+  align-items: flex-start;
+}
+
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-20px);}
+  to { opacity: 1; transform: translateY(0);}
+}
+
+/* Q&A 전체영역 */
+.boardWrapper {
+  width: 100%;
+  padding: 0 24px 32px 24px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  background: #fff;
+}
+.boardHeader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 22px;
+  padding: 0;
+  position: relative;
+}
+.boardTitle {
+  font-size: 28px;
+  font-weight: 700;
+  color: #222;
+  letter-spacing: 2px;
+  text-align: center;
+  flex: 1 1 0;
+}
+.boardTable {
+  width: 100%;
+  border-top: 1.5px solid #e2e2e2;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  padding: 0;
+}
+
+/* 핵심! boardRow와 boardInner 분리 */
+.boardRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 4px 0;
+  padding: 22px 0 18px 0;   /* 좌우 패딩 0! */
+  background: #fff;
+  position: relative;
+  transition: background 0.13s;
 }
-.formLabel {
-  width: 140px;
-  min-width: 140px;
-  font-size: 14px;
-  color: #333;
+.boardRow::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 0;
+  border-bottom: 1.5px solid #e2e2e2;
+  z-index: 1;
 }
-.formInput {
-  flex: 1;
-  min-width: 280px;
-  height: 40px;
-  padding: 0 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  font-size: 14px;
-  transition: border-color .12s ease, box-shadow .12s ease;
+.boardRow:last-child::before {
+  border-bottom: none;
 }
-.formInput:focus { border-color: #98c8ff; box-shadow: 0 0 0 3px rgba(152,200,255,0.25); }
-.telSelect, .telInput {
-  height: 40px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  outline: none;
-  padding: 0 10px;
-  font-size: 14px;
-  transition: border-color .12s ease, box-shadow .12s ease;
+.boardRow:hover {
+  background: #f5f8fd;
 }
-.telSelect { width: 110px; }
-.telInput { width: 120px; }
-.telSelect:focus, .telInput:focus { border-color: #98c8ff; box-shadow: 0 0 0 3px rgba(152,200,255,0.25); }
-.hyphen { margin: 0 6px; color: #aaa; user-select: none; }
-.inputGuide { margin-left: 10px; font-size: 12px; color: #999; }
-.fieldError, .errorText { margin-top: 6px; font-size: 12px; color: #d33; }
-.btnRow { display: flex; gap: 10px; margin-top: 8px; }
-.saveBtn, .leaveBtn {
-  min-width: 130px;
-  height: 40px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  font-weight: 600;
-  cursor: pointer;
-}
-.saveBtn { background: #1e86ff; color: #fff; }
-.saveBtn:hover { background: #1973d9; }
-.leaveBtn { background: #fff; color: #d33; border-color: #f1c6c6; }
-.leaveBtn:hover { background: #fff5f5; }
-.boardWrapper { padding: 6px; }
-.boardHeader { display: flex; align-items: center; margin-bottom: 12px; }
-.boardTitle { font-size: 18px; font-weight: 700; }
-.boardTable { border-top: 1px solid #eee; }
-.boardRow { border-bottom: 1px solid #f3f3f3; }
+/* 컨텐츠 패딩은 boardInner만 */
 .boardInner {
-  display: grid;
-  grid-template-columns: 70px 1fr 160px;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+.boardNum {
+  width: 60px;
+  text-align: center;
+  color: #444;
+  font-size: 17px;
+}
+.boardContent {
+  flex: 1 1 0;
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 8px;
+  color: #232323;
+  font-size: 18px;
+  font-weight: 500;
 }
-.boardNum { text-align: center; color: #666; }
-.boardContent { display: flex; align-items: center; gap: 8px; }
-.boardQTitle { font-weight: 600; }
+.boardQTitle {
+  font-size: 18px;
+  font-weight: 500;
+}
 .boardSecret {
-  border: 1px solid #bbb;
-  color: #666;
-  font-size: 12px;
-  padding: 1px 6px;
-  border-radius: 999px;
+  font-size: 13px;
+  color: #888;
+  background: #f2f2f2;
+  border: 1px solid #bdbdbd;
+  border-radius: 3px;
+  padding: 2px 8px;
+  margin-left: 6px;
 }
-.boardDate { text-align: right; color: #888; font-size: 13px; }
+.boardDate {
+  white-space: nowrap;
+  width: 180px;
+  min-width: 100px;
+  text-align: right;
+  color: #888;
+  font-size: 14px;
+  margin-left: 3px;
+  padding-right: 0;
+  word-break: keep-all;
+  line-height: 1.3;
+  box-sizing: border-box;
+}
 
-.qaToggleContent { background: #fafcff; border-top: 1px dashed #e5efff; padding: 14px 12px; }
+/* Q&A 펼침(토글) 본문 */
+.qaToggleContent {
+  background: #fafbfc;
+  border-radius: 8px;
+  margin: 0 0 12px 0;
+  padding: 28px 26px 22px 26px;
+  font-size: 17px;
+  color: #1a1a1a;
+  box-shadow: 0 1px 8px 0 rgba(20,20,20,0.05);
+  animation: fadeDown 0.18s;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 .qaQuestion, .qaAnswer {
-  display: grid;
-  grid-template-columns: 60px 1fr 160px;
-  gap: 8px;
-  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  line-height: 1.7;
 }
 .qaLabelQ, .qaLabelA {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 6px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
-  color: #155;
-  background: #e0f7ff;
-  text-align: center;
+  padding: 2px 10px;
+  border-radius: 5px;
+  background: #f5f5f7;
+  color: #666;
+  margin-right: 10px;
+  flex-shrink: 0;
 }
-.qaText { color: #333; }
-.qaQInfo, .qaAInfo { color: #8aa; font-size: 12px; text-align: right; }
-.qna::-webkit-scrollbar { width: 10px; }
-.qna::-webkit-scrollbar-thumb { background: #e1e9f5; border-radius: 6px; }
-.qna::-webkit-scrollbar-thumb:hover { background: #cddbf2; }
-@media (max-width: 900px) {
-  .mypageContainer { max-width: 100%; }
-  .statusContent { grid-template-columns: repeat(2, 1fr); }
-  .menuGrid { grid-template-columns: repeat(3, 1fr); }
-  .formRow { flex-direction: column; align-items: stretch; }
-  .formLabel { width: 100%; min-width: 0; }
-  .formInput { width: 100%; min-width: 0; }
-  .telSelect, .telInput { width: 100%; }
-  .boardInner, .qaQuestion, .qaAnswer { grid-template-columns: 1fr; }
-  .boardDate, .qaQInfo, .qaAInfo { text-align: left; }
+.qaLabelQ { border: 1px solid #bbbbbb; }
+.qaLabelA { border: 1px solid #4278fa; color: #4278fa; background: #f0f6ff; }
+.qaText {
+  flex: 1 1 0;
 }
-.menuBox { display: flex; flex-direction: column; align-items: center; }
-.menuIcon { display: block; margin: 0 auto 8px; }
+.qaQInfo, .qaAInfo {
+  margin-left: 20px;
+  color: #888;
+  font-size: 13px;
+  font-weight: 400;
+  flex-shrink: 0;
+}

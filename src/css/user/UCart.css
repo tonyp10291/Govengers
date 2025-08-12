@@ -19,6 +19,7 @@
     font-weight: bold;
     color: #333;
 }
+
 @keyframes titleFadeIn {
   from {
     opacity: 0;
@@ -30,6 +31,7 @@
   }
 }
 
+/* 장바구니 내용 컨테이너 */
 .cart_contents {
     max-width: 1400px;
 }
@@ -45,40 +47,47 @@
     border-collapse: collapse;
 }
 
-thead {
+.tableHead {
     height: 50px;
 }
-thead th {
+.tableHead th {
     font-weight: normal;
     color: #666;
     padding: 10px 0;
 }
 
 /* 테이블 바디 (tbody) */
-tbody {
+.tableBody {
     border-bottom: 1px solid #ddd;
 }
-tbody td {
+.tableBody td {
     padding: 20px 0;
-    text-align: center;
+    text-align: center; /* 이미지와 상품 정보 등을 중앙 정렬 */
     vertical-align: middle;
 }
 
-tbody td img {
+.tableBody td img {
     max-width: 80px;
     height: auto;
 }
 
-tbody td a {
+.tableBody td a {
     text-decoration: none;
     color: #333;
 }
 
-tbody td .quantity_input {
+.tableBody td .quantity_input {
     width: 20px;
     text-align: center;
-    font-size: 17px;
     border: 0;
+    font-size: 16px;
+}
+
+.delete_btn {
+    border: 1px solid #ddd;
+    background-color: #fff;
+    padding: 5px 10px;
+    cursor: pointer;
 }
 
 .top_buttons {

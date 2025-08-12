@@ -370,7 +370,7 @@ import axios from "axios";
                                                 e.target.src = '/api/images/default-product.jpg'
                                             }}
                                             /></td>
-                                             <td>
+                                             <td style={{textAlign : "left"}}>
                                                  <Link to={`/product/${list.pid}`}>{list.pnm}</Link>
                                              </td>
                                              <td>{list.price.toLocaleString()}원</td>

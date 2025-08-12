@@ -17,10 +17,9 @@ const UPdList = () => {
     const guest_id = localStorage.getItem('guest_id');
     const token = localStorage.getItem('token');
     const itemsPerPage = 12;
-    const API_BASE_URL = "http://localhost:8080";
+    const API_BASE_URL = "http://localhost:8090";
     const [searchParams] = useSearchParams();
     const urlCategory = searchParams.get('cate') || '전체';
-    const searchKeyword = searchParams.get('keyword') || ''; // 검색어 파라미터 추가
     const navigate = useNavigate();
 
     const homeBtnClick = () => {
@@ -31,16 +30,9 @@ const UPdList = () => {
         try {
             let response;
 
-            // 검색어가 있는 경우 검색 API 호출
-            if (searchKeyword) {
-                response = await axios.get(`/api/products/search?keyword=${encodeURIComponent(searchKeyword)}`);
-            }
-            // 카테고리가 있는 경우 카테고리별 조회
-            else if (urlCategory && urlCategory !== '전체') {
+            if (urlCategory && urlCategory !== '전체') {
                 response = await axios.get(`/api/products/category/${urlCategory}`);
-            } 
-            // 전체 상품 조회
-            else {
+            } else {
                 response = await axios.get('/api/products/list');
             }
 
@@ -51,7 +43,7 @@ const UPdList = () => {
             alert('상품을 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
             setProducts([]);
         }
-    }, [urlCategory, searchKeyword]); // searchKeyword를 의존성에 추가
+    }, [urlCategory]);
 
     useEffect(() => {
         if (!guest_id) {
@@ -60,7 +52,7 @@ const UPdList = () => {
 
         fetchProducts();
         setCurrentPage(1);
-    }, [fetchProducts, urlCategory, searchKeyword]); // searchKeyword를 의존성에 추가
+    }, [fetchProducts, urlCategory]);
 
     const totalPages = Math.ceil(products.length / itemsPerPage);
     const currentProducts = products.slice(
@@ -203,17 +195,6 @@ const UPdList = () => {
         }
     };
 
-    // 제목 텍스트 결정 함수
-    const getPageTitle = () => {
-        if (searchKeyword) {
-            return `"${searchKeyword}" 검색 결과`;
-        } else if (urlCategory === '전체' || !urlCategory) {
-            return '전체 상품';
-        } else {
-            return `${urlCategory} 상품`;
-        }
-    };
-
     return (
         <div className="updlist-container">
             <header className="home-header">
@@ -230,22 +211,13 @@ const UPdList = () => {
             </header>
 
             <div className="category-title">
-                <h2>{getPageTitle()}</h2>
-                {searchKeyword && (
-                    <p className="search-info">
-                        총 {products.length}개의 상품이 검색되었습니다.
-                    </p>
-                )}
+                <h2>{urlCategory === '전체' || !urlCategory ? '전체 상품' : `${urlCategory} 상품`}</h2>
             </div>
 
             <div className="products-grid">
                 {currentProducts.length === 0 ? (
                     <div className="no-products">
-                        {searchKeyword ? (
-                            <p>"{searchKeyword}"에 대한 검색 결과가 없습니다.</p>
-                        ) : (
-                            <p>상품이 없습니다.</p>
-                        )}
+                        <p>상품이 없습니다.</p>
                     </div>
                 ) : (
                     currentProducts.map(product => (
