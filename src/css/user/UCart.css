@@ -19,16 +19,6 @@
     font-weight: bold;
     color: #333;
 }
-@keyframes titleFadeIn {
-  from {
-    opacity: 0;
-    transform: translateX(-100px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0px);
-  }
-}
 
 @keyframes titleFadeIn {
   from {
@@ -70,7 +60,7 @@
 }
 .tableBody td {
     padding: 20px 0;
-    text-align: center;
+    text-align: center; /* 이미지와 상품 정보 등을 중앙 정렬 */
     vertical-align: middle;
 }
 

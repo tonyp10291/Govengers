@@ -1,25 +1,83 @@
-import React, { useRef, useState, useEffect, useContext } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import AuthContext from "../../context/AuthContext";
-import axios from 'axios';
 import '../../css/user/UPdPage.css';
-import { fetchAllCartItems, handleOrderItems } from "../../util/orderAllItems";
-
-const categoryLinks = [
-  { name: "소고기", to: "/products?cate=소고기" },
-  { name: "돼지고기", to: "/products?cate=돼지고기" },
-  { name: "닭고기", to: "/products?cate=닭고기" },
-  { name: "선물세트", to: "/products?cate=선물세트" },
-  { name: "소스류", to: "/products?cate=소스류" },
-  { name: "구매리뷰", to: "/products?cate=구매리뷰" },
-];
+import { Button } from '../../util/Buttons';
+import api from '../../api/axiosInstance';
 
 const API_PREFIX = '/api';
 
+const parseSafeDate = (v) => {
+  if (!v) return null;
+  if (typeof v === 'number') return new Date(v);
+  if (Array.isArray(v)) {
+    const [y, M, d, h = 0, m = 0, s = 0] = v;
+    return new Date(y, (M || 1) - 1, d || 1, h, m, s);
+  }
+  if (typeof v === 'string') {
+    let s = v.trim();
+    if (s.indexOf('T') < 0 && s.indexOf(' ') > -1) s = s.replace(' ', 'T');
+    s = s.replace(/\.(\d{3})\d+/, '.$1');
+    const d = new Date(s);
+    if (!Number.isNaN(d.getTime())) return d;
+    const m = v.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(\.\d+)?$/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+  }
+  return null;
+};
+const formatDateTime = (v) => {
+  const d = parseSafeDate(v);
+  return d ? d.toLocaleString() : '';
+};
+
+// ===== JWT helpers =====
+const getToken = () =>
+  (localStorage.getItem('token') ||
+    sessionStorage.getItem('token') ||
+    localStorage.getItem('Authorization') ||
+    ''
+  ).replace(/^Bearer\s+/i, '');
+
+const readRoleRaw = () =>
+  (localStorage.getItem('role') ||
+    sessionStorage.getItem('role') ||
+    localStorage.getItem('auth') ||
+    ''
+  ).replace(/["\[\]\s]/g, '').toUpperCase();
+
+const rolesFromToken = () => {
+  try {
+    const t = getToken();
+    if (!t) return [];
+    const payload = JSON.parse(atob((t.split('.')[1] || '')));
+    const r = payload?.role || payload?.roles || payload?.authorities;
+    if (!r) return [];
+    return Array.isArray(r) ? r.map(x => String(x).toUpperCase())
+      : String(r).toUpperCase().split(',');
+  } catch {
+    return [];
+  }
+};
+
+const isAdmin = () =>
+  readRoleRaw().includes('ADMIN') || rolesFromToken().some(r => r.includes('ADMIN'));
+
+const getUserId = () => {
+  try {
+    const t = getToken();
+    if (t) {
+      const p = JSON.parse(atob((t.split('.')[1] || '')));
+      const fromToken = p?.sub || p?.uid;
+      if (fromToken) return String(fromToken);
+    }
+  } catch { }
+  return (localStorage.getItem('userId') || '').replace(/"/g, '');
+};
+
+const getPid = (p) => p?.pid ?? p?.id ?? p?.productId ?? p?.pno ?? null;
 const maskId = (id) => {
   if (!id) return '';
-  if (id.length <= 3) return id[0] + '**';
-  return id.slice(0, id.length - 3) + '***';
+  if (id.includes('.entity.User')) id = id.split('.').pop();
+  return id.length <= 3 ? id[0] + '**' : id.slice(0, id.length - 3) + '***';
 };
 
 const MENU_ITEMS = [
@@ -30,33 +88,287 @@ const MENU_ITEMS = [
   { key: 'qna', label: '상품문의' },
 ];
 
-const VISIBLE_CNT = 5;
+const categoryLinks = [
+  { name: '소고기', to: '/products?cate=소고기' },
+  { name: '돼지고기', to: '/products?cate=돼지고기' },
+  { name: '닭고기', to: '/products?cate=닭고기' },
+  { name: '선물세트', to: '/products?cate=선물세트' },
+  { name: '소스류', to: '/products?cate=소스류' },
+  { name: '구매리뷰', to: '/products?cate=구매리뷰' },
+];
+
+/* 반응형 관련상품 */
+const getVisibleCnt = () => {
+  const w = window.innerWidth || 1200;
+  if (w < 480) return 1;
+  if (w < 768) return 2;
+  if (w < 1024) return 3;
+  if (w < 1280) return 4;
+  return 5;
+};
 
 function UPdPage() {
+  const topRef = useRef(null);
+  const revTopRef = useRef(null);
   const { pid } = useParams();
   const navigate = useNavigate();
-  const { isLoggedIn, userRole, userId } = useContext(AuthContext);
-  const isAdmin = isLoggedIn && userRole === 'ROLE_ADMIN';
-  const guest_id = localStorage.getItem('guest_id');
-  const token = localStorage.getItem('token');  
+
+  const imgUrl = (s) => (s?.startsWith('/api/images/') ? s : `${API_PREFIX}/images/${s}`);
+
+  /* 공통 */
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('description');
 
+  /* 관련상품 */
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [relIndex, setRelIndex] = useState(0);
+  const [visibleCnt, setVisibleCnt] = useState(getVisibleCnt());
+  const clampRelIndex = (i, len = relatedProducts.length, vc = visibleCnt) =>
+    Math.min(Math.max(0, i), Math.max(0, len - vc));
+  const handleRelPrev = () => setRelIndex((i) => clampRelIndex(i - 1));
+  const handleRelNext = () => setRelIndex((i) => clampRelIndex(i + 1));
 
+  /* 상세 이미지 (상품정보 섹션 하단) */
+  const [detailImages, setDetailImages] = useState([]);
+
+  // ✅ 상세 이미지: POST /products/{pid}/images/list 우선, 실패 시 GET /products/{pid}/images 폴백
+  useEffect(() => {
+    if (!pid) return;
+    (async () => {
+      const normalize = (raw) => {
+        const arr = Array.isArray(raw) ? raw : raw?.content || raw?.list || [];
+        return arr
+          .map(it => (typeof it === 'string' ? it
+            : (it?.savedFilename || it?.filename || it?.fileName || it?.path || it?.image || it?.url || '')))
+          .filter(Boolean)
+          .map(s => s.replace(/^.*[\\/]/, ''));
+      };
+
+      try {
+        const r = await api.post(`/products/${pid}/images/list`, null, { meta: { silent: true } });
+        setDetailImages(normalize(r.data));
+      } catch {
+        try {
+          const r = await api.get(`/products/${pid}/images`, { meta: { silent: true } });
+          setDetailImages(normalize(r.data));
+        } catch (e2) {
+          console.warn('상세 이미지 불러오기 실패/없음:', e2);
+          setDetailImages([]);
+        }
+      }
+    })();
+  }, [pid]);
+
+  // ✅ 관련상품 클릭 시: 이동 + 상단 스크롤
+  const goProductAndTop = (rid) => {
+    navigate(`/product/${rid}`);
+    setActiveTab('description');
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
+  };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [pid]);
+
+  useEffect(() => {
+    const onResize = () => {
+      const cnt = getVisibleCnt();
+      setVisibleCnt((prev) => {
+        if (prev !== cnt) setRelIndex((i) => clampRelIndex(i, relatedProducts.length, cnt));
+        return cnt;
+      });
+    };
+    window.addEventListener('resize', onResize);
+    onResize();
+    return () => window.removeEventListener('resize', onResize);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [relatedProducts.length]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      const tag = (document.activeElement?.tagName || '').toUpperCase();
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') handleRelPrev();
+      if (e.key === 'ArrowRight') handleRelNext();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [relIndex, relatedProducts.length, visibleCnt]);
+
+  /* ===== 상품 상세 ===== */
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const res = await api.get(`/products/${pid}`, { meta: { silent: true } });
+        setProduct(res.data);
+        setError('');
+      } catch (err) {
+        if (err?.response?.status === 404) setError('상품을 찾을 수 없습니다.');
+        else {
+          console.error('상품 정보 로드 실패:', err);
+          setError('상품 정보를 불러올 수 없습니다');
+        }
+      }
+    };
+    if (pid) fetchProduct();
+  }, [pid]);
+
+  /* ===== 관련상품 ===== */
+  useEffect(() => {
+    if (!product) return;
+
+    const getMainCategory = (p) => p?.mainCategory ?? p?.main_category ?? p?.category ?? null;
+
+    const fetchPage = async (qs) => {
+      try {
+        const res = await api.get(`/products?${qs}`, { meta: { silent: true } });
+        const data = res.data;
+        const list = Array.isArray(data?.content)
+          ? data.content
+          : Array.isArray(data?.list)
+            ? data.list
+            : Array.isArray(data)
+              ? data
+              : [];
+        return list;
+      } catch {
+        return [];
+      }
+    };
+
+    const run = async () => {
+      const mc = getMainCategory(product);
+      if (!mc) return setRelatedProducts([]);
+
+      const tries = [
+        new URLSearchParams({ page: '1', size: '30', mainCategory: mc }).toString(),
+        new URLSearchParams({ page: '0', size: '30', mainCategory: mc }).toString(),
+        new URLSearchParams({ page: '1', size: '30', main_category: mc }).toString(),
+        new URLSearchParams({ page: '0', size: '30', main_category: mc }).toString(),
+      ];
+      let list = [];
+      for (const q of tries) {
+        list = await fetchPage(q);
+        if (list.length) break;
+      }
+      list = list.filter((p) => getPid(p) && getPid(p) !== product.pid);
+      setRelatedProducts(list);
+      setRelIndex(0);
+    };
+
+    run();
+  }, [product]);
+
+  /* ===== 리뷰 ===== */
   const [reviews, setReviews] = useState([]);
-  const [qnas, setQnas] = useState([]);
-
+  const [revPage, setRevPage] = useState(1);
+  const [revSize, setRevSize] = useState(10);
+  const [revTotal, setRevTotal] = useState(0);
+  const [revShowForm, setRevShowForm] = useState(false);
   const [eligible, setEligible] = useState(false);
   const [revForm, setRevForm] = useState({ content: '', file: null, rating: 5 });
-  const [qnaForm, setQnaForm] = useState({ title: '', content: '', secret: false, password: '' });
+  const [revDeleteMode, setRevDeleteMode] = useState(false);
+  const [selectedRevs, setSelectedRevs] = useState([]);
+  const revLastPage = Math.max(1, Math.ceil((revTotal || 0) / revSize) || 1);
+  const [openRevId, setOpenRevId] = useState(null);
+  const [revDetail, setRevDetail] = useState(null);
+  const [revReplyTextByRid, setRevReplyTextByRid] = useState({});
+  const setRevReplyText = (rid, val) =>
+    setRevReplyTextByRid(prev => ({ ...prev, [rid]: val }));
 
+  const fetchReviewDetailById = async (rid) => {
+    try {
+      const r = await api.get(`/reviews/${rid}`, { meta: { silent: true } });
+      return r.data;
+    } catch (e) {
+      try { const r = await api.get('/reviews/detail', { params: { rid }, meta: { silent: true } }); return r.data; } catch (_) { }
+      try { const r = await api.post('/reviews/detail', { rid }, { meta: { silent: true } }); return r.data; } catch (_) { }
+      throw e;
+    }
+  };
+
+  const openReviewForReply = async (r) => {
+    try {
+      const d = await fetchReviewDetailById(r.rid);
+      setRevDetail(d);
+      setOpenRevId(r.rid);
+    } catch (err) {
+      console.error('리뷰 상세 조회 실패:', err);
+      alert('후기 내용을 불러올 수 없습니다.');
+    }
+  };
+
+  const submitAdminReplyToReview = async (e, rid) => {
+    e.preventDefault();
+    if (!isAdmin()) return;
+    const text = (revReplyTextByRid[rid] || '').trim();
+    if (!text) return;
+    try {
+      await api.post(`/reviews/${rid}/comments`, { content: text });
+      const d = await fetchReviewDetailById(rid);
+      setRevDetail(d);
+      setRevReplyTextByRid(prev => ({ ...prev, [rid]: '' }));
+    } catch (err) {
+      console.error('리뷰 답글 등록 실패:', err);
+      alert('답글 등록 실패');
+    }
+  };
+
+  /* ===== 리뷰 목록 ===== */
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!product?.pid) return;
+      try {
+        const res = await api.get('/reviews', {
+          params: { pid: product.pid, page: revPage, size: revSize },
+          meta: { silent: true },
+        });
+        const data = res.data;
+        setReviews(Array.isArray(data) ? data : data.content || []);
+        setRevTotal(data?.totalElements ?? data?.total ?? (Array.isArray(data) ? data.length : 0));
+      } catch (err) {
+        if (err?.response?.status !== 404) console.error('리뷰 목록 로드 실패:', err);
+        setReviews([]);
+        setRevTotal(0);
+      }
+    };
+    fetchReviews();
+  }, [product?.pid, revPage, revSize]);
+
+  /* ===== 후기 자격(구매자) 확인 ===== */
+  useEffect(() => {
+    const checkEligibility = async () => {
+      if (!product?.pid) return;
+      try {
+        const res = await api.get('/orders/eligible-review', {
+          params: { pid: product.pid },
+          meta: { silent: true },
+        });
+        setEligible(Boolean(res.data?.eligible));
+      } catch (err) {
+        if (err?.response?.status !== 404) console.error('리뷰 자격 확인 실패:', err);
+        setEligible(false);
+      }
+    };
+    checkEligibility();
+  }, [product?.pid]);
+
+  /* ===== QnA ===== */
+  const [qnas, setQnas] = useState([]);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(10);
+  const [total, setTotal] = useState(0);
+  const lastPage = Math.max(1, Math.ceil((total || 0) / size) || 1);
+  const [showForm, setShowForm] = useState(false);
+  const [qnaForm, setQnaForm] = useState({ title: '', content: '', secret: false, password: '' });
   const [openQnaId, setOpenQnaId] = useState(null);
   const [qnaDetail, setQnaDetail] = useState(null);
-  const [adminReply, setAdminReply] = useState({ targetType: '', targetId: null, text: '' });
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [selectedQnas, setSelectedQnas] = useState([]);
+  const [replyTextByQid, setReplyTextByQid] = useState({});
+  const setReplyText = (qid, val) => setReplyTextByQid(prev => ({ ...prev, [qid]: val }));
 
   const sectionRefs = {
     description: useRef(null),
@@ -66,272 +378,212 @@ function UPdPage() {
     qna: useRef(null),
   };
 
-  useEffect(() => {
-    if (!guest_id) {
-        window.location.reload();
+  const makeListNo = (idx) => (total > 0 ? total - ((page - 1) * size + idx) : qnas.length - idx);
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToRevTop = () => revTopRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+  const fetchQna = async () => {
+    if (!product?.pid) return;
+    try {
+      const res = await api.get('/qna', {
+        params: { pid: product.pid, page, size },
+        meta: { silent: true },
+      });
+      const pg = res.data;
+      setQnas(pg.content || []);
+      setTotal(pg.totalElements || 0);
+    } catch (err) {
+      if (err?.response?.status !== 404) console.error('QnA 목록 로드 실패:', err);
+      setQnas([]);
+      setTotal(0);
     }
+  };
+  useEffect(() => { fetchQna(); }, [product?.pid, page, size]);
 
-    const fetchProduct = async () => {
-      try {
-        const res = await fetch(`${API_PREFIX}/products/${pid}`);
-        if (!res.ok) throw new Error('상품 정보를 불러올 수 없습니다');
-        const data = await res.json();
-        setProduct(data);
-      } catch (e) {
-        setError('상품 정보를 불러올 수 없습니다');
-      }
-    };
-    fetchProduct();
-  }, [pid]);
+  const onClickWriteReview = () => {
+    if (!eligible) return alert('구매이력이 있어야 작성이 가능합니다!');
+    setRevShowForm(true);
+  };
 
-  useEffect(() => {
-    const getMainCategory = (p) =>
-      p?.mainCategory ?? p?.main_category ?? p?.category ?? null;
-
-    const fetchPage = async (qs) => {
-      const res = await fetch(`/api/products?${qs}`, { headers: { Accept: 'application/json' } });
-      if (!res.ok) return null;
-      const data = await res.json();
-      // Page<ProductDto> or { list: [...] } 형태 모두 대응
-      let list = Array.isArray(data?.content) ? data.content
-        : Array.isArray(data?.list) ? data.list
-          : Array.isArray(data) ? data
-            : [];
-      return { list, raw: data };
-    };
-
-    const fetchRelated = async () => {
-      const mc = getMainCategory(product);
-      if (!mc) {
-        console.warn('관련상품: mainCategory 없음', product);
-        setRelatedProducts([]);
-        return;
-      }
-
-      // 1) mainCategory로 0/1 페이지 인덱스 모두 시도
-      const tryQueries = [
-        new URLSearchParams({ page: '1', size: '30', mainCategory: mc }).toString(),
-        new URLSearchParams({ page: '0', size: '30', mainCategory: mc }).toString(),
-        new URLSearchParams({ page: '1', size: '30', main_category: mc }).toString(),
-        new URLSearchParams({ page: '0', size: '30', main_category: mc }).toString(),
-      ];
-
-      let rel = null;
-      for (const q of tryQueries) {
-        rel = await fetchPage(q);
-        if (rel && rel.list) break;
-      }
-
-      if (!rel) {
-        console.warn('관련상품: 응답 파싱 실패');
-        setRelatedProducts([]);
-        return;
-      }
-
-      // 디버그: 실제 응답 구조 눈으로 확인
-      console.debug('[관련상품] mainCategory=', mc, '응답(raw)=', rel.raw);
-
-      // 2) 현재 상품 제외
-      const filtered = rel.list.filter((p) => p.pid !== product.pid);
-
-      // 3) 만약 filtered가 0이면 (해당 카테고리에 현재 상품만 있는 경우) → 대체 목록 노출
-      if (filtered.length === 0) {
-        console.info('관련상품: 동일 카테고리 결과 0 → 대체 목록(전체 최신) 사용');
-        const fallbackQs = new URLSearchParams({ page: '1', size: '10' }).toString();
-        const fb = await fetchPage(fallbackQs);
-        const fbList = (fb?.list ?? []).filter((p) => p.pid !== product.pid).slice(0, 5);
-        setRelatedProducts(fbList);
-        setRelIndex(0);
-        return;
-      }
-
-      // 4) 정상 세팅
-      setRelatedProducts(filtered);
-      setRelIndex(0);
-    };
-
-    if (product) fetchRelated();
-  }, [product]);
-
-  useEffect(() => {
-    if (!product) return;
-
-    // 1) 리뷰 목록
-    (async () => {
-      try {
-        const res = await fetch(`/api/reviews?pid=${product.pid}`);
-        if (res.ok) {
-          const data = await res.json();
-          setReviews(Array.isArray(data) ? data : (data.content || []));
-        }
-      } catch (e) { console.error(e); }
-    })();
-
-    // 2) 문의 목록
-    (async () => {
-      try {
-        const res = await fetch(`/api/qna?pid=${product.pid}`);
-        if (res.ok) {
-          const data = await res.json();
-          setQnas(Array.isArray(data) ? data : (data.content || []));
-        }
-      } catch (e) { console.error(e); }
-    })();
-
-    // 3) 리뷰 작성 자격(구매자) 확인
-    (async () => {
-      try {
-        const res = await fetch(`/api/orders/eligible-review?pid=${product.pid}`);
-        if (res.ok) {
-          const data = await res.json();
-          setEligible(!!data?.eligible);
-        } else {
-          setEligible(false);
-        }
-      } catch { setEligible(false); }
-    })();
-  }, [product]);
-
-  // 리뷰 등록 (구매자만)
   const submitReview = async (e) => {
     e.preventDefault();
-    if (!eligible) return alert('이 상품을 구매하신 분만 후기를 작성할 수 있습니다.');
     if (!revForm.content.trim()) return alert('후기 내용을 입력해 주세요.');
-
     const fd = new FormData();
     fd.append('pid', product.pid);
     fd.append('content', revForm.content);
     fd.append('rating', revForm.rating);
     if (revForm.file) fd.append('file', revForm.file);
-
     try {
-      const res = await fetch('/api/reviews', { method: 'POST', body: fd });
-      if (!res.ok) throw new Error('리뷰 등록 실패');
-      const saved = await res.json();
+      const res = await api.post('/reviews', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const saved = res.data;
       setReviews((prev) => [saved, ...prev]);
       setRevForm({ content: '', file: null, rating: 5 });
-    } catch (e) {
+      setRevShowForm(false);
+      alert('리뷰가 등록되었습니다.');
+    } catch (err) {
+      console.error('리뷰 등록 실패:', err);
       alert('리뷰 등록에 실패했습니다.');
-      console.error(e);
     }
   };
 
-  // 리뷰 삭제 (작성자 or 관리자)
   const deleteReview = async (rid, writerId) => {
-
-    if (!isAdmin && userId !== writerId) return alert('삭제 권한이 없습니다.');
+    const me = getUserId();
+    if (!isAdmin() && me !== writerId) return alert('삭제 권한이 없습니다.');
     if (!window.confirm('이 후기를 삭제하시겠습니까?')) return;
-
     try {
-      const res = await fetch(`/api/reviews/${rid}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      await api.delete(`/reviews/${rid}`);
       setReviews((prev) => prev.filter((r) => r.rid !== rid));
-    } catch {
+      alert('후기가 삭제되었습니다.');
+    } catch (err) {
+      console.error('리뷰 삭제 실패:', err);
       alert('삭제 실패');
     }
   };
 
-  const submitAdminReplyToReview = async (rid) => {
-    if (!isAdmin) return;
-    const text = adminReply.text?.trim();
-    if (!text) return;
+  const toggleRevDeleteMode = () => { setRevDeleteMode((v) => !v); setSelectedRevs([]); };
+  const handleRevSelection = (rid) => {
+    setSelectedRevs((prev) => (prev.includes(rid) ? prev.filter((id) => id !== rid) : [...prev, rid]));
+  };
+  const deleteSelectedRevs = async () => {
+    if (selectedRevs.length === 0) return alert('삭제할 후기를 선택하세요.');
+    if (!window.confirm(`선택한 ${selectedRevs.length}개의 후기를 삭제하시겠습니까?`)) return;
     try {
-      const res = await fetch(`/api/reviews/${rid}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text }),
-      });
-      if (!res.ok) throw new Error();
-      // 간단히 목록 재조회 (가벼우면 상태 갱신해도 됨)
-      const r2 = await fetch(`/api/reviews?pid=${product.pid}`);
-      const d2 = await r2.json();
-      setReviews(Array.isArray(d2) ? d2 : (d2.content || []));
-      setAdminReply({ targetType: '', targetId: null, text: '' });
-    } catch {
-      alert('답글 등록 실패');
+      for (const rid of selectedRevs) await api.delete(`/reviews/${rid}`);
+      setReviews((prev) => prev.filter((r) => !selectedRevs.includes(r.rid)));
+      setSelectedRevs([]);
+      setRevDeleteMode(false);
+      alert('선택한 후기가 삭제되었습니다.');
+    } catch (err) {
+      console.error('선택 후기 삭제 실패:', err);
+      alert('삭제 실패');
     }
   };
 
-  // Q&A 등록 (비밀글 가능)
   const submitQna = async (e) => {
     e.preventDefault();
-    const { title, content, secret, password } = qnaForm;
-    if (!title.trim()) return alert('제목을 입력해 주세요.');
-    if (!content.trim()) return alert('내용을 입력해 주세요.');
-    if (secret && !password.trim()) return alert('비밀글 비밀번호를 입력해 주세요.');
-    if (isAdmin) return alert('관리자는 상품문의를 작성할 수 없습니다.');
+    if (isAdmin()) { alert('관리자는 문의를 등록할 수 없습니다.'); return; }
+    if (!qnaForm.title.trim()) return alert('제목을 입력해주세요.');
+    if (!qnaForm.content.trim()) return alert('내용을 입력해주세요.');
+    if (qnaForm.secret && !qnaForm.password.trim()) return alert('비밀글 비밀번호를 입력해주세요.');
+
+    const body = {
+      pid: product.pid,
+      title: qnaForm.title,
+      content: qnaForm.content,
+      secret: qnaForm.secret,
+      password: qnaForm.secret ? qnaForm.password : null,
+    };
 
     try {
-      const res = await fetch('/api/qna', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          pid: product.pid, title, content, secret, password: secret ? password : undefined
-        })
-      });
-      if (!res.ok) throw new Error();
-      const saved = await res.json();
-      setQnas((prev) => [saved, ...prev]);
+      await api.post('/qna', body);
+      alert('등록되었습니다.');
       setQnaForm({ title: '', content: '', secret: false, password: '' });
-    } catch {
-      alert('문의 등록 실패');
+      setShowForm(false);
+      setPage(1);
+      await fetchQna();
+    } catch (err) {
+      console.error('QnA 등록 실패:', err);
+      if (err?.response?.status === 401) alert('다시 로그인 해주세요.');
+      else if (err?.response?.status === 403) alert('작성 권한이 없습니다.');
+      else alert('등록 실패');
     }
   };
 
-  // Q&A 삭제 (작성자 or 관리자)
-  const deleteQna = async (qid, writerId) => {
-
-    if (!isAdmin && userId !== writerId) return alert('삭제 권한이 없습니다.');
+  const deleteOwnQna = async (qid, writerId) => {
+    if (isAdmin()) return;
+    const me = getUserId();
+    if (me !== writerId) return alert('삭제 권한이 없습니다.');
     if (!window.confirm('이 문의를 삭제하시겠습니까?')) return;
-
     try {
-      const res = await fetch(`/api/qna/${qid}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
-      setQnas((prev) => prev.filter((q) => q.qid !== qid));
-    } catch {
+      await api.delete(`/qna/${qid}`);
+      await fetchQna();
+      alert('삭제되었습니다.');
+    } catch (err) {
+      console.error('QnA 삭제 실패:', err);
       alert('삭제 실패');
     }
   };
 
-  // Q&A 클릭 -> 상세 열람 (비밀글 비번검증 포함)
-  const openQna = async (q) => {
-
-    if (!q.secret || q.writerId === userId || isAdmin) {
-      const r = await fetch(`/api/qna/${q.qid}`);
-      const d = await r.json();
-      setQnaDetail(d); setOpenQnaId(q.qid);
-      return;
+  const handleDeleteModeToggle = () => {
+    setDeleteMode(!deleteMode);
+    setSelectedQnas([]);
+    setOpenQnaId(null);
+    setQnaDetail(null);
+  };
+  const handleQnaSelection = (qid) => {
+    setSelectedQnas((prev) => (prev.includes(qid) ? prev.filter((id) => id !== qid) : [...prev, qid]));
+  };
+  const handleDeleteSelectedQnas = async () => {
+    if (selectedQnas.length === 0) return alert('삭제할 문의를 선택하세요.');
+    if (!window.confirm(`선택한 ${selectedQnas.length}개의 문의를 삭제하시겠습니까?`)) return;
+    try {
+      for (const qid of selectedQnas) await api.delete(`/qna/${qid}`);
+      setSelectedQnas([]); setDeleteMode(false);
+      await fetchQna();
+      alert('선택한 문의가 삭제되었습니다.');
+    } catch (err) {
+      console.error('QnA 삭제 실패:', err);
+      alert('삭제 실패');
     }
-    // 비밀글: 비번 검증
-    const pw = prompt('비밀글 비밀번호를 입력해 주세요.');
-    if (!pw) return;
-    const v = await fetch(`/api/qna/${q.qid}/verify`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw })
-    });
-    if (!v.ok) return alert('비밀번호가 올바르지 않습니다.');
-    const ok = await v.json();
-    if (!ok?.ok) return alert('비밀번호가 올바르지 않습니다.');
-    const r = await fetch(`/api/qna/${q.qid}`);
-    const d = await r.json();
-    setQnaDetail(d); setOpenQnaId(q.qid);
   };
 
-  // 관리자 Q&A 답글
-  const submitAdminReplyToQna = async (qid) => {
-    if (isAdmin) return;
-    const text = adminReply.text?.trim();
-    if (!text) return;
+  const openQna = async (q) => {
+    if (deleteMode) return;
+    const me = getUserId();
+
+    if (isAdmin() || q.writerId === me || !q.secret) {
+      try {
+        const [detailRes, commentsRes] = await Promise.all([
+          api.get(`/qna/${q.qid}`, { meta: { silent: true } }),
+          api.get(`/qna/${q.qid}/comments`, { meta: { silent: true } }),
+        ]);
+        const detail = detailRes.data || {};
+        const comments = commentsRes.data || [];
+        setQnaDetail({ ...detail, comments });
+        setOpenQnaId(q.qid);
+      } catch (err) {
+        console.error('QnA 상세 조회 실패:', err);
+        alert('문의 내용을 불러올 수 없습니다.');
+      }
+      return;
+    }
+
+    const pw = prompt('비밀글 비밀번호를 입력해 주세요.');
+    if (!pw) return;
+
     try {
-      const res = await fetch(`/api/qna/${qid}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: text }),
-      });
-      if (!res.ok) throw new Error();
-      // 상세 다시 가져오기
-      const r = await fetch(`/api/qna/${qid}`); const d = await r.json();
-      setQnaDetail(d); setAdminReply({ targetType: '', targetId: null, text: '' });
-    } catch {
+      const v = await api.post(`/qna/${q.qid}/verify`, { password: pw });
+      if (!v.data?.ok) return alert('비밀번호가 올바르지 않습니다.');
+      const r = await api.get(`/qna/${q.qid}`);
+      setQnaDetail(r.data);
+      setOpenQnaId(q.qid);
+    } catch (err) {
+      console.error('비밀글 확인 실패:', err);
+      alert('비밀번호가 올바르지 않습니다.');
+    }
+  };
+
+  const submitAdminReplyInline = async (e, qid) => {
+    e.preventDefault();
+    if (!isAdmin()) return;
+    const text = (replyTextByQid[qid] || '').trim();
+    if (!text) return;
+
+    try {
+      const { data: saved } = await api.post(`/qna/${qid}/comments`, { content: text });
+      if (!saved.createdAt) saved.createdAt = new Date().toISOString();
+
+      setQnaDetail(prev => prev ? { ...prev, comments: [...(prev.comments || []), saved] } : prev);
+      setQnas(prev => prev.map(item =>
+        item.qid === qid
+          ? { ...item, comments: [...(item.comments || []), saved], commentCount: (item.commentCount ?? (item.comments?.length ?? 0)) + 1 }
+          : item
+      ));
+      setReplyTextByQid(prev => ({ ...prev, [qid]: '' }));
+    } catch (err) {
+      console.error('관리자 답글 등록 실패:', err);
       alert('답글 등록 실패');
     }
   };
@@ -340,150 +592,20 @@ function UPdPage() {
     setActiveTab(key);
     sectionRefs[key].current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
-
-  const handleCategoryClick = (to) => navigate(to);
-  const handleQuantityChange = (delta) => setQuantity(q => Math.max(1, q + delta));
-
-  const handleAddToCart = async (product, quantity) => {
-    if (!guest_id) {
-            window.location.reload();
-        }
-        if (isAdmin){
-            alert("관리자는 사용 불가능한 기능입니다.");
-            return;
-        }
-        if (product.soldout == 1) {
-            const result = window.confirm("품절된 상품은 장바구니 추가가 불가능 합니다.\n찜목록에 추가 하시겠습니까?");
-            if (result){
-                handleAddWishlist(product);
-                return;
-            } else {
-                return;
-            }
-        }
-        
-        let url = '';
-        let headers = {};
-
-        if (token) {
-            url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
-            headers = { 'Authorization': `Bearer ${token}` };
-        } else {
-            url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
-        }
-
-        try {
-            await axios.post(url, {}, { headers });
-            alert("상품이 장바구니에 담겼습니다.");
-        } catch (err) {         
-            alert("오류가 발생했습니다.");
-            console.error(err);
-        }
-    };
-
-    const handleAddWishlist = async (product) => {
-        if (!guest_id) {
-            window.location.reload();
-        }
-
-        if (isAdmin){
-            alert("관리자는 사용 불가능한 기능입니다.");
-            return;
-        }
-        
-        let url = '';
-        let headers = { 'Content-Type': 'application/json' };
-
-        if (token) {
-            url = `/api/wishlist/user/add?pid=${product.pid}`;
-            headers = { ...headers, 'Authorization': `Bearer ${token}` };
-        } else {
-            url = `/api/wishlist/guest/add?guestId=${guest_id}&pid=${product.pid}`;
-        }
-
-        try {
-            await axios.post(url, {}, { headers });
-            alert('찜하기가 완료되었습니다.');
-        } catch (err) {
-            if (err.response && err.response.data) {
-                if (err.response.data === "wishlist 추가 실패") {
-                    console.error(err.response.data);
-                    let result = window.confirm("이미 리스트에 있는 상품입니다.\n찜목록으로 이동하시겠습니까?");
-                    if (result) {
-                        navigate("/wishlist");
-                    }
-                } else {
-                    alert("알 수 없는 에러: " + err.response.data);
-                }
-            } else {
-                alert("네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.");
-                console.error(err);
-            }
-        }
-    };
-
-  const handleBuyNow = async () => {
-
-    if (!guest_id) {
-            window.location.reload();
-        }
-    if (isAdmin){
-        alert("관리자는 사용 불가능한 기능입니다.");
-        return;
-    }
-    if (!product) {
-      alert('상품 정보를 불러오는 중입니다.');
-      return;
-    }
-    
-    let url = '';
-    let headers = {};
-
-    if (token) {
-        url = `/api/cart/user/add?pid=${product.pid}&quantity=${quantity}`;
-        headers = { 'Authorization': `Bearer ${token}` };
-    } else {
-        url = `/api/cart/guest/add?guestId=${guest_id}&pid=${product.pid}&quantity=${quantity}`;
-    }
-
-    try {
-        await axios.post(url, {}, { headers });
-    } catch (err) {         
-            alert("오류가 발생했습니다.");
-            console.error(err);
-    }
-
-    const allItems = await fetchAllCartItems(token, guest_id, navigate);
-    handleOrderItems(navigate, allItems);
-
-    const productInfo = {
-      productName: product.pnm,
-      productImage: product.image 
-        ? `${API_PREFIX}/images/${product.image}` 
-        : `${API_PREFIX}/images/default-product.jpg`,
-      description: product.pdesc,
-      quantity: quantity,
-      amount: product.price * quantity,
-      pid: product.pid,
-      shippingCost: product.shippingCost,
-      price: product.price,
-    };
-
-    console.log('구매하기 - 상품 정보:', productInfo);
+  const handleCategoryClick = (to) => {
+    navigate(to);
+    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 0);
   };
-
-  const handleRelPrev = () => relIndex > 0 && setRelIndex(i => i - 1);
-  const handleRelNext = () => {
-    if (relIndex + VISIBLE_CNT < relatedProducts.length) setRelIndex(i => i + 1);
-  };
+  const handleQuantityChange = (delta) => setQuantity((q) => Math.max(1, q + delta));
+  const handleAddToCart = () => alert('장바구니에 담았습니다 (실제 기능 연동 필요)');
+  const handleBuyNow = () => alert('구매하기 기능은 개발중입니다!');
 
   const infoLabels = [
-    { label: '적립금', value: product ? `${Math.floor(product.price * 0.05)}원` : '-' },
+    { label: '적립금', value: product ? `${Math.floor(product.price * 0.01)}원` : '-' },
     { label: '원산지', value: product?.origin || '국내' },
     { label: '카테고리', value: product?.mainCategory },
     { label: '유통기한', value: product?.expDate || '-' },
   ];
-
   const totalPrice = product ? product.price * quantity : 0;
 
   if (error) {
@@ -496,7 +618,6 @@ function UPdPage() {
       </div>
     );
   }
-
   if (!product) {
     return (
       <div className="upd-container">
@@ -507,45 +628,32 @@ function UPdPage() {
 
   return (
     <div className="upd-container">
-      {/* 상단 카테고리 네비 */}
+      {/* 카테고리 네비 */}
       <div className="upd-categories">
         {categoryLinks.map((c) => (
-          <span
-            key={c.name}
-            className="upd-category-item"
-            onClick={() => handleCategoryClick(c.to)}
-            style={{ userSelect: 'none' }}
-          >
+          <span key={c.name} className="upd-category-item" onClick={() => handleCategoryClick(c.to)} style={{ userSelect: 'none', cursor: 'pointer' }}>
             {c.name}
           </span>
         ))}
       </div>
 
-      {/* 메인(이미지 + 정보) */}
+      {/* 메인 */}
       <div className="upd-main-flex">
-        {/* 메인 이미지 */}
+        {/* 이미지 */}
         <div className="upd-img-box">
           <img
-            src={
-              product.image
-                ? `${API_PREFIX}/images/${product.image}`
-                : `${API_PREFIX}/images/default-product.jpg`
-            }
+            src={product.image ? `${API_PREFIX}/images/${product.image}` : `${API_PREFIX}/images/default-product.jpg`}
             alt={product.pnm}
             className="upd-main-img"
+            onError={(e) => { e.target.src = `${API_PREFIX}/images/default-product.jpg`; }}
           />
         </div>
 
-        {/* 상품 정보 */}
+        {/* 정보 */}
         <div className="upd-info-box">
           <div className="upd-title-row">
             <span className="upd-title">{product.pnm}</span>
-            {product.hit == 1 && 
-              <span className="upd-hit">HIT</span>
-            }
-            {product.soldout == 1 &&
-                <span className="upd-soldout">품절</span>
-            }
+            {product.hit > 0 && <span className="upd-hit">HIT</span>}
           </div>
 
           <div className="upd-price">₩{Number(product.price).toLocaleString()}</div>
@@ -577,51 +685,43 @@ function UPdPage() {
           </div>
 
           <div className="upd-btn-group">
-            {product.soldout == 0 &&
-              <button className="upd-buy-btn" onClick={handleBuyNow}>구매하기</button>
-            }
+            <button className="upd-buy-btn" onClick={handleBuyNow}>구매하기</button>
             <div className="upd-cart-wish-row">
-              {product.soldout == 0 &&
-                  <button
-                      className="upd-cart-btn"
-                      onClick={() => {
-                          handleAddToCart(product, quantity);
-                      }}
-                  >
-                      장바구니 담기
-                  </button>
-                }
-              <button
-                    className="upd-wish-btn"
-                    onClick={() => {
-                        handleAddWishlist(product);
-                    }}    
-              >
-                  관심상품
-              </button>
+              <button className="upd-cart-btn" onClick={handleAddToCart}>장바구니</button>
+              <button className="upd-wish-btn">관심상품</button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 나머지 섹션들은 동일... */}
       {/* 상단 고정 탭 메뉴 */}
       <div className="upd-sticky-menu">
         {MENU_ITEMS.map((m) => (
-          <button
-            key={m.key}
-            className={`upd-menu-btn ${activeTab === m.key ? 'active' : ''}`}
-            onClick={() => handleMenuClick(m.key)}
-          >
+          <button key={m.key} className={`upd-menu-btn ${activeTab === m.key ? 'active' : ''}`} onClick={() => handleMenuClick(m.key)}>
             {m.label}
           </button>
         ))}
       </div>
 
-      {/* 상품정보 섹션 */}
+      {/* 상품정보 섹션 (텍스트 + 상세이미지 그리드) */}
       <section ref={sectionRefs.description} className="upd-section">
         <h3>상품정보</h3>
         <div className="upd-desc-box">{product.pdesc}</div>
+
+        {detailImages.length > 0 && (
+          <div className="upd-desc-images full">
+            {detailImages.map((fn) => (
+              <img
+                key={fn}
+                src={imgUrl(fn)}
+                alt="상세 이미지"
+                className="upd-desc-img full"
+                loading="lazy"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* 구매정보 섹션 */}
@@ -669,267 +769,321 @@ function UPdPage() {
         </div>
       </section>
 
+      {/* 관련상품 */}
       <section ref={sectionRefs.related} className="upd-section">
         <h3>관련상품</h3>
         {relatedProducts.length === 0 ? (
           <p className="upd-related-empty">해당 카테고리의 관련 상품이 없습니다.</p>
         ) : (
           <div className="upd-related-wrap">
-            {relatedProducts.length > VISIBLE_CNT && (
-              <button
-                className="upd-rel-arrow upd-rel-prev"
-                onClick={handleRelPrev}
-                disabled={relIndex === 0}
-                aria-label="이전"
-              >
-                ‹
-              </button>
-            )}
-
-            <div className="upd-related-viewport">
-              <div
-                className="upd-related-track"
-                style={{ transform: `translateX(-${relIndex * (100 / VISIBLE_CNT)}%)` }}
-              >
-                {relatedProducts.map((rp) => (
-                  <div
-                    key={rp.pid}
-                    className="upd-related-card"
-                    onClick={() => {
-                      navigate(`/product/${rp.pid}`);
-                      window.scroll({ 
-                        top: 0, 
-                        behavior: 'smooth' 
-                      });
-                    }}
-                  >
-                    <div className="upd-related-thumb">
-                      <img
-                        src={
-                          rp.image
-                            ? `${API_PREFIX}/images/${rp.image}`
-                            : `${API_PREFIX}/images/default-product.jpg`
-                        }
-                        alt={rp.pnm}
-                      />
+            <button className="upd-rel-arrow upd-rel-prev" onClick={handleRelPrev} disabled={relIndex === 0} aria-label="이전" type="button">‹</button>
+            <div className="upd-related-viewport" style={{ '--cards-per-view': visibleCnt }}>
+              <div className="upd-related-track" style={{ transform: `translateX(-${relIndex * (100 / visibleCnt)}%)` }}>
+                {relatedProducts.map((rp) => {
+                  const rid = getPid(rp);
+                  if (!rid) return null;
+                  return (
+                    <div
+                      key={rid}
+                      className="upd-related-card"
+                      onClick={() => goProductAndTop(rid)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="upd-related-thumb">
+                        <img
+                          src={rp.image ? `${API_PREFIX}/images/${rp.image}` : `${API_PREFIX}/images/default-product.jpg`}
+                          alt={rp.pnm}
+                          onError={(e) => { e.target.src = `${API_PREFIX}/images/default-product.jpg`; }}
+                        />
+                      </div>
+                      <div className="upd-related-info">
+                        <div className="upd-related-name" title={rp.pnm}>{rp.pnm}</div>
+                        <div className="upd-related-price">₩{Number(rp.price).toLocaleString()}</div>
+                      </div>
+                      {rp.hit > 0 && <span className="upd-related-hit">HIT</span>}
                     </div>
-                    <div className="upd-related-info">
-                      <div className="upd-related-name" title={rp.pnm}>{rp.pnm}</div>
-                      <div className="upd-related-price">₩{Number(rp.price).toLocaleString()}</div>
-                    </div>
-                    {rp.hit > 0 && <span className="upd-related-hit">HIT</span>}
-                    {rp.soldout > 0 && <span className={`upd-related-soldout ${rp.hit > 0 ? 'move-right' : ''}`}>품절</span>}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
-
-            {relatedProducts.length > VISIBLE_CNT && (
-              <button
-                className="upd-rel-arrow upd-rel-next"
-                onClick={handleRelNext}
-                disabled={relIndex + VISIBLE_CNT >= relatedProducts.length}
-                aria-label="다음"
-              >
-                ›
-              </button>
-            )}
+            <button className="upd-rel-arrow upd-rel-next" onClick={handleRelNext} disabled={relIndex + visibleCnt >= relatedProducts.length} aria-label="다음" type="button">›</button>
           </div>
         )}
       </section>
 
-      {/* 구매후기 섹션 */}
+      {/* 구매후기 */}
       <section ref={sectionRefs.reviews} className="upd-section">
+        <div ref={revTopRef} />
         <h3>구매후기</h3>
 
-        {/* 작성 폼 (구매자만) */}
-        {eligible ? (
-          <form className="rev-form" onSubmit={submitReview}>
-            <div className="rev-row">
+        <div className="qna-toolbar">
+          {!revShowForm && <button className="qna-write-btn" onClick={onClickWriteReview}>WRITE</button>}
+          {isAdmin() && (
+            <>
+              <button className="qna-delete-btn" onClick={toggleRevDeleteMode}>{revDeleteMode ? 'CANCEL' : 'DELETE'}</button>
+              {revDeleteMode && <button className="qna-delete-confirm-btn" onClick={deleteSelectedRevs}>DELETE SELECTED ({selectedRevs.length})</button>}
+            </>
+          )}
+        </div>
+
+        {revShowForm && (
+          <form className="qna-form" onSubmit={submitReview}>
+            <div className="q-row">
               <label>평점</label>
-              <select
-                value={revForm.rating}
-                onChange={(e) => setRevForm((f) => ({ ...f, rating: Number(e.target.value) }))}
-              >
-                {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n}</option>)}
-              </select>
+              <div className="q-field">
+                <select value={revForm.rating} onChange={(e) => setRevForm((f) => ({ ...f, rating: Number(e.target.value) }))} className="q-input">
+                  {[5, 4, 3, 2, 1].map(n => <option key={n} value={n}>{n}점</option>)}
+                </select>
+              </div>
             </div>
-            <div className="rev-row">
+
+            <div className="q-row">
               <label>내용</label>
-              <textarea
-                value={revForm.content}
-                onChange={(e) => setRevForm((f) => ({ ...f, content: e.target.value }))}
-                placeholder="구매 후기를 남겨주세요."
-              />
+              <div className="q-field">
+                <textarea className="q-textarea" value={revForm.content} onChange={(e) => setRevForm((f) => ({ ...f, content: e.target.value }))} placeholder="구매 후기를 남겨주세요." maxLength={500} />
+                <div className="q-counter">{revForm.content.length}/500</div>
+              </div>
             </div>
-            <div className="rev-row">
+
+            <div className="q-row">
               <label>파일</label>
-              <input type="file" accept="image/*"
-                onChange={(e) => setRevForm((f) => ({ ...f, file: e.target.files?.[0] || null }))}
-              />
+              <div className="q-field">
+                <input type="file" accept="image/*" onChange={(e) => setRevForm((f) => ({ ...f, file: e.target.files?.[0] || null }))} className="q-input" />
+              </div>
             </div>
-            <button className="upd-buy-btn" type="submit">후기 등록</button>
+
+            <div className="qna-btn-group">
+              <button className="qna-submit-btn" type="submit">후기 등록</button>
+              <button type="button" className="qna-cancel-btn" onClick={() => setRevShowForm(false)}>취소</button>
+            </div>
           </form>
-        ) : (
-          <p className="muted">이 상품 구매 이력이 있어야 후기를 작성할 수 있습니다.</p>
         )}
 
-        {/* 목록 */}
-        <div className="rev-list">
-          {reviews.length === 0 && <p className="muted">등록된 후기가 없습니다.</p>}
-          {reviews.map((r) => (
-            <div key={r.rid} className="rev-item">
-              <div className="rev-meta">
-                <b>{maskId(r.writerId)}</b>
-                <span className="rev-rating">★ {r.rating}</span>
-                <span className="rev-date">{new Date(r.createdAt).toLocaleDateString()}</span>
-                {(isAdmin || userId === r.writerId) && (
-                  <button className="tiny danger" onClick={() => deleteReview(r.rid, r.writerId)}>삭제</button>
+        <div className="qna-table">
+          <div className="qna-row qna-header">
+            {isAdmin() && revDeleteMode && <div className="col-checkbox">선택</div>}
+            <div className="col-no">번호</div>
+            <div className="col-title">내용</div>
+            <div className="col-writer">작성자</div>
+            <div className="col-date">작성일</div>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="qna-row qna-empty">
+              {isAdmin() && revDeleteMode && <div className="col-checkbox">-</div>}
+              <div className="col-no">-</div>
+              <div className="col-title muted">등록된 후기가 없습니다.</div>
+              <div className="col-writer">-</div>
+              <div className="col-date">-</div>
+            </div>
+          ) : (
+            reviews.map((r, idx) => (
+              <div key={r.rid} className="qna-row">
+                {isAdmin() && revDeleteMode && (
+                  <div className="col-checkbox">
+                    <input type="checkbox" checked={selectedRevs.includes(r.rid)} onChange={() => handleRevSelection(r.rid)} />
+                  </div>
+                )}
+                <div className="col-no">{revTotal ? (revTotal - ((revPage - 1) * revSize + idx)) : (reviews.length - idx)}</div>
+                <div className="col-title">
+                  <span className="rev-rating">★ {r.rating}</span>&nbsp;
+                  <span className="qna-title">{r.content}</span>
+                  {r.imageUrl && <span className="rev-hasimg" style={{ marginLeft: 6 }}>📷</span>}
+                  {!isAdmin() && getUserId() === r.writerId && !revDeleteMode && (
+                    <button className="delete-btn" onClick={() => deleteReview(r.rid, r.writerId)} style={{ marginLeft: 8, fontSize: '12px', color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>
+                      삭제
+                    </button>
+                  )}
+                  {isAdmin() && !revDeleteMode && (
+                    <button className="tiny" onClick={() => openReviewForReply(r)} style={{ marginLeft: 8 }}>답글</button>
+                  )}
+                </div>
+                <div className="col-writer">{maskId(r.writerId)}</div>
+                <div className="col-date">{formatDateTime(r.createdAt)}</div>
+
+                {openRevId === r.rid && revDetail && !revDeleteMode && (
+                  <div className="qna-detail">
+                    <div className="qna-content">{revDetail.content || r.content}</div>
+                    {isAdmin() && (
+                      <form className="admin-reply inline" onSubmit={(e) => submitAdminReplyToReview(e, r.rid)}>
+                        <textarea
+                          rows={4}
+                          className="fixed-textarea"
+                          value={revReplyTextByRid[r.rid] || ''}
+                          onChange={(e) => setRevReplyText(r.rid, e.target.value)}
+                          placeholder="관리자 답글을 입력하세요"
+                        />
+                        <button type="submit" className="tiny">등록</button>
+                      </form>
+                    )}
+                    {Array.isArray(revDetail.comments) && revDetail.comments.length > 0 && (
+                      <div className="qna-comments">
+                        {[...revDetail.comments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                          .map((c) => (
+                            <div key={c.cid} className="qna-comment">
+                              <span className="badge">관리자</span> {c.content}
+                              <span className="qna-date">{formatDateTime(c.createdAt)}</span>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-              <div className="rev-content">{r.content}</div>
-              {r.imageUrl && (
-                <div className="rev-image">
-                  <img src={r.imageUrl.startsWith('http') ? r.imageUrl : `/api/images/${r.imageUrl}`} alt="review" />
-                </div>
-              )}
-              {/* 관리자 답글 쓰기 */}
-              {isAdmin && (
-                <div className="admin-reply">
-                  <input
-                    value={adminReply.targetType === 'review' && adminReply.targetId === r.rid ? adminReply.text : ''}
-                    onChange={(e) => setAdminReply({ targetType: 'review', targetId: r.rid, text: e.target.value })}
-                    placeholder="관리자 답글 작성..."
-                  />
-                  <button className="tiny" onClick={() => submitAdminReplyToReview(r.rid)}>등록</button>
-                </div>
-              )}
-              {/* 기존 댓글(관리자/운영자 답변) 목록 노출 가정 */}
-              {Array.isArray(r.comments) && r.comments.length > 0 && (
-                <div className="rev-comments">
-                  {r.comments.map((c) => (
-                    <div key={c.cid} className="rev-comment">
-                      <span className="badge">관리자</span> {c.content}
-                      <span className="rev-date">{new Date(c.createdAt).toLocaleString()}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
+            ))
+          )}
         </div>
+
+        <div className="qna-pagination">
+          <Button text="≪" onClick={() => setRevPage(1)} disabled={revPage === 1} />
+          <Button text="‹" onClick={() => setRevPage(p => Math.max(1, p - 1))} disabled={revPage === 1} />
+          <span className="current">{revPage}</span>
+          <Button text="›" onClick={() => setRevPage(p => Math.min(revLastPage, p + 1))} disabled={revPage === revLastPage} />
+          <Button text="≫" onClick={() => setRevPage(revLastPage)} disabled={revPage === revLastPage} />
+        </div>
+
+        <button className="qna-top-btn" onClick={scrollToRevTop} aria-label="Go to top" title="Top">↑</button>
       </section>
 
-      {/* 상품문의 섹션 */}
+      {/* Q & A */}
       <section ref={sectionRefs.qna} className="upd-section">
-        <h3>상품문의</h3>
+        <div ref={topRef} />
+        <h3>Q & A</h3>
 
-        {/* ⬇️ 관리자면 폼 숨김 */}
-        {isAdmin && (
+        <div className="qna-toolbar">
+          {!isAdmin() && !showForm && <button className="qna-write-btn" onClick={() => setShowForm(true)}>WRITE</button>}
+          {isAdmin() && (
+            <>
+              <button className="qna-delete-btn" onClick={handleDeleteModeToggle}>{deleteMode ? 'CANCEL' : 'DELETE'}</button>
+              {deleteMode && <button className="qna-delete-confirm-btn" onClick={handleDeleteSelectedQnas}>DELETE SELECTED ({selectedQnas.length})</button>}
+            </>
+          )}
+        </div>
+
+        {!isAdmin() && showForm && (
           <form className="qna-form" onSubmit={submitQna}>
-            {/* 제목 */}
             <div className="q-row">
               <label>제목</label>
               <div className="q-field">
-                <input
-                  className="q-input"
-                  value={qnaForm.title}
-                  onChange={(e) => setQnaForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="제목을 입력하세요"
-                />
+                <input className="q-input" value={qnaForm.title} onChange={(e) => setQnaForm((f) => ({ ...f, title: e.target.value }))} placeholder="제목을 입력하세요" required />
               </div>
             </div>
 
-            {/* 내용 */}
             <div className="q-row">
               <label>내용</label>
               <div className="q-field">
-                <textarea
-                  className="q-textarea"
-                  maxLength={200}
-                  value={qnaForm.content}
-                  onChange={(e) => setQnaForm((f) => ({ ...f, content: e.target.value }))}
-                  placeholder="문의 내용을 입력하세요"
-                />
+                <textarea className="q-textarea" maxLength={200} value={qnaForm.content} onChange={(e) => setQnaForm((f) => ({ ...f, content: e.target.value }))} placeholder="문의 내용을 입력하세요" required />
                 <div className="q-counter">{qnaForm.content.length}/200</div>
               </div>
             </div>
 
-            {/* 비밀글 */}
             <div className="q-row q-secret-row">
               <label className="q-secret-label">
-                <input
-                  type="checkbox"
-                  checked={qnaForm.secret}
-                  onChange={(e) => setQnaForm((f) => ({ ...f, secret: e.target.checked }))}
-                /> 비밀글
+                <input type="checkbox" checked={qnaForm.secret} onChange={(e) => setQnaForm((f) => ({ ...f, secret: e.target.checked }))} /> 비밀글
               </label>
               {qnaForm.secret && (
-                <input
-                  type="password"
-                  className="q-pass"
-                  value={qnaForm.password}
-                  onChange={(e) => setQnaForm((f) => ({ ...f, password: e.target.value }))}
-                  placeholder="비밀글 비밀번호"
-                />
+                <input type="password" className="q-pass" value={qnaForm.password} onChange={(e) => setQnaForm((f) => ({ ...f, password: e.target.value }))} placeholder="비밀글 비밀번호" required={qnaForm.secret} />
               )}
             </div>
 
-            <button className="qna-submit-btn" type="submit">문의 등록</button>
+            <div className="qna-btn-group">
+              <button className="qna-submit-btn" type="submit">문의 등록</button>
+              <button type="button" className="qna-cancel-btn" onClick={() => { setShowForm(false); setQnaForm({ title: '', content: '', secret: false, password: '' }); }}>취소</button>
+            </div>
           </form>
         )}
 
-        {/* 목록 */}
-        <div className="qna-list">
-          {qnas.length === 0 && <p className="muted">등록된 문의가 없습니다.</p>}
-          {qnas.map((q) => (
-            <div key={q.qid} className="qna-item">
-              <div className="qna-head">
-                <b className="qna-title" onClick={() => openQna(q)} style={{ cursor: 'pointer' }}>
-                  {q.secret && <span className="lock">🔒</span>} {q.title}
-                </b>
-                <span className="qna-writer">{maskId(q.writerId)}</span>
-                <span className="qna-date">{new Date(q.createdAt).toLocaleDateString()}</span>
-                {(isAdmin || userId === q.writerId) && (
-                  <button className="tiny danger" onClick={() => deleteQna(q.qid, q.writerId)}>삭제</button>
+        <div className="qna-table">
+          <div className="qna-row qna-header">
+            {deleteMode && isAdmin() && <div className="col-checkbox">선택</div>}
+            <div className="col-no">번호</div>
+            <div className="col-title">제목</div>
+            <div className="col-writer">작성자</div>
+            <div className="col-date">작성일</div>
+          </div>
+
+          {qnas.length === 0 ? (
+            <div className="qna-row qna-empty">
+              {deleteMode && isAdmin() && <div className="col-checkbox">-</div>}
+              <div className="col-no">-</div>
+              <div className="col-title muted">등록된 문의가 없습니다.</div>
+              <div className="col-writer">-</div>
+              <div className="col-date">-</div>
+            </div>
+          ) : (
+            qnas.map((q, idx) => (
+              <div key={q.qid} className="qna-row">
+                {deleteMode && isAdmin() && (
+                  <div className="col-checkbox">
+                    <input type="checkbox" checked={selectedQnas.includes(q.qid)} onChange={() => handleQnaSelection(q.qid)} />
+                  </div>
                 )}
-              </div>
-
-              {/* 펼침 상세 */}
-              {openQnaId === q.qid && qnaDetail && (
-                <div className="qna-detail">
-                  <div className="qna-content">{qnaDetail.content}</div>
-
-                  {/* 관리자 답글 입력 */}
-                  {isAdmin && (
-                    <div className="admin-reply">
-                      <input
-                        value={adminReply.targetType === 'qna' && adminReply.targetId === q.qid ? adminReply.text : ''}
-                        onChange={(e) => setAdminReply({ targetType: 'qna', targetId: q.qid, text: e.target.value })}
-                        placeholder="관리자 답글 작성..."
-                      />
-                      <button className="tiny" onClick={() => submitAdminReplyToQna(q.qid)}>등록</button>
-                    </div>
+                <div className="col-no">{makeListNo(idx)}</div>
+                <div className="col-title">
+                  <span className="qna-title" onClick={() => openQna(q)} style={{ cursor: deleteMode ? 'default' : 'pointer', color: deleteMode ? '#666' : 'inherit' }}>
+                    {q.secret && <span className="lock">🔒</span>} {q.title}
+                  </span>
+                  {(q.commentCount ?? (q.comments?.length ?? 0)) > 0 && (
+                    <span className="qna-count"> [{q.commentCount ?? q.comments.length}]</span>
                   )}
-
-                  {/* 댓글 목록 */}
-                  {Array.isArray(qnaDetail.comments) && qnaDetail.comments.length > 0 && (
-                    <div className="qna-comments">
-                      {qnaDetail.comments.map((c) => (
-                        <div key={c.cid} className="qna-comment">
-                          <span className="badge">관리자</span> {c.content}
-                          <span className="qna-date">{new Date(c.createdAt).toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
+                  {!isAdmin() && getUserId() === q.writerId && !deleteMode && (
+                    <button className="delete-btn" onClick={() => deleteOwnQna(q.qid, q.writerId)} style={{ marginLeft: 8, fontSize: '12px', color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}>
+                      삭제
+                    </button>
                   )}
                 </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+                <div className="col-writer">{maskId(q.writerId)}</div>
+                <div className="col-date">{formatDateTime(q.createdAt)}</div>
 
+                {openQnaId === q.qid && qnaDetail && !deleteMode && (
+                  <div className="qna-detail">
+                    {/* 문의 본문 */}
+                    <div className="qna-content">{qnaDetail.content}</div>
+
+                    {/* 관리자 댓글 입력: 본문 바로 밑 */}
+                    {isAdmin() && (
+                      <form className="admin-reply inline" onSubmit={(e) => submitAdminReplyInline(e, q.qid)}>
+                        <textarea
+                          rows={4}
+                          className="fixed-textarea"
+                          value={replyTextByQid[q.qid] || ''}
+                          onChange={(e) => setReplyText(q.qid, e.target.value)}
+                          placeholder="관리자 답글을 입력하세요"
+                        />
+                        <button type="submit" className="tiny">등록</button>
+                      </form>
+                    )}
+
+                    {/* 댓글 목록 최신순 */}
+                    {Array.isArray(qnaDetail.comments) && qnaDetail.comments.length > 0 && (
+                      <div className="qna-comments">
+                        {[...qnaDetail.comments]
+                          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                          .map((c) => (
+                            <div key={c.cid} className="qna-comment">
+                              <span className="badge">관리자</span> {c.content}
+                              <span className="qna-date">{new Date(c.createdAt).toLocaleString()}</span>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        <div className="qna-pagination">
+          <Button text="≪" onClick={() => setPage(1)} disabled={page === 1} />
+          <Button text="‹" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} />
+          <span className="current">{page}</span>
+          <Button text="›" onClick={() => setPage(p => Math.min(lastPage, p + 1))} disabled={page === lastPage} />
+          <Button text="≫" onClick={() => setPage(lastPage)} disabled={page === lastPage} />
+        </div>
+
+        <button className="qna-top-btn" onClick={scrollToTop} aria-label="Go to top" title="Top">↑</button>
+      </section>
     </div>
   );
 }
