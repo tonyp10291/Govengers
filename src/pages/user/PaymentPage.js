@@ -15,12 +15,6 @@ const PaymentPage = () => {
     const [totalShippingCost, setTotalShippingCost] = useState(0);
     const [finalTotalPrice, setFinalTotalPrice] = useState(0);
     const API_BASE_URL = "http://localhost:8080";
-    const productInfo = location.state;
-    const mainProductName = productInfo.length > 0 ? productInfo[0].productName : '';
-    const otherItemsCount = productInfo.length - 1;
-    const productNameSummary = otherItemsCount > 0 
-        ? `${mainProductName} 외 ${otherItemsCount}건` 
-        : mainProductName;
     
     const [orderData, setOrderData] = useState({
         buyerName: '',
@@ -39,7 +33,21 @@ const PaymentPage = () => {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
 
-    // 이미지 에러 핸들링 함수
+    const productInfo = location.state;
+    let mainProductName;
+    let otherItemsCount;
+    let productNameSummary ;
+    
+    if (!productInfo || productInfo.length === 0) {
+        navigate("/alert");
+    }else{
+         mainProductName = productInfo.length > 0 ? productInfo[0].productName : '';
+         otherItemsCount = productInfo.length - 1;
+         productNameSummary = otherItemsCount > 0 
+        ? `${mainProductName} 외 ${otherItemsCount}건`
+        : mainProductName;
+    }
+
     const handleImageError = (e, item) => {
         console.warn(`이미지 로드 실패: ${item.imageFilename || 'undefined'} (상품: ${item.productName})`);
         e.target.src = `${API_BASE_URL}/api/images/default-product.jpg`;
@@ -47,6 +55,7 @@ const PaymentPage = () => {
             e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuydtOuvuOyngCDsl5bsnYw8L3RleHQ+PC9zdmc+';
         };
     };
+
 
     // 회원인 경우 기존 정보 자동 입력
     useEffect(() => {
